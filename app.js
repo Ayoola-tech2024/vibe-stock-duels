@@ -769,6 +769,11 @@ function setupMatchState(initialPrices) {
 async function startHostPvPMatch() {
     try {
         placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
+        
+        // Reset global prices to force fresh fetch for new rounds
+        currentPriceA = 0;
+        currentPriceB = 0;
+        
         const initialPrices = await fetchLivePrices();
         if (!initialPrices || !initialPrices.a || !initialPrices.b) {
             alert("⚠️ Failed to connect to live Oracle."); resetBetUI(); return;
