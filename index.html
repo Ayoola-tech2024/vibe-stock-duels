@@ -109,6 +109,18 @@
                     <button id="placeBetBtn" class="btn-action" disabled>Select a Team First</button>
                 </div>
             </div>
+            
+            <!-- PvP Chat Box (Hidden by default) -->
+            <div id="pvpChatContainer" class="hidden tactile-card" style="margin-top: 20px; padding: 10px; background: var(--charcoal-ink); border: 2px solid var(--vibe-purple);">
+                <div style="color: var(--vibe-cyan); font-weight: bold; margin-bottom: 5px;">💬 Live Match Chat</div>
+                <div id="chatMessages" style="height: 120px; overflow-y: auto; color: var(--cream-paper); font-size: 0.9rem; margin-bottom: 10px; background: #000; border: 1px solid #333; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="color: #666; font-style: italic;">Waiting for opponent to connect...</div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chatInput" placeholder="Trash talk here..." style="flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid var(--vibe-cyan); font-family: 'Space Grotesk';">
+                    <button id="sendChatBtn" class="btn-action" style="padding: 5px 15px; font-size: 0.9rem; background: var(--vibe-gold); color: #000;">Send</button>
+                </div>
+            </div>
         </main>
     </div>
 

@@ -261,8 +261,8 @@ placeBetBtn.addEventListener('click', async () => {
             
             // Calculate Damage based on relative delta
             const diff = Math.abs(changeA - changeB);
-            // Exaggerate damage multiplier for crypto micro-percentages to keep the fight active
-            const damage = Math.min(diff * 50, 15); 
+            // Drastically reduced damage so rounds don't end in 5 seconds. Matches will now almost always go to 60 seconds.
+            const damage = Math.min(diff * 5, 3); 
             
             if (changeA > changeB) {
                 hpB -= damage;
@@ -278,6 +278,7 @@ placeBetBtn.addEventListener('click', async () => {
             
             triggerCombatAnimations(changeA, changeB);
             
+            // Only trigger early KO if someone is absolutely destroyed
             if (hpA <= 0 || hpB <= 0) {
                 clearInterval(priceInterval); // Stop combat
                 if (hpA <= 0) avatarA.classList.add('ko-state');
@@ -633,6 +634,9 @@ function setupConnectionLogic() {
             document.getElementById('teamA').style.pointerEvents = 'none';
             document.getElementById('teamA').style.opacity = '0.7';
         }
+        // Show Chat
+        const chatContainer = document.getElementById('pvpChatContainer');
+        if (chatContainer) chatContainer.classList.remove('hidden');
         
         p2pConnection.on('data', (data) => handleP2PData(data));
     });
@@ -651,6 +655,10 @@ function handleP2PData(data) {
             document.getElementById('pvpHostName').innerText = oppUsername;
             document.getElementById('pvpGuestName').innerText = myUsername;
         }
+    }
+    
+    if (data.type === 'CHAT') {
+        appendChatMessage(oppUsername, data.message, 'var(--alert-red)');
     }
     
     if (data.type === 'LOCK') {
@@ -750,7 +758,8 @@ async function startPvPMatch() {
             drawChart();
             
             const diff = Math.abs(changeA - changeB);
-            const damage = Math.min(diff * 50, 15); 
+            // Drastically reduced damage so rounds don't end in 5 seconds. Matches will now almost always go to 60 seconds.
+            const damage = Math.min(diff * 5, 3); 
             if (changeA > changeB) hpB -= damage;
             else if (changeB > changeA) hpA -= damage;
             
@@ -761,6 +770,7 @@ async function startPvPMatch() {
             
             triggerCombatAnimations(changeA, changeB);
             
+            // Only trigger early KO if someone is absolutely destroyed
             if (hpA <= 0 || hpB <= 0) {
                 clearInterval(priceInterval);
                 if (hpA <= 0) avatarA.classList.add('ko-state');
@@ -774,4 +784,37 @@ async function startPvPMatch() {
         alert("⚠️ Something went wrong starting the PvP match.");
         resetBetUI();
     }
+}
+
+// ==========================================
+// PHASE 7: PVP CHAT BOX
+// ==========================================
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChatBtn');
+const chatMessages = document.getElementById('chatMessages');
+
+function appendChatMessage(sender, text, color = 'var(--vibe-cyan)') {
+    if (!chatMessages) return;
+    const msgEl = document.createElement('div');
+    msgEl.innerHTML = `<strong style="color: ${color};">${sender}:</strong> <span>${text}</span>`;
+    chatMessages.appendChild(msgEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendChat() {
+    const text = chatInput.value.trim();
+    if (!text || !p2pConnection) return;
+    
+    appendChatMessage('You', text, 'var(--vibe-cyan)');
+    p2pConnection.send({ type: 'CHAT', message: text });
+    chatInput.value = '';
+}
+
+if (sendChatBtn) {
+    sendChatBtn.addEventListener('click', sendChat);
+}
+if (chatInput) {
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChat();
+    });
 }
