@@ -392,8 +392,12 @@ function startTimer() {
     }, 1000);
 }
 
-function resolveRound() {
+function resolveRound(finalPriceA = null, finalPriceB = null) {
     clearInterval(priceInterval);
+    
+    // In PvP, Host dictates final prices to Guest
+    if (finalPriceA !== null) currentPriceA = finalPriceA;
+    if (finalPriceB !== null) currentPriceB = finalPriceB;
     
     // Reset Avatars
     avatarA.classList.remove('advancing-a', 'retreating', 'taking-damage', 'attacking-a');
@@ -635,6 +639,8 @@ function setupConnectionLogic() {
             selectTeam('A');
             document.getElementById('teamB').style.pointerEvents = 'none';
             document.getElementById('teamB').style.opacity = '0.7';
+            // Force Guest to match Host's current dropdowns
+            p2pConnection.send({ type: 'SELECTION_FORCE', assetA: selectA.value, assetB: selectB.value });
         } else {
             selectTeam('B');
             document.getElementById('teamA').style.pointerEvents = 'none';
@@ -667,6 +673,13 @@ function handleP2PData(data) {
         appendChatMessage(oppUsername, data.message, 'var(--alert-red)');
     }
     
+    if (data.type === 'SELECTION_FORCE') {
+        selectA.value = data.assetA;
+        selectB.value = data.assetB;
+        updateAvatar(selectA, 'avatarA');
+        updateAvatar(selectB, 'avatarB');
+    }
+    
     if (data.type === 'SELECTION') {
         if (isHost && data.team === 'B') {
             selectB.value = data.asset;
@@ -697,6 +710,10 @@ function handleP2PData(data) {
     
     if (data.type === 'COMBAT_TICK') {
         applyCombatTick(data);
+    }
+    
+    if (data.type === 'RESOLVE') {
+        setTimeout(() => { timer = 0; resolveRound(data.finalPriceA, data.finalPriceB); }, 1000);
     }
 }
 
@@ -789,7 +806,10 @@ async function startHostPvPMatch() {
                 clearInterval(priceInterval);
                 if (hpA <= 0) avatarA.classList.add('ko-state');
                 if (hpB <= 0) avatarB.classList.add('ko-state');
-                setTimeout(() => { timer = 0; resolveRound(); }, 1000);
+                
+                // Force Guest to resolve with exact final prices
+                p2pConnection.send({ type: 'RESOLVE', finalPriceA: currentPriceA, finalPriceB: currentPriceB });
+                setTimeout(() => { timer = 0; resolveRound(currentPriceA, currentPriceB); }, 1000);
             }
         }, 1500);
     } catch (err) {
@@ -814,11 +834,9 @@ function applyCombatTick(data) {
     document.getElementById('hpB').style.width = `${hpB}%`;
     triggerCombatAnimations(data.changeA, data.changeB);
     
-    if (hpA <= 0 || hpB <= 0 || timer <= 0) {
-        if (hpA <= 0) avatarA.classList.add('ko-state');
-        if (hpB <= 0) avatarB.classList.add('ko-state');
-        setTimeout(() => { timer = 0; resolveRound(); }, 1000);
-    }
+    if (hpA <= 0) avatarA.classList.add('ko-state');
+    if (hpB <= 0) avatarB.classList.add('ko-state');
+    // Guest waits for RESOLVE packet to end the round.
 }
 
 // ==========================================
