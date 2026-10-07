@@ -87,8 +87,9 @@ const ASSETS = {
     SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 145, img: "viber4.webp", color: "#00F0FF" }, // Cyan
     TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 240.50, img: "viber5.webp", color: "#FF3366" }, // Red
     AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 190.20, img: "viber6.webp", color: "#FDFBF7" }, // White/Cream
-    SPACE: { name: "SpaceX", ticker: "SPACE", type: "synth", base: 500.00, img: "viber7.webp", color: "#A1A1AA" }, // Silver/Gray
-    DANG: { name: "Dangote", ticker: "DANG", type: "synth", base: 15.30, img: "viber8.webp", color: "#00FF41" } // Neon Green
+    NVDA: { name: "NVIDIA", ticker: "$NVDA", type: "stock", base: 125.50, img: "viber8.webp", color: "#76B900" }, // Nvidia Green
+    MSFT: { name: "Microsoft", ticker: "$MSFT", type: "stock", base: 415.00, img: "viber7.webp", color: "#00A4EF" }, // MS Blue
+    AMZN: { name: "Amazon", ticker: "$AMZN", type: "stock", base: 185.00, img: "viber3.webp", color: "#FF9900" } // Amazon Orange
 };
 
 const selectA = document.getElementById('assetA');
