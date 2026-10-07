@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Stock Duels</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="cyber-skyline-bg">
+    <div class="sky-cyber-gradient"></div>
+    
+    <div class="app-container">
+        <!-- Navigation / Header -->
+        <header class="top-nav tactile-card">
+            <div class="logo">⚔️ Vibe Duels</div>
+            <div class="user-controls">
+                <div class="token-balance hidden" id="balancePill">0 $VCT</div>
+                <button id="loginBtn" class="btn-google-pill">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" width="18">
+                    Connect to Play
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Arena -->
+        <main class="duel-arena">
+            <!-- Timer -->
+            <div class="timer-display tactile-card">
+                <div class="timer-label">Round Ends In</div>
+                <div class="countdown-text"><span id="countdown">60</span>s</div>
+            </div>
+
+            <!-- The Duel -->
+            <div class="versus-container">
+                <!-- Team A -->
+                <div class="team-card tactile-card" id="teamA">
+                    <div class="health-bar-wrapper hidden" id="hpBoxA">
+                        <div class="health-fill" id="hpA" style="width: 100%; background: var(--vibe-cyan);"></div>
+                    </div>
+                    <div class="viber-avatar viber-mint" id="avatarA">
+                        <div class="weapon weapon-a" id="weaponA">🗡️</div>
+                    </div>
+                    <div class="stock-info">
+                        <div class="stock-ticker">$HOOD</div>
+                        <div class="stock-name">Robinhood</div>
+                    </div>
+                    <div class="pool-amount">Prize Pool: <span id="poolA">0</span> VCT</div>
+                </div>
+
+                <div class="vs-center">
+                    <div class="vs-badge" id="vsBadge">VS</div>
+                    
+                    <!-- Live Chart container -->
+                    <div class="chart-container hidden" id="chartBox">
+                        <div class="chart-label">🔴 Live Performance Chart 🟢</div>
+                        <canvas id="liveChart" width="300" height="180"></canvas>
+                    </div>
+                </div>
+
+                <!-- Team B -->
+                <div class="team-card tactile-card" id="teamB">
+                    <div class="health-bar-wrapper hidden" id="hpBoxB">
+                        <div class="health-fill" id="hpB" style="width: 100%; background: var(--alert-red);"></div>
+                    </div>
+                    <div class="viber-avatar viber-ruby" id="avatarB">
+                        <div class="weapon weapon-b" id="weaponB">🔨</div>
+                    </div>
+                    <div class="stock-info">
+                        <div class="stock-ticker">$NVDA</div>
+                        <div class="stock-name">NVIDIA</div>
+                    </div>
+                    <div class="pool-amount">Prize Pool: <span id="poolB">0</span> VCT</div>
+                </div>
+            </div>
+
+            <!-- Betting Controls -->
+            <div class="betting-panel danfo-sheet">
+                <h3>Predict the Winner</h3>
+                <p>Which stock will perform better in the next 60 seconds?</p>
+                <div class="bet-controls">
+                    <input type="number" id="betAmount" placeholder="Amount of $VCT" disabled>
+                    <button id="placeBetBtn" class="btn-action" disabled>Select a Team First</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Result Modal (Replaces Browser Alert) -->
+    <div id="resultModal" class="privy-overlay hidden">
+        <div class="danfo-sheet result-card">
+            <h2 id="resultTitle">Round Over!</h2>
+            <div id="resultIcon" style="font-size: 4rem; margin: 10px 0;">🔔</div>
+            <p id="resultMessage" style="font-size: 1.2rem; margin-bottom: 20px;">The Oracle has spoken.</p>
+            <button class="btn-action" id="closeResultBtn">Next Round</button>
+        </div>
+    </div>
+
+    <!-- Phase 2: Privy Auth Modal Simulation -->
+    <div id="privyModal" class="privy-overlay hidden">
+        <div class="privy-modal">
+            <div class="privy-header">
+                <h4>Log in or sign up</h4>
+                <button id="closePrivy" class="close-btn">&times;</button>
+            </div>
+            <div class="privy-body">
+                <button class="privy-btn" onclick="simulatePrivyLogin('Google')">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="20" alt="Google"> Continue with Google
+                </button>
+                <button class="privy-btn" onclick="simulatePrivyLogin('Discord')">
+                    <img src="https://img.icons8.com/color/48/000000/discord-logo.png" width="20" alt="Discord"> Continue with Discord
+                </button>
+                <div class="privy-divider"><span>or</span></div>
+                <button class="privy-btn-outline" onclick="simulatePrivyLogin('External Wallet')">
+                    🔗 Connect External Wallet
+                </button>
+            </div>
+            <div class="privy-footer">
+                Protected by <strong>Privy</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
