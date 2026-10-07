@@ -107,8 +107,14 @@ function updateAvatar(selectEl, avatarId) {
     }
 }
 
-selectA.addEventListener('change', () => updateAvatar(selectA, 'avatarA'));
-selectB.addEventListener('change', () => updateAvatar(selectB, 'avatarB'));
+selectA.addEventListener('change', () => {
+    updateAvatar(selectA, 'avatarA');
+    if (isMultiplayer && p2pConnection && isHost) p2pConnection.send({ type: 'SELECTION', team: 'A', asset: selectA.value });
+});
+selectB.addEventListener('change', () => {
+    updateAvatar(selectB, 'avatarB');
+    if (isMultiplayer && p2pConnection && !isHost) p2pConnection.send({ type: 'SELECTION', team: 'B', asset: selectB.value });
+});
 
 // Oracle Data State
 let startPriceA = 0;
@@ -661,13 +667,36 @@ function handleP2PData(data) {
         appendChatMessage(oppUsername, data.message, 'var(--alert-red)');
     }
     
+    if (data.type === 'SELECTION') {
+        if (isHost && data.team === 'B') {
+            selectB.value = data.asset;
+            updateAvatar(selectB, 'avatarB');
+        } else if (!isHost && data.team === 'A') {
+            selectA.value = data.asset;
+            updateAvatar(selectA, 'avatarA');
+        }
+    }
+    
     if (data.type === 'LOCK') {
         oppLock = true;
+        // Update opponent pool visually
+        if (isHost) document.getElementById('poolB').innerText = data.amount;
+        else document.getElementById('poolA').innerText = data.amount;
+        
         if (myLock) {
-            startPvPMatch();
+            if (isHost) startHostPvPMatch();
+            else placeBetBtn.innerText = "WAITING FOR HOST TO START... 📡";
         } else {
             alert(`🔥 ${oppUsername} has locked in their bet! Place your bet to start the match!`);
         }
+    }
+    
+    if (data.type === 'START_MATCH') {
+        startGuestPvPMatch(data.initialPrices);
+    }
+    
+    if (data.type === 'COMBAT_TICK') {
+        applyCombatTick(data);
     }
 }
 
@@ -682,68 +711,55 @@ function attemptPvPLock(amount) {
     selectA.disabled = true;
     selectB.disabled = true;
     
-    p2pConnection.send({ type: 'LOCK' });
+    const myAsset = selectedTeam === 'A' ? selectA.value : selectB.value;
+    p2pConnection.send({ type: 'LOCK', amount: amount, asset: myAsset });
     
     if (oppLock) {
-        startPvPMatch();
+        if (isHost) startHostPvPMatch();
+        else placeBetBtn.innerText = "WAITING FOR HOST TO START... 📡";
     }
 }
 
-async function startPvPMatch() {
+function setupMatchState(initialPrices) {
+    userBalance -= pendingBetAmount;
+    currentBet = pendingBetAmount;
+    roundLocked = true;
+    
+    startPriceA = currentPriceA = initialPrices.a;
+    startPriceB = currentPriceB = initialPrices.b;
+    
+    historyA = [0]; historyB = [0];
+    hpA = 100; hpB = 100;
+    timer = 60; countdownEl.innerText = timer;
+    
+    document.getElementById('hpA').style.width = '100%';
+    document.getElementById('hpB').style.width = '100%';
+    document.getElementById('hpBoxA').classList.remove('hidden');
+    document.getElementById('hpBoxB').classList.remove('hidden');
+    avatarA.classList.remove('ko-state'); avatarB.classList.remove('ko-state');
+    
+    balancePill.innerText = `${userBalance} $VCT`;
+    const myPool = isHost ? 'poolA' : 'poolB';
+    document.getElementById(myPool).innerText = pendingBetAmount;
+    
+    placeBetBtn.innerText = "FIGHTING! ⚔️";
+    placeBetBtn.style.background = "var(--alert-red)";
+    teamACard.classList.add('fighting'); teamBCard.classList.add('fighting');
+    vsBadge.classList.add('hidden'); chartBox.classList.remove('hidden');
+    drawChart();
+}
+
+async function startHostPvPMatch() {
     try {
         placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
-        
-        // Fetch initial prices
-        currentPriceA = 0; 
-        currentPriceB = 0;
         const initialPrices = await fetchLivePrices();
-        
         if (!initialPrices || !initialPrices.a || !initialPrices.b) {
-            alert("⚠️ Failed to connect to live Oracle.");
-            resetBetUI();
-            return;
+            alert("⚠️ Failed to connect to live Oracle."); resetBetUI(); return;
         }
-
-        // Process Bet
-        userBalance -= pendingBetAmount;
-        currentBet = pendingBetAmount;
-        roundLocked = true;
         
-        // Set Live Data
-        startPriceA = currentPriceA = initialPrices.a;
-        startPriceB = currentPriceB = initialPrices.b;
+        p2pConnection.send({ type: 'START_MATCH', initialPrices });
+        setupMatchState(initialPrices);
         
-        historyA = [0];
-        historyB = [0];
-        hpA = 100;
-        hpB = 100;
-        timer = 60;
-        countdownEl.innerText = timer;
-        
-        // Reset UI
-        document.getElementById('hpA').style.width = '100%';
-        document.getElementById('hpB').style.width = '100%';
-        document.getElementById('hpBoxA').classList.remove('hidden');
-        document.getElementById('hpBoxB').classList.remove('hidden');
-        avatarA.classList.remove('ko-state');
-        avatarB.classList.remove('ko-state');
-        
-        balancePill.innerText = `${userBalance} $VCT`;
-        const poolEl = document.getElementById(`pool${selectedTeam}`);
-        poolEl.innerText = parseInt(poolEl.innerText) + pendingBetAmount; // Show my bet in pool
-        // Opponent's bet will be in the other pool visually if we wanted, but let's keep it simple
-        
-        placeBetBtn.innerText = "FIGHTING! ⚔️";
-        placeBetBtn.style.background = "var(--alert-red)";
-        
-        teamACard.classList.add('fighting');
-        teamBCard.classList.add('fighting');
-        vsBadge.classList.add('hidden');
-        chartBox.classList.remove('hidden');
-        
-        drawChart();
-        
-        // Start Combat loop exactly like single player
         priceInterval = setInterval(async () => {
             const livePrices = await fetchLivePrices();
             if (livePrices) {
@@ -752,37 +768,56 @@ async function startPvPMatch() {
             }
             const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
             const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
-            
-            historyA.push(changeA);
-            historyB.push(changeB);
-            drawChart();
+            historyA.push(changeA); historyB.push(changeB); drawChart();
             
             const diff = Math.abs(changeA - changeB);
-            // Drastically reduced damage so rounds don't end in 5 seconds. Matches will now almost always go to 60 seconds.
-            const damage = Math.min(diff * 5, 3); 
-            if (changeA > changeB) hpB -= damage;
-            else if (changeB > changeA) hpA -= damage;
+            const damage = Math.min(diff * 5, 3);
+            if (changeA > changeB) hpB -= damage; else if (changeB > changeA) hpA -= damage;
+            hpA = Math.max(0, hpA); hpB = Math.max(0, hpB);
             
-            hpA = Math.max(0, hpA);
-            hpB = Math.max(0, hpB);
             document.getElementById('hpA').style.width = `${hpA}%`;
             document.getElementById('hpB').style.width = `${hpB}%`;
-            
             triggerCombatAnimations(changeA, changeB);
             
-            // Only trigger early KO if someone is absolutely destroyed
-            if (hpA <= 0 || hpB <= 0) {
+            timer--;
+            countdownEl.innerText = timer;
+            
+            // Broadcast exact state to guest
+            p2pConnection.send({ type: 'COMBAT_TICK', timer, changeA, changeB, hpA, hpB });
+            
+            if (hpA <= 0 || hpB <= 0 || timer <= 0) {
                 clearInterval(priceInterval);
                 if (hpA <= 0) avatarA.classList.add('ko-state');
                 if (hpB <= 0) avatarB.classList.add('ko-state');
                 setTimeout(() => { timer = 0; resolveRound(); }, 1000);
             }
         }, 1500);
-
     } catch (err) {
-        console.error("Critical PvP Error:", err);
-        alert("⚠️ Something went wrong starting the PvP match.");
-        resetBetUI();
+        console.error(err); alert("⚠️ PvP Error"); resetBetUI();
+    }
+}
+
+function startGuestPvPMatch(initialPrices) {
+    setupMatchState(initialPrices);
+}
+
+function applyCombatTick(data) {
+    timer = data.timer;
+    countdownEl.innerText = timer;
+    
+    historyA.push(data.changeA);
+    historyB.push(data.changeB);
+    drawChart();
+    
+    hpA = data.hpA; hpB = data.hpB;
+    document.getElementById('hpA').style.width = `${hpA}%`;
+    document.getElementById('hpB').style.width = `${hpB}%`;
+    triggerCombatAnimations(data.changeA, data.changeB);
+    
+    if (hpA <= 0 || hpB <= 0 || timer <= 0) {
+        if (hpA <= 0) avatarA.classList.add('ko-state');
+        if (hpB <= 0) avatarB.classList.add('ko-state');
+        setTimeout(() => { timer = 0; resolveRound(); }, 1000);
     }
 }
 
