@@ -186,6 +186,15 @@ placeBetBtn.addEventListener('click', async () => {
     currentBet = amount;
     roundLocked = true;
     
+    // Broadcast PvP Start
+    if (isMultiplayer && p2pConnection) {
+        p2pConnection.send({
+            type: 'SYNC_START',
+            selectedTeam,
+            amount
+        });
+    }
+    
     // Set Live Data
     startPriceA = currentPriceA = initialPrices.a;
     startPriceB = currentPriceB = initialPrices.b;
@@ -453,3 +462,138 @@ function resetBoard() {
 }
 
 startTimer();
+
+// ==========================================
+// PHASE 6: P2P WEBRTC MULTIPLAYER (PEERJS)
+// ==========================================
+const multiplayerBtn = document.getElementById('multiplayerBtn');
+const multiplayerModal = document.getElementById('multiplayerModal');
+const closeMultiplayer = document.getElementById('closeMultiplayer');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+const inviteLinkInput = document.getElementById('inviteLink');
+
+const stateCreate = document.getElementById('lobbyStateCreate');
+const stateWaiting = document.getElementById('lobbyStateWaiting');
+const stateJoining = document.getElementById('lobbyStateJoining');
+
+let peer = null;
+let p2pConnection = null;
+let isMultiplayer = false;
+let isHost = false;
+
+// Mock Online Counter Fluctuation
+setInterval(() => {
+    const el = document.getElementById('onlineCount');
+    if (el) {
+        let current = parseInt(el.innerText.replace(',', ''));
+        current += Math.floor(Math.random() * 5) - 2; // fluctuate -2 to +2
+        el.innerText = current.toLocaleString();
+    }
+}, 5000);
+
+multiplayerBtn.addEventListener('click', () => {
+    multiplayerModal.classList.remove('hidden');
+    stateCreate.classList.remove('hidden');
+    stateWaiting.classList.add('hidden');
+    stateJoining.classList.add('hidden');
+});
+
+closeMultiplayer.addEventListener('click', () => {
+    multiplayerModal.classList.add('hidden');
+});
+
+function initPeer(onOpenCallback) {
+    if (peer) return onOpenCallback(peer.id);
+    
+    // Generate a short readable ID
+    const randomId = 'vibe-' + Math.random().toString(36).substr(2, 6);
+    peer = new Peer(randomId, { debug: 2 });
+    
+    peer.on('open', (id) => {
+        console.log('My peer ID is: ' + id);
+        onOpenCallback(id);
+    });
+    
+    peer.on('connection', (c) => {
+        // Someone joined my room!
+        p2pConnection = c;
+        isHost = true;
+        isMultiplayer = true;
+        setupConnectionLogic();
+    });
+    
+    peer.on('error', (err) => {
+        console.error(err);
+        alert("P2P Connection Error: " + err.type);
+    });
+}
+
+createRoomBtn.addEventListener('click', () => {
+    createRoomBtn.innerText = "Generating P2P Room...";
+    initPeer((id) => {
+        stateCreate.classList.add('hidden');
+        stateWaiting.classList.remove('hidden');
+        const link = window.location.origin + window.location.pathname + '?duel=' + id;
+        inviteLinkInput.value = link;
+    });
+});
+
+copyLinkBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(inviteLinkInput.value);
+    copyLinkBtn.innerText = "✅ Copied!";
+    setTimeout(() => copyLinkBtn.innerText = "📋 Copy Link", 2000);
+});
+
+// Check if joined via link
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const duelId = urlParams.get('duel');
+    if (duelId) {
+        multiplayerModal.classList.remove('hidden');
+        stateCreate.classList.add('hidden');
+        stateWaiting.classList.add('hidden');
+        stateJoining.classList.remove('hidden');
+        
+        initPeer((myId) => {
+            console.log("Connecting to host:", duelId);
+            p2pConnection = peer.connect(duelId);
+            isHost = false;
+            isMultiplayer = true;
+            setupConnectionLogic();
+        });
+    }
+});
+
+function setupConnectionLogic() {
+    p2pConnection.on('open', () => {
+        console.log("P2P Connected!");
+        multiplayerModal.classList.add('hidden');
+        alert("⚔️ PvP Match Connected! You are now dueling against a real player.");
+        
+        // Sync UI for Multiplayer
+        multiplayerBtn.innerText = "🔴 Live PvP Match";
+        multiplayerBtn.style.background = "var(--alert-red)";
+        
+        p2pConnection.on('data', (data) => {
+            console.log("Received P2P Data:", data);
+            handleP2PData(data);
+        });
+    });
+}
+
+function handleP2PData(data) {
+    if (data.type === 'SYNC_START') {
+        // Opponent placed their bet and started the round
+        // We sync the start visually
+        triggerMultiplayerRoundStart(data);
+    }
+}
+
+function triggerMultiplayerRoundStart(data) {
+    // If the opponent started the fight, we mirror their setup
+    // But since this is a quick hackathon prototype, we just 
+    // let the host drive the main start, and notify the guest.
+    // To keep it minimal, if you receive a SYNC_START, we just alert.
+    alert("🔥 Your opponent has locked their bet and started the fight! Watch the chart!");
+}
