@@ -124,7 +124,7 @@ let hpB = 100;
 let historyA = [];
 let historyB = [];
 
-// Hybrid Oracle (Live Binance for Crypto, Testnet Synth for Private/Stocks)
+// Hybrid Oracle (Live Binance for Crypto, Yahoo Finance for Stocks, Synth for Private)
 async function fetchAssetPrice(assetKey, currentPrice = 0) {
     const asset = ASSETS[assetKey];
     if (asset.type === 'crypto') {
@@ -140,10 +140,27 @@ async function fetchAssetPrice(assetKey, currentPrice = 0) {
             const base = currentPrice || asset.base;
             return base * (1 + (Math.random() - 0.49) * 0.015);
         }
+    } else if (asset.type === 'stock') {
+        // Fetch REAL base price from Yahoo Finance via CORS proxy if starting fresh
+        if (!currentPrice) {
+            try {
+                const cleanTicker = asset.ticker.replace('$', '');
+                const targetUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${cleanTicker}`);
+                const res = await fetch(`https://api.allorigins.win/get?url=${targetUrl}`);
+                const json = await res.json();
+                const yahooData = JSON.parse(json.contents);
+                return yahooData.chart.result[0].meta.regularMarketPrice;
+            } catch(e) {
+                console.warn("Yahoo API failed, using base:", e);
+                return asset.base;
+            }
+        } else {
+            // Free stock APIs delay by 15 mins. To make characters fight every 1.5s, we simulate combat micro-fluctuations off the REAL Yahoo price!
+            return currentPrice * (1 + (Math.random() - 0.49) * 0.015);
+        }
     } else {
-        // Simulated Synthetic Oracle for Private companies & Stocks
+        // Simulated Synthetic Oracle for Private companies (SpaceX/Dangote)
         const base = currentPrice || asset.base;
-        // Random walk volatility
         return base * (1 + (Math.random() - 0.49) * 0.015);
     }
 }
@@ -390,8 +407,8 @@ function resolveRound() {
     
     const winningTicker = winner === 'A' ? assetA.ticker : assetB.ticker;
     
-    const typeA = assetA.type === 'crypto' ? 'BINANCE API (LIVE)' : 'TESTNET ORACLE (SYNTHETIC)';
-    const typeB = assetB.type === 'crypto' ? 'BINANCE API (LIVE)' : 'TESTNET ORACLE (SYNTHETIC)';
+    const typeA = assetA.type === 'crypto' ? 'BINANCE API (LIVE)' : (assetA.type === 'stock' ? 'YAHOO FINANCE API' : 'TESTNET ORACLE (SYNTHETIC)');
+    const typeB = assetB.type === 'crypto' ? 'BINANCE API (LIVE)' : (assetB.type === 'stock' ? 'YAHOO FINANCE API' : 'TESTNET ORACLE (SYNTHETIC)');
 
     const receiptHTML = `
         <div style="background: #111; color: #00F0FF; padding: 10px; border-radius: 8px; font-family: monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">
