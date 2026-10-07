@@ -35,6 +35,7 @@
             </div>
 
             <!-- The Duel -->
+            <h2 id="pvpHeader" class="hidden" style="text-align: center; color: var(--vibe-cyan); margin-bottom: 20px; font-weight: 700; text-transform: uppercase;">⚔️ <span id="pvpHostName">Host</span> vs <span id="pvpGuestName">Guest</span> ⚔️</h2>
             <div class="versus-container">
                 <!-- Team A -->
                 <div class="team-card tactile-card" id="teamA">
@@ -156,6 +157,7 @@
             <p>Challenge a friend to a 60-second binary duel.</p>
             
             <div id="lobbyStateCreate" style="margin: 20px 0;">
+                <input type="text" id="hostUsername" placeholder="Enter your Username" style="width: 100%; padding: 10px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-purple); margin-bottom: 10px; font-family: 'Space Grotesk';">
                 <button id="createRoomBtn" class="btn-action" style="width: 100%;">Create Invite Link</button>
             </div>
             
@@ -167,8 +169,9 @@
             </div>
             
             <div id="lobbyStateJoining" class="hidden" style="margin: 20px 0;">
-                <h3 style="color: var(--vibe-gold);">Connecting to Opponent...</h3>
-                <p>Establishing P2P WebRTC Connection...</p>
+                <h3 style="color: var(--vibe-gold);">You were invited to a Duel!</h3>
+                <input type="text" id="guestUsername" placeholder="Enter your Username" style="width: 100%; padding: 10px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-gold); margin-bottom: 10px; font-family: 'Space Grotesk';">
+                <button id="joinRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000;">Join Match</button>
             </div>
         </div>
     </div>

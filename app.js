@@ -164,6 +164,12 @@ placeBetBtn.addEventListener('click', async () => {
     if (!amount || amount <= 0) return;
     if (amount > userBalance) { alert("❌ Insufficient $VCT balance!"); return; }
     
+    // MULTIPLAYER INTERCEPT
+    if (isMultiplayer && p2pConnection) {
+        attemptPvPLock(amount);
+        return; // Halt single-player execution!
+    }
+
     try {
         placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
         placeBetBtn.disabled = true;
@@ -186,15 +192,6 @@ placeBetBtn.addEventListener('click', async () => {
         userBalance -= amount;
         currentBet = amount;
         roundLocked = true;
-        
-        // Broadcast PvP Start
-        if (isMultiplayer && p2pConnection) {
-            p2pConnection.send({
-                type: 'SYNC_START',
-                selectedTeam,
-                amount
-            });
-        }
         
         // Set Live Data
         startPriceA = currentPriceA = initialPrices.a;
@@ -488,6 +485,7 @@ const closeMultiplayer = document.getElementById('closeMultiplayer');
 const createRoomBtn = document.getElementById('createRoomBtn');
 const copyLinkBtn = document.getElementById('copyLinkBtn');
 const inviteLinkInput = document.getElementById('inviteLink');
+const joinRoomBtn = document.getElementById('joinRoomBtn');
 
 const stateCreate = document.getElementById('lobbyStateCreate');
 const stateWaiting = document.getElementById('lobbyStateWaiting');
@@ -497,6 +495,13 @@ let peer = null;
 let p2pConnection = null;
 let isMultiplayer = false;
 let isHost = false;
+
+// PvP State
+let myUsername = "Guest";
+let oppUsername = "Opponent";
+let myLock = false;
+let oppLock = false;
+let pendingBetAmount = 0;
 
 // Mock Online Counter Fluctuation
 setInterval(() => {
@@ -522,17 +527,15 @@ closeMultiplayer.addEventListener('click', () => {
 function initPeer(onOpenCallback) {
     if (peer) return onOpenCallback(peer.id);
     
-    // Generate a short readable ID
     const randomId = 'vibe-' + Math.random().toString(36).substr(2, 6);
     peer = new Peer(randomId, { debug: 2 });
     
     peer.on('open', (id) => {
-        console.log('My peer ID is: ' + id);
         onOpenCallback(id);
     });
     
     peer.on('connection', (c) => {
-        // Someone joined my room!
+        // Someone joined my room! (I am Host)
         p2pConnection = c;
         isHost = true;
         isMultiplayer = true;
@@ -546,6 +549,10 @@ function initPeer(onOpenCallback) {
 }
 
 createRoomBtn.addEventListener('click', () => {
+    const hostInput = document.getElementById('hostUsername').value.trim();
+    if (!hostInput) { alert("Please enter a username!"); return; }
+    myUsername = hostInput;
+    
     createRoomBtn.innerText = "Generating P2P Room...";
     initPeer((id) => {
         stateCreate.classList.add('hidden');
@@ -571,12 +578,18 @@ window.addEventListener('DOMContentLoaded', () => {
         stateWaiting.classList.add('hidden');
         stateJoining.classList.remove('hidden');
         
-        initPeer((myId) => {
-            console.log("Connecting to host:", duelId);
-            p2pConnection = peer.connect(duelId);
-            isHost = false;
-            isMultiplayer = true;
-            setupConnectionLogic();
+        joinRoomBtn.addEventListener('click', () => {
+            const guestInput = document.getElementById('guestUsername').value.trim();
+            if (!guestInput) { alert("Please enter a username!"); return; }
+            myUsername = guestInput;
+            
+            joinRoomBtn.innerText = "Connecting...";
+            initPeer((myId) => {
+                p2pConnection = peer.connect(duelId);
+                isHost = false;
+                isMultiplayer = true;
+                setupConnectionLogic();
+            });
         });
     }
 });
@@ -585,31 +598,163 @@ function setupConnectionLogic() {
     p2pConnection.on('open', () => {
         console.log("P2P Connected!");
         multiplayerModal.classList.add('hidden');
-        alert("⚔️ PvP Match Connected! You are now dueling against a real player.");
+        
+        // Exchange Usernames
+        p2pConnection.send({ type: 'HELLO', username: myUsername });
         
         // Sync UI for Multiplayer
-        multiplayerBtn.innerText = "🔴 Live PvP Match";
+        multiplayerBtn.innerText = "🔴 Live PvP Room";
         multiplayerBtn.style.background = "var(--alert-red)";
         
-        p2pConnection.on('data', (data) => {
-            console.log("Received P2P Data:", data);
-            handleP2PData(data);
-        });
+        // Lock Teams: Host is always Team A, Guest is always Team B to avoid conflict
+        if (isHost) {
+            selectTeam('A');
+            document.getElementById('teamB').style.pointerEvents = 'none';
+            document.getElementById('teamB').style.opacity = '0.7';
+        } else {
+            selectTeam('B');
+            document.getElementById('teamA').style.pointerEvents = 'none';
+            document.getElementById('teamA').style.opacity = '0.7';
+        }
+        
+        p2pConnection.on('data', (data) => handleP2PData(data));
     });
 }
 
 function handleP2PData(data) {
-    if (data.type === 'SYNC_START') {
-        // Opponent placed their bet and started the round
-        // We sync the start visually
-        triggerMultiplayerRoundStart(data);
+    if (data.type === 'HELLO') {
+        oppUsername = data.username;
+        const pvpHeader = document.getElementById('pvpHeader');
+        pvpHeader.classList.remove('hidden');
+        
+        if (isHost) {
+            document.getElementById('pvpHostName').innerText = myUsername;
+            document.getElementById('pvpGuestName').innerText = oppUsername;
+        } else {
+            document.getElementById('pvpHostName').innerText = oppUsername;
+            document.getElementById('pvpGuestName').innerText = myUsername;
+        }
+    }
+    
+    if (data.type === 'LOCK') {
+        oppLock = true;
+        if (myLock) {
+            startPvPMatch();
+        } else {
+            alert(`🔥 ${oppUsername} has locked in their bet! Place your bet to start the match!`);
+        }
     }
 }
 
-function triggerMultiplayerRoundStart(data) {
-    // If the opponent started the fight, we mirror their setup
-    // But since this is a quick hackathon prototype, we just 
-    // let the host drive the main start, and notify the guest.
-    // To keep it minimal, if you receive a SYNC_START, we just alert.
-    alert("🔥 Your opponent has locked their bet and started the fight! Watch the chart!");
+// Intercept normal place bet logic for PvP Dual Lock
+function attemptPvPLock(amount) {
+    myLock = true;
+    pendingBetAmount = amount;
+    
+    placeBetBtn.innerText = `WAITING FOR ${oppUsername.toUpperCase()}... ⏳`;
+    placeBetBtn.disabled = true;
+    betInput.disabled = true;
+    selectA.disabled = true;
+    selectB.disabled = true;
+    
+    p2pConnection.send({ type: 'LOCK' });
+    
+    if (oppLock) {
+        startPvPMatch();
+    }
+}
+
+async function startPvPMatch() {
+    try {
+        placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
+        
+        // Fetch initial prices
+        currentPriceA = 0; 
+        currentPriceB = 0;
+        const initialPrices = await fetchLivePrices();
+        
+        if (!initialPrices || !initialPrices.a || !initialPrices.b) {
+            alert("⚠️ Failed to connect to live Oracle.");
+            resetBetUI();
+            return;
+        }
+
+        // Process Bet
+        userBalance -= pendingBetAmount;
+        currentBet = pendingBetAmount;
+        roundLocked = true;
+        
+        // Set Live Data
+        startPriceA = currentPriceA = initialPrices.a;
+        startPriceB = currentPriceB = initialPrices.b;
+        
+        historyA = [0];
+        historyB = [0];
+        hpA = 100;
+        hpB = 100;
+        timer = 60;
+        countdownEl.innerText = timer;
+        
+        // Reset UI
+        document.getElementById('hpA').style.width = '100%';
+        document.getElementById('hpB').style.width = '100%';
+        document.getElementById('hpBoxA').classList.remove('hidden');
+        document.getElementById('hpBoxB').classList.remove('hidden');
+        avatarA.classList.remove('ko-state');
+        avatarB.classList.remove('ko-state');
+        
+        balancePill.innerText = `${userBalance} $VCT`;
+        const poolEl = document.getElementById(`pool${selectedTeam}`);
+        poolEl.innerText = parseInt(poolEl.innerText) + pendingBetAmount; // Show my bet in pool
+        // Opponent's bet will be in the other pool visually if we wanted, but let's keep it simple
+        
+        placeBetBtn.innerText = "FIGHTING! ⚔️";
+        placeBetBtn.style.background = "var(--alert-red)";
+        
+        teamACard.classList.add('fighting');
+        teamBCard.classList.add('fighting');
+        vsBadge.classList.add('hidden');
+        chartBox.classList.remove('hidden');
+        
+        drawChart();
+        
+        // Start Combat loop exactly like single player
+        priceInterval = setInterval(async () => {
+            const livePrices = await fetchLivePrices();
+            if (livePrices) {
+                currentPriceA = livePrices.a;
+                currentPriceB = livePrices.b;
+            }
+            const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
+            const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
+            
+            historyA.push(changeA);
+            historyB.push(changeB);
+            drawChart();
+            
+            const diff = Math.abs(changeA - changeB);
+            const damage = Math.min(diff * 50, 15); 
+            if (changeA > changeB) hpB -= damage;
+            else if (changeB > changeA) hpA -= damage;
+            
+            hpA = Math.max(0, hpA);
+            hpB = Math.max(0, hpB);
+            document.getElementById('hpA').style.width = `${hpA}%`;
+            document.getElementById('hpB').style.width = `${hpB}%`;
+            
+            triggerCombatAnimations(changeA, changeB);
+            
+            if (hpA <= 0 || hpB <= 0) {
+                clearInterval(priceInterval);
+                if (hpA <= 0) avatarA.classList.add('ko-state');
+                if (hpB <= 0) avatarB.classList.add('ko-state');
+                setTimeout(() => { timer = 0; resolveRound(); }, 1000);
+            }
+        }, 1500);
+
+    } catch (err) {
+        console.error("Critical PvP Error:", err);
+        alert("⚠️ Something went wrong starting the PvP match.");
+        resetBetUI();
+    }
 }
