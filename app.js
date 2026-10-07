@@ -82,13 +82,13 @@ let currentBet = 0;
 let roundLocked = false;
 
 const ASSETS = {
-    BTC: { name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 62000, img: "viber1.webp", color: "var(--vibe-gold)" },
-    ETH: { name: "Ethereum", ticker: "$ETH", type: "crypto", base: 3400, img: "viber2.webp", color: "var(--vibe-purple)" },
-    SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 145, img: "viber4.webp", color: "var(--vibe-cyan)" },
-    TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 240.50, img: "viber5.webp", color: "var(--alert-red)" },
-    AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 190.20, img: "viber6.webp", color: "var(--cream-paper)" },
-    SPACE: { name: "SpaceX", ticker: "SPACE", type: "synth", base: 500.00, img: "viber7.webp", color: "var(--charcoal-ink)" },
-    DANG: { name: "Dangote", ticker: "DANG", type: "synth", base: 15.30, img: "viber8.webp", color: "var(--matrix-green)" }
+    BTC: { name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 62000, img: "viber1.webp", color: "#FFD700" }, // Gold
+    ETH: { name: "Ethereum", ticker: "$ETH", type: "crypto", base: 3400, img: "viber2.webp", color: "#A855F7" }, // Purple
+    SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 145, img: "viber4.webp", color: "#00F0FF" }, // Cyan
+    TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 240.50, img: "viber5.webp", color: "#FF3366" }, // Red
+    AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 190.20, img: "viber6.webp", color: "#FDFBF7" }, // White/Cream
+    SPACE: { name: "SpaceX", ticker: "SPACE", type: "synth", base: 500.00, img: "viber7.webp", color: "#A1A1AA" }, // Silver/Gray
+    DANG: { name: "Dangote", ticker: "DANG", type: "synth", base: 15.30, img: "viber8.webp", color: "#00FF41" } // Neon Green
 };
 
 const selectA = document.getElementById('assetA');
