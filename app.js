@@ -73,18 +73,48 @@ function selectTeam(team) {
 
     betInput.disabled = false;
     placeBetBtn.disabled = false;
-    placeBetBtn.innerText = `Place Bet on ${team === 'A' ? '$HOOD' : '$NVDA'}`;
+    const ticker = team === 'A' ? ASSETS[selectA.value].ticker : ASSETS[selectB.value].ticker;
+    placeBetBtn.innerText = `Place Bet on ${ticker}`;
 }
 
 // Phase 5: Live Chart & Dynamic Combat
 let currentBet = 0;
 let roundLocked = false;
 
+const ASSETS = {
+    BTC: { name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 62000, img: "viber1.webp", color: "var(--vibe-gold)" },
+    ETH: { name: "Ethereum", ticker: "$ETH", type: "crypto", base: 3400, img: "viber2.webp", color: "var(--vibe-purple)" },
+    SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 145, img: "viber4.webp", color: "var(--vibe-cyan)" },
+    TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 240.50, img: "viber5.webp", color: "var(--alert-red)" },
+    AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 190.20, img: "viber6.webp", color: "var(--cream-paper)" },
+    SPACE: { name: "SpaceX", ticker: "SPACE", type: "synth", base: 500.00, img: "viber7.webp", color: "var(--charcoal-ink)" },
+    DANG: { name: "Dangote", ticker: "DANG", type: "synth", base: 15.30, img: "viber8.webp", color: "var(--matrix-green)" }
+};
+
+const selectA = document.getElementById('assetA');
+const selectB = document.getElementById('assetB');
+
+function updateAvatar(selectEl, avatarId) {
+    const asset = ASSETS[selectEl.value];
+    const avatar = document.getElementById(avatarId);
+    avatar.style.backgroundImage = `url('assets/vibers/${asset.img}')`;
+    avatar.style.boxShadow = `0 0 15px ${asset.color}`;
+    
+    // Update button if a team is currently selected
+    if (selectedTeam) {
+        const activeSelect = selectedTeam === 'A' ? selectA : selectB;
+        placeBetBtn.innerText = `Place Bet on ${ASSETS[activeSelect.value].ticker}`;
+    }
+}
+
+selectA.addEventListener('change', () => updateAvatar(selectA, 'avatarA'));
+selectB.addEventListener('change', () => updateAvatar(selectB, 'avatarB'));
+
 // Oracle Data State
-let startPriceA = 22.45;
-let startPriceB = 114.20;
-let currentPriceA = startPriceA;
-let currentPriceB = startPriceB;
+let startPriceA = 0;
+let startPriceB = 0;
+let currentPriceA = 0;
+let currentPriceB = 0;
 
 // Health State
 let hpA = 100;
@@ -94,22 +124,72 @@ let hpB = 100;
 let historyA = [];
 let historyB = [];
 
-placeBetBtn.addEventListener('click', () => {
+// Hybrid Oracle (Live Binance for Crypto, Testnet Synth for Private/Stocks)
+async function fetchAssetPrice(assetKey, currentPrice = 0) {
+    const asset = ASSETS[assetKey];
+    if (asset.type === 'crypto') {
+        try {
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${assetKey}USDT`);
+            const data = await res.json();
+            return parseFloat(data.price);
+        } catch (e) {
+            console.error("Binance Oracle fail:", e);
+            return currentPrice || asset.base;
+        }
+    } else {
+        // Simulated Synthetic Oracle for Private companies & Stocks
+        const base = currentPrice || asset.base;
+        // Random walk volatility
+        return base * (1 + (Math.random() - 0.49) * 0.015);
+    }
+}
+
+async function fetchLivePrices() {
+    const pA = await fetchAssetPrice(selectA.value, currentPriceA);
+    const pB = await fetchAssetPrice(selectB.value, currentPriceB);
+    return { a: pA, b: pB };
+}
+
+placeBetBtn.addEventListener('click', async () => {
     if (!userWallet) { alert("⚠️ Please click 'Connect to Play' to generate your wallet first!"); return; }
     if (roundLocked) return;
+    
+    if (selectA.value === selectB.value) { alert("❌ You cannot duel the same asset!"); return; }
 
     const amount = parseInt(betInput.value);
     if (!amount || amount <= 0) return;
     if (amount > userBalance) { alert("❌ Insufficient $VCT balance!"); return; }
     
+    placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
+    placeBetBtn.disabled = true;
+    betInput.disabled = true;
+    selectA.disabled = true;
+    selectB.disabled = true;
+
+    // Fetch initial prices
+    currentPriceA = 0; // reset for fresh base
+    currentPriceB = 0;
+    const initialPrices = await fetchLivePrices();
+    
+    if (!initialPrices || !initialPrices.a || !initialPrices.b) {
+        alert("⚠️ Failed to connect to live Oracle.");
+        placeBetBtn.innerText = `Place Bet`;
+        placeBetBtn.disabled = false;
+        betInput.disabled = false;
+        selectA.disabled = false;
+        selectB.disabled = false;
+        return;
+    }
+
     // Process Bet
     userBalance -= amount;
     currentBet = amount;
     roundLocked = true;
     
-    // Reset Data
-    currentPriceA = startPriceA = 22.45 + (Math.random()*5); // slight variation every round
-    currentPriceB = startPriceB = 114.20 + (Math.random()*15);
+    // Set Live Data
+    startPriceA = currentPriceA = initialPrices.a;
+    startPriceB = currentPriceB = initialPrices.b;
+    
     historyA = [0];
     historyB = [0];
     hpA = 100;
@@ -129,8 +209,6 @@ placeBetBtn.addEventListener('click', () => {
     const poolEl = document.getElementById(`pool${selectedTeam}`);
     poolEl.innerText = parseInt(poolEl.innerText) + amount;
     
-    betInput.disabled = true;
-    placeBetBtn.disabled = true;
     placeBetBtn.innerText = "FIGHTING! ⚔️";
     placeBetBtn.style.background = "var(--alert-red)";
     
@@ -142,11 +220,13 @@ placeBetBtn.addEventListener('click', () => {
     
     drawChart();
     
-    // Simulate live stock price & Combat triggers
-    priceInterval = setInterval(() => {
-        // Price Random Walk (Drift + Volatility)
-        currentPriceA *= (1 + (Math.random() - 0.49) * 0.015);
-        currentPriceB *= (1 + (Math.random() - 0.49) * 0.015);
+    // Live Combat triggers (using real API)
+    priceInterval = setInterval(async () => {
+        const livePrices = await fetchLivePrices();
+        if (livePrices) {
+            currentPriceA = livePrices.a;
+            currentPriceB = livePrices.b;
+        }
         
         const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
         const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
@@ -155,9 +235,10 @@ placeBetBtn.addEventListener('click', () => {
         historyB.push(changeB);
         drawChart();
         
-        // Calculate Damage
+        // Calculate Damage based on relative delta
         const diff = Math.abs(changeA - changeB);
-        const damage = Math.min(diff * 4, 15); // Scale diff to HP damage
+        // Exaggerate damage multiplier for crypto micro-percentages to keep the fight active
+        const damage = Math.min(diff * 50, 15); 
         
         if (changeA > changeB) {
             hpB -= damage;
@@ -183,7 +264,7 @@ placeBetBtn.addEventListener('click', () => {
             }, 1000);
         }
         
-    }, 1000);
+    }, 1500); // 1.5s interval to respect API limits while staying responsive
 });
 
 // Dynamic Combat based on live prices
@@ -245,21 +326,23 @@ function drawChart() {
         ctx.stroke();
     };
     
-    // Draw NVDA (Ruby/Red)
-    drawLine(historyB, '#FF3366');
-    // Draw HOOD (Mint/Cyan)
-    drawLine(historyA, '#00F0FF');
+    const colorA = ASSETS[selectA.value].color;
+    const colorB = ASSETS[selectB.value].color;
+
+    // Draw lines
+    drawLine(historyB, colorB);
+    drawLine(historyA, colorA);
 }
 
 // Simple Countdown
 function startTimer() {
     timerInterval = setInterval(() => {
-        if (!roundLocked) return; // Don't tick if round isn't active
+        if (!roundLocked || timer <= 0) return; // Don't tick if round isn't active or timer is done
         timer--;
+        countdownEl.innerText = timer;
         if (timer <= 0) {
             resolveRound();
         }
-        countdownEl.innerText = timer;
     }, 1000);
 }
 
@@ -279,14 +362,21 @@ function resolveRound() {
     const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
     
     const winner = changeA > changeB ? 'A' : 'B';
-    const winningStock = winner === 'A' ? '$HOOD' : '$NVDA';
     
+    const assetA = ASSETS[selectA.value];
+    const assetB = ASSETS[selectB.value];
+    
+    const winningTicker = winner === 'A' ? assetA.ticker : assetB.ticker;
+    
+    const typeA = assetA.type === 'crypto' ? 'BINANCE API (LIVE)' : 'TESTNET ORACLE (SYNTHETIC)';
+    const typeB = assetB.type === 'crypto' ? 'BINANCE API (LIVE)' : 'TESTNET ORACLE (SYNTHETIC)';
+
     const receiptHTML = `
         <div style="background: #111; color: #00F0FF; padding: 10px; border-radius: 8px; font-family: monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">
             <div><strong>ON-CHAIN ORACLE RECEIPT</strong></div>
-            <div style="margin-top:5px; color: #00F0FF;">$HOOD: $${startPriceA.toFixed(2)} ➔ $${currentPriceA.toFixed(2)} (${changeA > 0 ? '+' : ''}${changeA.toFixed(2)}%)</div>
-            <div style="color: #FF3366;">$NVDA: $${startPriceB.toFixed(2)} ➔ $${currentPriceB.toFixed(2)} (${changeB > 0 ? '+' : ''}${changeB.toFixed(2)}%)</div>
-            <div style="margin-top:5px; color: #FFD700;">WINNER: ${winningStock}</div>
+            <div style="margin-top:5px; color: ${assetA.color};">[${typeA}]<br>${assetA.ticker}: $${startPriceA.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} ➔ $${currentPriceA.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} (${changeA > 0 ? '+' : ''}${changeA.toFixed(2)}%)</div>
+            <div style="margin-top:5px; color: ${assetB.color};">[${typeB}]<br>${assetB.ticker}: $${startPriceB.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} ➔ $${currentPriceB.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} (${changeB > 0 ? '+' : ''}${changeB.toFixed(2)}%)</div>
+            <div style="margin-top:5px; color: #FFD700;">WINNER: ${winningTicker}</div>
         </div>
     `;
     
@@ -302,9 +392,9 @@ function resolveRound() {
         if (selectedTeam === winner) {
             const winnings = Math.floor(currentBet * 1.95);
             userBalance += winnings;
-            showCustomModal(`🎉 YOU WON!`, `Your stock outperformed!`, `+${winnings} $VCT`, 'var(--vibe-cyan)', receiptHTML);
+            showCustomModal(`🎉 YOU WON!`, `Your asset outperformed!`, `+${winnings} $VCT`, 'var(--vibe-cyan)', receiptHTML);
         } else {
-            showCustomModal(`💀 YOU LOST`, `Your stock was outperformed.`, `-${currentBet} $VCT`, 'var(--alert-red)', receiptHTML);
+            showCustomModal(`💀 YOU LOST`, `Your asset was outperformed.`, `-${currentBet} $VCT`, 'var(--alert-red)', receiptHTML);
         }
     }
 
@@ -351,6 +441,9 @@ function resetBoard() {
     teamACard.classList.remove('winner-card', 'loser-card', 'selected');
     teamBCard.classList.remove('winner-card', 'loser-card', 'selected');
     selectedTeam = null;
+    
+    selectA.disabled = false;
+    selectB.disabled = false;
     
     betInput.disabled = true;
     placeBetBtn.disabled = true;

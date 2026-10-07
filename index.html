@@ -38,12 +38,23 @@
                     <div class="health-bar-wrapper hidden" id="hpBoxA">
                         <div class="health-fill" id="hpA" style="width: 100%; background: var(--vibe-cyan);"></div>
                     </div>
-                    <div class="viber-avatar viber-mint" id="avatarA">
+                    <div class="viber-avatar" id="avatarA" style="background-image: url('assets/vibers/viber1.webp'); box-shadow: 0 0 15px var(--vibe-cyan);">
                         <div class="weapon weapon-a" id="weaponA">🗡️</div>
                     </div>
                     <div class="stock-info">
-                        <div class="stock-ticker">$HOOD</div>
-                        <div class="stock-name">Robinhood</div>
+                        <select id="assetA" class="asset-dropdown">
+                            <optgroup label="Live Crypto (Binance API)">
+                                <option value="BTC" selected>Bitcoin ($BTC)</option>
+                                <option value="ETH">Ethereum ($ETH)</option>
+                                <option value="SOL">Solana ($SOL)</option>
+                            </optgroup>
+                            <optgroup label="Synthetic Stocks (Testnet Oracle)">
+                                <option value="TSLA">Tesla ($TSLA)</option>
+                                <option value="AAPL">Apple ($AAPL)</option>
+                                <option value="SPACE">SpaceX (Synthetic)</option>
+                                <option value="DANG">Dangote (Synthetic)</option>
+                            </optgroup>
+                        </select>
                     </div>
                     <div class="pool-amount">Prize Pool: <span id="poolA">0</span> VCT</div>
                 </div>
@@ -63,12 +74,23 @@
                     <div class="health-bar-wrapper hidden" id="hpBoxB">
                         <div class="health-fill" id="hpB" style="width: 100%; background: var(--alert-red);"></div>
                     </div>
-                    <div class="viber-avatar viber-ruby" id="avatarB">
+                    <div class="viber-avatar" id="avatarB" style="background-image: url('assets/vibers/viber4.webp'); box-shadow: 0 0 15px var(--alert-red);">
                         <div class="weapon weapon-b" id="weaponB">🔨</div>
                     </div>
                     <div class="stock-info">
-                        <div class="stock-ticker">$NVDA</div>
-                        <div class="stock-name">NVIDIA</div>
+                        <select id="assetB" class="asset-dropdown">
+                            <optgroup label="Live Crypto (Binance API)">
+                                <option value="BTC">Bitcoin ($BTC)</option>
+                                <option value="ETH">Ethereum ($ETH)</option>
+                                <option value="SOL" selected>Solana ($SOL)</option>
+                            </optgroup>
+                            <optgroup label="Synthetic Stocks (Testnet Oracle)">
+                                <option value="TSLA">Tesla ($TSLA)</option>
+                                <option value="AAPL">Apple ($AAPL)</option>
+                                <option value="SPACE">SpaceX (Synthetic)</option>
+                                <option value="DANG">Dangote (Synthetic)</option>
+                            </optgroup>
+                        </select>
                     </div>
                     <div class="pool-amount">Prize Pool: <span id="poolB">0</span> VCT</div>
                 </div>
@@ -77,7 +99,7 @@
             <!-- Betting Controls -->
             <div class="betting-panel danfo-sheet">
                 <h3>Predict the Winner</h3>
-                <p>Which stock will perform better in the next 60 seconds?</p>
+                <p>Which asset will perform better in the next 60 seconds?</p>
                 <div class="bet-controls">
                     <input type="number" id="betAmount" placeholder="Amount of $VCT" disabled>
                     <button id="placeBetBtn" class="btn-action" disabled>Select a Team First</button>

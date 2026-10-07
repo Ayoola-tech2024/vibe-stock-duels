@@ -129,3 +129,33 @@ input[type="number"] { padding: 12px; border: 3px solid var(--charcoal-ink); bor
 .ko-state .weapon {
     display: none;
 }
+
+/* Asset Dropdown */
+.asset-dropdown {
+    appearance: none;
+    background: var(--charcoal-ink);
+    color: var(--cream-paper);
+    border: 2px solid var(--cream-paper);
+    padding: 8px 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,1);
+    transition: all 0.2s ease;
+}
+.asset-dropdown:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 rgba(0,0,0,1);
+}
+.asset-dropdown:focus {
+    outline: none;
+    border-color: var(--vibe-cyan);
+}
+.viber-avatar {
+    background-size: cover;
+    background-position: center;
+}
