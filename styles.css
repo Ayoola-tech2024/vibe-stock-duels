@@ -159,3 +159,47 @@ input[type="number"] { padding: 12px; border: 3px solid var(--charcoal-ink); bor
     background-size: cover;
     background-position: center;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS FIXES
+   ========================================================================== */
+@media (max-width: 768px) {
+    .versus-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .team-card {
+        width: 100%;
+        max-width: 350px;
+    }
+    
+    .vs-center {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .chart-container {
+        width: 100%;
+    }
+    
+    #liveChart {
+        width: 100% !important;
+        height: 140px !important;
+    }
+
+    .betting-panel {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .bet-controls {
+        flex-direction: column;
+    }
+    
+    .user-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+}

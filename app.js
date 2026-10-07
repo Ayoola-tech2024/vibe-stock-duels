@@ -129,12 +129,16 @@ async function fetchAssetPrice(assetKey, currentPrice = 0) {
     const asset = ASSETS[assetKey];
     if (asset.type === 'crypto') {
         try {
-            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${assetKey}USDT`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${assetKey}USDT`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await res.json();
             return parseFloat(data.price);
         } catch (e) {
-            console.error("Binance Oracle fail:", e);
-            return currentPrice || asset.base;
+            console.warn("Binance Oracle fail (Network/Timeout). Falling back to synthetic:", e);
+            const base = currentPrice || asset.base;
+            return base * (1 + (Math.random() - 0.49) * 0.015);
         }
     } else {
         // Simulated Synthetic Oracle for Private companies & Stocks
@@ -160,121 +164,133 @@ placeBetBtn.addEventListener('click', async () => {
     if (!amount || amount <= 0) return;
     if (amount > userBalance) { alert("❌ Insufficient $VCT balance!"); return; }
     
-    placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
-    placeBetBtn.disabled = true;
-    betInput.disabled = true;
-    selectA.disabled = true;
-    selectB.disabled = true;
+    try {
+        placeBetBtn.innerText = "CONNECTING TO ORACLE... 📡";
+        placeBetBtn.disabled = true;
+        betInput.disabled = true;
+        selectA.disabled = true;
+        selectB.disabled = true;
 
-    // Fetch initial prices
-    currentPriceA = 0; // reset for fresh base
-    currentPriceB = 0;
-    const initialPrices = await fetchLivePrices();
-    
-    if (!initialPrices || !initialPrices.a || !initialPrices.b) {
-        alert("⚠️ Failed to connect to live Oracle.");
-        placeBetBtn.innerText = `Place Bet`;
-        placeBetBtn.disabled = false;
-        betInput.disabled = false;
-        selectA.disabled = false;
-        selectB.disabled = false;
-        return;
-    }
+        // Fetch initial prices
+        currentPriceA = 0; // reset for fresh base
+        currentPriceB = 0;
+        const initialPrices = await fetchLivePrices();
+        
+        if (!initialPrices || !initialPrices.a || !initialPrices.b) {
+            alert("⚠️ Failed to connect to live Oracle.");
+            resetBetUI();
+            return;
+        }
 
-    // Process Bet
-    userBalance -= amount;
-    currentBet = amount;
-    roundLocked = true;
-    
-    // Broadcast PvP Start
-    if (isMultiplayer && p2pConnection) {
-        p2pConnection.send({
-            type: 'SYNC_START',
-            selectedTeam,
-            amount
-        });
-    }
-    
-    // Set Live Data
-    startPriceA = currentPriceA = initialPrices.a;
-    startPriceB = currentPriceB = initialPrices.b;
-    
-    historyA = [0];
-    historyB = [0];
-    hpA = 100;
-    hpB = 100;
-    timer = 60;
-    countdownEl.innerText = timer;
-    
-    // Reset UI
-    document.getElementById('hpA').style.width = '100%';
-    document.getElementById('hpB').style.width = '100%';
-    document.getElementById('hpBoxA').classList.remove('hidden');
-    document.getElementById('hpBoxB').classList.remove('hidden');
-    avatarA.classList.remove('ko-state');
-    avatarB.classList.remove('ko-state');
-    
-    balancePill.innerText = `${userBalance} $VCT`;
-    const poolEl = document.getElementById(`pool${selectedTeam}`);
-    poolEl.innerText = parseInt(poolEl.innerText) + amount;
-    
-    placeBetBtn.innerText = "FIGHTING! ⚔️";
-    placeBetBtn.style.background = "var(--alert-red)";
-    
-    // START VISUAL FIGHT & CHART
-    teamACard.classList.add('fighting');
-    teamBCard.classList.add('fighting');
-    vsBadge.classList.add('hidden');
-    chartBox.classList.remove('hidden');
-    
-    drawChart();
-    
-    // Live Combat triggers (using real API)
-    priceInterval = setInterval(async () => {
-        const livePrices = await fetchLivePrices();
-        if (livePrices) {
-            currentPriceA = livePrices.a;
-            currentPriceB = livePrices.b;
+        // Process Bet
+        userBalance -= amount;
+        currentBet = amount;
+        roundLocked = true;
+        
+        // Broadcast PvP Start
+        if (isMultiplayer && p2pConnection) {
+            p2pConnection.send({
+                type: 'SYNC_START',
+                selectedTeam,
+                amount
+            });
         }
         
-        const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
-        const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
+        // Set Live Data
+        startPriceA = currentPriceA = initialPrices.a;
+        startPriceB = currentPriceB = initialPrices.b;
         
-        historyA.push(changeA);
-        historyB.push(changeB);
+        historyA = [0];
+        historyB = [0];
+        hpA = 100;
+        hpB = 100;
+        timer = 60;
+        countdownEl.innerText = timer;
+        
+        // Reset UI
+        document.getElementById('hpA').style.width = '100%';
+        document.getElementById('hpB').style.width = '100%';
+        document.getElementById('hpBoxA').classList.remove('hidden');
+        document.getElementById('hpBoxB').classList.remove('hidden');
+        avatarA.classList.remove('ko-state');
+        avatarB.classList.remove('ko-state');
+        
+        balancePill.innerText = `${userBalance} $VCT`;
+        const poolEl = document.getElementById(`pool${selectedTeam}`);
+        poolEl.innerText = parseInt(poolEl.innerText) + amount;
+        
+        placeBetBtn.innerText = "FIGHTING! ⚔️";
+        placeBetBtn.style.background = "var(--alert-red)";
+        
+        // START VISUAL FIGHT & CHART
+        teamACard.classList.add('fighting');
+        teamBCard.classList.add('fighting');
+        vsBadge.classList.add('hidden');
+        chartBox.classList.remove('hidden');
+        
         drawChart();
         
-        // Calculate Damage based on relative delta
-        const diff = Math.abs(changeA - changeB);
-        // Exaggerate damage multiplier for crypto micro-percentages to keep the fight active
-        const damage = Math.min(diff * 50, 15); 
-        
-        if (changeA > changeB) {
-            hpB -= damage;
-        } else if (changeB > changeA) {
-            hpA -= damage;
-        }
-        
-        hpA = Math.max(0, hpA);
-        hpB = Math.max(0, hpB);
-        
-        document.getElementById('hpA').style.width = `${hpA}%`;
-        document.getElementById('hpB').style.width = `${hpB}%`;
-        
-        triggerCombatAnimations(changeA, changeB);
-        
-        if (hpA <= 0 || hpB <= 0) {
-            clearInterval(priceInterval); // Stop combat
-            if (hpA <= 0) avatarA.classList.add('ko-state');
-            if (hpB <= 0) avatarB.classList.add('ko-state');
-            setTimeout(() => {
-                timer = 0; // Force end
-                resolveRound();
-            }, 1000);
-        }
-        
-    }, 1500); // 1.5s interval to respect API limits while staying responsive
+        // Live Combat triggers (using real API)
+        priceInterval = setInterval(async () => {
+            const livePrices = await fetchLivePrices();
+            if (livePrices) {
+                currentPriceA = livePrices.a;
+                currentPriceB = livePrices.b;
+            }
+            
+            const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
+            const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
+            
+            historyA.push(changeA);
+            historyB.push(changeB);
+            drawChart();
+            
+            // Calculate Damage based on relative delta
+            const diff = Math.abs(changeA - changeB);
+            // Exaggerate damage multiplier for crypto micro-percentages to keep the fight active
+            const damage = Math.min(diff * 50, 15); 
+            
+            if (changeA > changeB) {
+                hpB -= damage;
+            } else if (changeB > changeA) {
+                hpA -= damage;
+            }
+            
+            hpA = Math.max(0, hpA);
+            hpB = Math.max(0, hpB);
+            
+            document.getElementById('hpA').style.width = `${hpA}%`;
+            document.getElementById('hpB').style.width = `${hpB}%`;
+            
+            triggerCombatAnimations(changeA, changeB);
+            
+            if (hpA <= 0 || hpB <= 0) {
+                clearInterval(priceInterval); // Stop combat
+                if (hpA <= 0) avatarA.classList.add('ko-state');
+                if (hpB <= 0) avatarB.classList.add('ko-state');
+                setTimeout(() => {
+                    timer = 0; // Force end
+                    resolveRound();
+                }, 1000);
+            }
+            
+        }, 1500); // 1.5s interval to respect API limits while staying responsive
+
+    } catch (err) {
+        console.error("Critical Bet Error:", err);
+        alert("⚠️ Something went wrong starting the match. Please try again.");
+        resetBetUI();
+    }
 });
+
+function resetBetUI() {
+    const activeSelect = selectedTeam === 'A' ? selectA : selectB;
+    placeBetBtn.innerText = `Place Bet on ${ASSETS[activeSelect.value].ticker}`;
+    placeBetBtn.disabled = false;
+    betInput.disabled = false;
+    selectA.disabled = false;
+    selectB.disabled = false;
+}
 
 // Dynamic Combat based on live prices
 function triggerCombatAnimations(changeA, changeB) {
