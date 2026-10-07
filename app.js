@@ -82,14 +82,14 @@ let currentBet = 0;
 let roundLocked = false;
 
 const ASSETS = {
-    BTC: { name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 62000, img: "viber1.webp", color: "#FFD700" }, // Gold
-    ETH: { name: "Ethereum", ticker: "$ETH", type: "crypto", base: 3400, img: "viber2.webp", color: "#A855F7" }, // Purple
-    SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 145, img: "viber4.webp", color: "#00F0FF" }, // Cyan
-    TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 240.50, img: "viber5.webp", color: "#FF3366" }, // Red
-    AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 190.20, img: "viber6.webp", color: "#FDFBF7" }, // White/Cream
-    NVDA: { name: "NVIDIA", ticker: "$NVDA", type: "stock", base: 125.50, img: "viber8.webp", color: "#76B900" }, // Nvidia Green
-    MSFT: { name: "Microsoft", ticker: "$MSFT", type: "stock", base: 415.00, img: "viber7.webp", color: "#00A4EF" }, // MS Blue
-    AMZN: { name: "Amazon", ticker: "$AMZN", type: "stock", base: 185.00, img: "viber3.webp", color: "#FF9900" } // Amazon Orange
+    BTC: { name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 85000, img: "viber1.webp", color: "#FFD700" }, // Gold
+    ETH: { name: "Ethereum", ticker: "$ETH", type: "crypto", base: 4500, img: "viber2.webp", color: "#A855F7" }, // Purple
+    SOL: { name: "Solana", ticker: "$SOL", type: "crypto", base: 118.60, img: "viber4.webp", color: "#00F0FF" }, // Cyan
+    TSLA: { name: "Tesla", ticker: "$TSLA", type: "stock", base: 377.81, img: "viber5.webp", color: "#FF3366" }, // Red
+    AAPL: { name: "Apple", ticker: "$AAPL", type: "stock", base: 336.67, img: "viber6.webp", color: "#FDFBF7" }, // White/Cream
+    NVDA: { name: "NVIDIA", ticker: "$NVDA", type: "stock", base: 238.50, img: "viber8.webp", color: "#76B900" }, // Nvidia Green
+    MSFT: { name: "Microsoft", ticker: "$MSFT", type: "stock", base: 480.00, img: "viber7.webp", color: "#00A4EF" }, // MS Blue
+    AMZN: { name: "Amazon", ticker: "$AMZN", type: "stock", base: 215.00, img: "viber3.webp", color: "#FF9900" } // Amazon Orange
 };
 
 const selectA = document.getElementById('assetA');
@@ -151,8 +151,8 @@ async function fetchAssetPrice(assetKey, currentPrice = 0) {
         // Fetch REAL base price from Yahoo Finance via CORS proxy if starting fresh
         if (!currentPrice) {
             try {
-                const cleanTicker = asset.ticker.replace('$', '');
-                const targetUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${cleanTicker}`);
+                // Use assetKey (e.g. "TSLA") instead of asset.ticker (e.g. "$TSLA") to avoid 404s!
+                const targetUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${assetKey}`);
                 const res = await fetch(`https://api.allorigins.win/get?url=${targetUrl}`);
                 const json = await res.json();
                 const yahooData = JSON.parse(json.contents);
