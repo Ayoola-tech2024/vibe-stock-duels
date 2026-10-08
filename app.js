@@ -24,6 +24,44 @@ const balancePill = document.getElementById('balancePill');
 const privyModal = document.getElementById('privyModal');
 const closePrivy = document.getElementById('closePrivy');
 
+// Phase 3: Onboarding Elements
+const tutorialBtn = document.getElementById('tutorialBtn');
+const tutorialModal = document.getElementById('tutorialModal');
+const closeTutorialBtn = document.getElementById('closeTutorialBtn');
+const nicknameModal = document.getElementById('nicknameModal');
+const nicknameInput = document.getElementById('nicknameInput');
+const saveNicknameBtn = document.getElementById('saveNicknameBtn');
+const nicknamePill = document.getElementById('nicknamePill');
+const playerNameDisplay = document.getElementById('playerNameDisplay');
+
+let playerNickname = localStorage.getItem('vibe_stock_nickname');
+
+// Initialize Onboarding
+window.addEventListener('DOMContentLoaded', () => {
+    if (!playerNickname) {
+        nicknameModal.classList.remove('hidden');
+    } else {
+        playerNameDisplay.innerText = playerNickname;
+        nicknamePill.classList.remove('hidden');
+    }
+});
+
+saveNicknameBtn.addEventListener('click', () => {
+    const name = nicknameInput.value.trim();
+    if (name.length < 2) return alert('Nickname too short!');
+    playerNickname = name;
+    localStorage.setItem('vibe_stock_nickname', name);
+    playerNameDisplay.innerText = name;
+    nicknamePill.classList.remove('hidden');
+    nicknameModal.classList.add('hidden');
+    
+    // Show tutorial immediately after first-time nickname entry
+    tutorialModal.classList.remove('hidden');
+});
+
+tutorialBtn.addEventListener('click', () => tutorialModal.classList.remove('hidden'));
+closeTutorialBtn.addEventListener('click', () => tutorialModal.classList.add('hidden'));
+
 let userWallet = null;
 let userBalance = 0;
 let selectedTeam = null;
@@ -641,10 +679,7 @@ function initPeer(onOpenCallback) {
 }
 
 createRoomBtn.addEventListener('click', () => {
-    const hostInput = document.getElementById('hostUsername').value.trim();
-    if (!hostInput) { alert("Please enter a username!"); return; }
-    myUsername = hostInput;
-    
+    myUsername = playerNickname || "Host Raider";
     createRoomBtn.innerText = "Generating P2P Room...";
     initPeer((id) => {
         stateCreate.classList.add('hidden');
@@ -665,16 +700,17 @@ window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const duelId = urlParams.get('duel');
     if (duelId) {
+        // If guest joined via link, they still need to do the main nickname modal first.
+        // Once they close it, we auto-trigger the join room UI.
+        const originalSaveBtnClick = saveNicknameBtn.onclick;
+        
         multiplayerModal.classList.remove('hidden');
         stateCreate.classList.add('hidden');
         stateWaiting.classList.add('hidden');
         stateJoining.classList.remove('hidden');
         
         joinRoomBtn.addEventListener('click', () => {
-            const guestInput = document.getElementById('guestUsername').value.trim();
-            if (!guestInput) { alert("Please enter a username!"); return; }
-            myUsername = guestInput;
-            
+            myUsername = playerNickname || "Guest Raider";
             joinRoomBtn.innerText = "Connecting...";
             initPeer((myId) => {
                 p2pConnection = peer.connect(duelId);

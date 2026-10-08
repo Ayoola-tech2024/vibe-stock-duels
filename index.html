@@ -15,9 +15,11 @@
         <!-- Navigation / Header -->
         <header class="top-nav tactile-card">
             <div class="logo">⚔️ Vibe Duels</div>
-            <div class="user-controls">
-                <div class="online-counter" style="color: var(--vibe-cyan); font-weight: bold; margin-right: 15px;">🟢 <span id="onlineCount">1,402</span> Online</div>
-                <button id="multiplayerBtn" class="btn-action" style="margin-right: 15px; background: var(--vibe-purple);">👥 Challenge Friend</button>
+            <div class="user-controls" style="display: flex; align-items: center; gap: 15px;">
+                <button id="tutorialBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px;">❓ How to Play</button>
+                <div class="online-counter" style="color: var(--vibe-cyan); font-weight: bold;">🟢 <span id="onlineCount">1,402</span> Online</div>
+                <button id="multiplayerBtn" class="btn-action" style="background: var(--vibe-purple);">👥 Challenge Friend</button>
+                <div class="tactile-card hidden" id="nicknamePill" style="padding: 8px 12px; font-weight: bold; font-size: 0.9rem; background: var(--alert-red); color: white;">👤 <span id="playerNameDisplay">Raider</span></div>
                 <div class="token-balance hidden" id="balancePill">0 $VCT</div>
                 <button id="loginBtn" class="btn-google-pill">
                     <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" width="18">
@@ -25,6 +27,30 @@
                 </button>
             </div>
         </header>
+
+        <!-- Modals for Onboarding -->
+        <div id="nicknameModal" class="privy-overlay hidden">
+            <div class="danfo-sheet result-card">
+                <h2 style="color: var(--vibe-gold); margin-bottom: 10px;">Enter the Arena</h2>
+                <p style="margin-bottom: 20px;">What should we call you on the leaderboard?</p>
+                <input type="text" id="nicknameInput" placeholder="Enter Nickname (e.g. Satoshi)" style="width: 100%; padding: 12px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-cyan); margin-bottom: 15px; font-family: 'Space Grotesk'; text-align: center; font-size: 1.1rem;">
+                <button id="saveNicknameBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000;">Save & Continue ➔</button>
+            </div>
+        </div>
+
+        <div id="tutorialModal" class="privy-overlay hidden">
+            <div class="danfo-sheet result-card" style="text-align: left;">
+                <h2 style="color: var(--vibe-cyan); margin-bottom: 15px; text-align: center;">How to Play ⚔️</h2>
+                <ul style="line-height: 1.6; margin-bottom: 20px; padding-left: 20px; font-size: 0.95rem;">
+                    <li><strong>1. Pick Your Asset:</strong> Select a crypto or stock for both sides (e.g. $BTC vs $TSLA).</li>
+                    <li><strong>2. Place Your Bet:</strong> Enter how many $VCT tokens you want to wager.</li>
+                    <li><strong>3. Lock In:</strong> Click "Place Bet" and confirm the Web3 transaction to lock your tokens in the Smart Vault.</li>
+                    <li><strong>4. 60-Second Duel:</strong> The arena pulls <strong>live</strong> market prices. The asset whose price goes up the most (or down the least) in 60 seconds wins!</li>
+                    <li><strong>5. Payout:</strong> The winner takes the combined prize pool (minus a protocol burn fee).</li>
+                </ul>
+                <button id="closeTutorialBtn" class="btn-action" style="width: 100%; background: var(--vibe-purple);">Let's Duel! 🚀</button>
+            </div>
+        </div>
 
         <!-- Main Arena -->
         <main class="duel-arena">
@@ -172,7 +198,6 @@
             <p>Challenge a friend to a 60-second binary duel.</p>
             
             <div id="lobbyStateCreate" style="margin: 20px 0;">
-                <input type="text" id="hostUsername" placeholder="Enter your Username" style="width: 100%; padding: 10px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-purple); margin-bottom: 10px; font-family: 'Space Grotesk';">
                 <button id="createRoomBtn" class="btn-action" style="width: 100%;">Create Invite Link</button>
             </div>
             
@@ -185,8 +210,7 @@
             
             <div id="lobbyStateJoining" class="hidden" style="margin: 20px 0;">
                 <h3 style="color: var(--vibe-gold);">You were invited to a Duel!</h3>
-                <input type="text" id="guestUsername" placeholder="Enter your Username" style="width: 100%; padding: 10px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-gold); margin-bottom: 10px; font-family: 'Space Grotesk';">
-                <button id="joinRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000;">Join Match</button>
+                <button id="joinRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; margin-top: 10px;">Join Match</button>
             </div>
         </div>
     </div>
