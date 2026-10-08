@@ -480,6 +480,19 @@ function drawChart() {
     // Draw lines
     drawLine(historyB, colorB);
     drawLine(historyA, colorA);
+
+    // Draw Legend
+    ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+    
+    // Asset A Legend (Top Left)
+    ctx.fillStyle = colorA;
+    ctx.textAlign = 'left';
+    ctx.fillText(`■ ${ASSETS[selectA.value].ticker}`, 10, 20);
+
+    // Asset B Legend (Top Right)
+    ctx.fillStyle = colorB;
+    ctx.textAlign = 'right';
+    ctx.fillText(`■ ${ASSETS[selectB.value].ticker}`, canvas.width - 10, 20);
 }
 
 // Simple Countdown
