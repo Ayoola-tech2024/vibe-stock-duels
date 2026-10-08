@@ -712,15 +712,26 @@ copyLinkBtn.addEventListener('click', () => {
 window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const duelId = urlParams.get('duel');
+    
     if (duelId) {
-        // If guest joined via link, they still need to do the main nickname modal first.
-        // Once they close it, we auto-trigger the join room UI.
-        const originalSaveBtnClick = saveNicknameBtn.onclick;
-        
-        multiplayerModal.classList.remove('hidden');
         stateCreate.classList.add('hidden');
         stateWaiting.classList.add('hidden');
         stateJoining.classList.remove('hidden');
+        
+        const openJoinModal = () => {
+            multiplayerModal.classList.remove('hidden');
+        };
+
+        // If they don't have a nickname, they are forced to do the onboarding.
+        // We will wait until the tutorial is closed before showing the join modal.
+        if (!playerNickname) {
+            // We append to the existing closeTutorialBtn listener
+            closeTutorialBtn.addEventListener('click', () => {
+                setTimeout(openJoinModal, 500); // Show join modal right after tutorial closes
+            });
+        } else {
+            openJoinModal();
+        }
         
         joinRoomBtn.addEventListener('click', () => {
             myUsername = playerNickname || "Guest Raider";
