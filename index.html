@@ -189,29 +189,41 @@
         </div>
     </div>
 
-    <!-- Multiplayer Lobby Modal -->
+    <!-- Multiplayer Lobby Modal (OTP Room Code System) -->
     <div id="multiplayerModal" class="privy-overlay hidden">
-        <div class="danfo-sheet result-card">
-            <div class="privy-header" style="justify-content: flex-end; margin-bottom: -20px;">
+        <div class="danfo-sheet result-card" style="max-width: 420px;">
+            <div class="privy-header" style="justify-content: flex-end; margin-bottom: -15px; width: 100%;">
                 <button id="closeMultiplayer" class="close-btn">&times;</button>
             </div>
-            <h2 style="color: var(--vibe-cyan);">PvP Lobby</h2>
-            <p>Challenge a friend to a 60-second binary duel.</p>
-            
-            <div id="lobbyStateCreate" style="margin: 20px 0;">
-                <button id="createRoomBtn" class="btn-action" style="width: 100%;">Create Invite Link</button>
+            <h2 style="color: var(--vibe-cyan); margin-bottom: 5px;">PvP Duel Arena</h2>
+            <p style="margin-bottom: 18px; font-size: 0.95rem; color: #ccc;">Fast, instant Web3 duel using a 6-digit OTP.</p>
+
+            <!-- Mode Selector Tabs: Host vs Join -->
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 18px;">
+                <button id="tabHostBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--vibe-purple);">👑 Host Match</button>
+                <button id="tabJoinBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--charcoal-ink); color: #ccc;">⚡ Join with OTP</button>
             </div>
-            
-            <div id="lobbyStateWaiting" class="hidden" style="margin: 20px 0;">
-                <p>Send this link to your opponent:</p>
-                <input type="text" id="inviteLink" readonly style="width: 100%; padding: 10px; background: #111; color: var(--vibe-gold); border: 2px solid var(--vibe-purple); margin-bottom: 10px; font-family: monospace;">
-                <button id="copyLinkBtn" class="btn-action" style="background: var(--vibe-cyan); color: #000;">📋 Copy Link</button>
-                <p style="margin-top: 15px; color: var(--vibe-purple);" id="waitingText">⏳ Waiting for opponent to join...<br><span style="font-size: 0.8rem; opacity: 0.8; color: #fff;">(Keep this tab open while your friend connects)</span></p>
+
+            <!-- Panel 1: Host Room (Generates 6-Digit OTP) -->
+            <div id="panelHost" style="width: 100%; text-align: center;">
+                <div id="hostPreGenerate">
+                    <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Create an arena room and get a 6-digit OTP code to share with your opponent.</p>
+                    <button id="createRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; font-size: 1.1rem;">🎲 Generate Duel OTP ➔</button>
+                </div>
+                
+                <div id="hostCodeDisplay" class="hidden" style="margin-top: 5px;">
+                    <p style="font-size: 0.85rem; color: #bbb; margin-bottom: 8px;">SHARE THIS 6-DIGIT CODE WITH YOUR FRIEND:</p>
+                    <div id="roomOtpBadge" style="font-family: monospace; font-size: 2.5rem; letter-spacing: 8px; font-weight: 900; color: var(--vibe-gold); background: #000; border: 3px solid var(--vibe-gold); padding: 12px; border-radius: 12px; margin-bottom: 12px; text-shadow: 0 0 15px rgba(255,215,0,0.4);">------</div>
+                    <button id="copyOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; margin-bottom: 12px;">📋 Copy 6-Digit Code</button>
+                    <p style="color: var(--vibe-purple); font-size: 0.9rem;" id="waitingText">⏳ Waiting for opponent to enter code...<br><span style="font-size: 0.78rem; opacity: 0.8; color: #fff;">(Keep this tab open on your screen)</span></p>
+                </div>
             </div>
-            
-            <div id="lobbyStateJoining" class="hidden" style="margin: 20px 0;">
-                <h3 style="color: var(--vibe-gold);">You were invited to a Duel!</h3>
-                <button id="joinRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; margin-top: 10px;">Join Match</button>
+
+            <!-- Panel 2: Join Room (Input 6-Digit OTP) -->
+            <div id="panelJoin" class="hidden" style="width: 100%; text-align: center;">
+                <p style="font-size: 0.9rem; color: #bbb; margin-bottom: 10px;">Enter the 6-digit OTP from your friend:</p>
+                <input type="text" id="joinOtpInput" maxlength="6" placeholder="000000" inputmode="numeric" style="width: 100%; font-family: monospace; font-size: 2.2rem; letter-spacing: 8px; text-align: center; font-weight: 900; padding: 12px; background: #000; color: var(--vibe-cyan); border: 3px solid var(--vibe-cyan); border-radius: 12px; margin-bottom: 15px; outline: none;">
+                <button id="joinWithOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; font-size: 1.1rem;">⚡ Connect & Fight ➔</button>
                 <p id="joinStatusText" style="margin-top: 12px; font-size: 0.85rem; color: var(--vibe-cyan);" class="hidden"></p>
             </div>
         </div>

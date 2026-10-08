@@ -626,24 +626,32 @@ function resetBoard() {
 startTimer();
 
 // ==========================================
-// PHASE 6: P2P WEBRTC MULTIPLAYER (PEERJS)
+// PHASE 6: P2P WEBRTC MULTIPLAYER (OTP SYSTEM)
 // ==========================================
 const multiplayerBtn = document.getElementById('multiplayerBtn');
 const multiplayerModal = document.getElementById('multiplayerModal');
 const closeMultiplayer = document.getElementById('closeMultiplayer');
-const createRoomBtn = document.getElementById('createRoomBtn');
-const copyLinkBtn = document.getElementById('copyLinkBtn');
-const inviteLinkInput = document.getElementById('inviteLink');
-const joinRoomBtn = document.getElementById('joinRoomBtn');
 
-const stateCreate = document.getElementById('lobbyStateCreate');
-const stateWaiting = document.getElementById('lobbyStateWaiting');
-const stateJoining = document.getElementById('lobbyStateJoining');
+const tabHostBtn = document.getElementById('tabHostBtn');
+const tabJoinBtn = document.getElementById('tabJoinBtn');
+const panelHost = document.getElementById('panelHost');
+const panelJoin = document.getElementById('panelJoin');
+
+const hostPreGenerate = document.getElementById('hostPreGenerate');
+const hostCodeDisplay = document.getElementById('hostCodeDisplay');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const roomOtpBadge = document.getElementById('roomOtpBadge');
+const copyOtpBtn = document.getElementById('copyOtpBtn');
+
+const joinOtpInput = document.getElementById('joinOtpInput');
+const joinWithOtpBtn = document.getElementById('joinWithOtpBtn');
+const joinStatusText = document.getElementById('joinStatusText');
 
 let peer = null;
 let p2pConnection = null;
 let isMultiplayer = false;
 let isHost = false;
+let currentRoomOtp = null;
 
 // PvP State
 let myUsername = "Guest";
@@ -651,6 +659,29 @@ let oppUsername = "Opponent";
 let myLock = false;
 let oppLock = false;
 let pendingBetAmount = 0;
+
+// Tab Switching (Host vs Join)
+function switchMultiplayerTab(mode) {
+    if (mode === 'host') {
+        panelHost.classList.remove('hidden');
+        panelJoin.classList.add('hidden');
+        tabHostBtn.style.background = 'var(--vibe-purple)';
+        tabHostBtn.style.color = '#fff';
+        tabJoinBtn.style.background = 'var(--charcoal-ink)';
+        tabJoinBtn.style.color = '#ccc';
+    } else {
+        panelJoin.classList.remove('hidden');
+        panelHost.classList.add('hidden');
+        tabJoinBtn.style.background = 'var(--vibe-gold)';
+        tabJoinBtn.style.color = '#000';
+        tabHostBtn.style.background = 'var(--charcoal-ink)';
+        tabHostBtn.style.color = '#ccc';
+        setTimeout(() => joinOtpInput.focus(), 100);
+    }
+}
+
+tabHostBtn.addEventListener('click', () => switchMultiplayerTab('host'));
+tabJoinBtn.addEventListener('click', () => switchMultiplayerTab('join'));
 
 // Mock Online Counter Fluctuation
 setInterval(() => {
@@ -664,9 +695,9 @@ setInterval(() => {
 
 multiplayerBtn.addEventListener('click', () => {
     multiplayerModal.classList.remove('hidden');
-    stateCreate.classList.remove('hidden');
-    stateWaiting.classList.add('hidden');
-    stateJoining.classList.add('hidden');
+    if (!currentRoomOtp) {
+        switchMultiplayerTab('host');
+    }
 });
 
 closeMultiplayer.addEventListener('click', () => {
@@ -706,18 +737,22 @@ const PEER_ICE_CONFIG = {
     }
 };
 
-function initPeer(onOpenCallback) {
-    if (peer && !peer.destroyed && peer.id) return onOpenCallback(peer.id);
+function initPeerWithCustomId(customId, onOpenCallback) {
+    if (peer && !peer.destroyed && peer.id === customId) {
+        return onOpenCallback(peer.id);
+    }
+    if (peer && !peer.destroyed) {
+        peer.destroy();
+    }
     
-    const randomId = 'vibe-' + Math.random().toString(36).substr(2, 6);
-    peer = new Peer(randomId, PEER_ICE_CONFIG);
+    peer = new Peer(customId, PEER_ICE_CONFIG);
     
     peer.on('open', (id) => {
         onOpenCallback(id);
     });
     
     peer.on('connection', (c) => {
-        // Someone joined my room! (I am Host)
+        // Someone entered my OTP! (I am Host)
         p2pConnection = c;
         isHost = true;
         isMultiplayer = true;
@@ -727,95 +762,141 @@ function initPeer(onOpenCallback) {
     peer.on('error', (err) => {
         console.error("PeerJS Network Error:", err);
         if (err.type === 'peer-unavailable') {
-            alert("❌ Room Not Found! The host closed or refreshed their tab, or the invite link has expired. Ask your host for a fresh link!");
-            const joinBtn = document.getElementById('joinRoomBtn');
-            if (joinBtn) {
-                joinBtn.innerText = "Room Expired (Ask for new link)";
-                joinBtn.disabled = false;
+            const cleanOtp = joinOtpInput ? joinOtpInput.value.trim() : "";
+            if (joinStatusText) {
+                joinStatusText.innerText = `❌ Code [${cleanOtp}] not found! Make sure host is waiting with this code.`;
+                joinStatusText.classList.remove('hidden');
             }
+            if (joinWithOtpBtn) {
+                joinWithOtpBtn.innerText = "⚡ Connect & Fight ➔";
+                joinWithOtpBtn.disabled = false;
+            }
+            alert(`❌ Room #${cleanOtp} not found! Check the 6 digits and make sure the host has generated the code and has their screen open.`);
+        } else if (err.type === 'unavailable-id') {
+            // Collision on random OTP, regenerate
+            if (createRoomBtn) createRoomBtn.click();
         } else {
             console.warn("PeerJS Notice: " + (err.type || err.message));
         }
     });
 }
 
+// 1. Host: Generate 6-Digit OTP
 createRoomBtn.addEventListener('click', () => {
     myUsername = playerNickname || "Host Raider";
-    createRoomBtn.innerText = "Generating P2P Room...";
-    initPeer((id) => {
-        stateCreate.classList.add('hidden');
-        stateWaiting.classList.remove('hidden');
-        const link = window.location.origin + window.location.pathname + '?duel=' + id;
-        inviteLinkInput.value = link;
+    createRoomBtn.innerText = "Generating Duel Code...";
+    createRoomBtn.disabled = true;
+
+    // Generate clean 6-digit numeric OTP (e.g. 748291)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hostPeerId = 'vibe-duel-' + otp;
+
+    initPeerWithCustomId(hostPeerId, (id) => {
+        currentRoomOtp = otp;
+        hostPreGenerate.classList.add('hidden');
+        hostCodeDisplay.classList.remove('hidden');
+        roomOtpBadge.innerText = otp;
+        createRoomBtn.innerText = "🎲 Generate Duel OTP ➔";
+        createRoomBtn.disabled = false;
     });
 });
 
-copyLinkBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(inviteLinkInput.value);
-    copyLinkBtn.innerText = "✅ Copied!";
-    setTimeout(() => copyLinkBtn.innerText = "📋 Copy Link", 2000);
+copyOtpBtn.addEventListener('click', () => {
+    if (!currentRoomOtp) return;
+    navigator.clipboard.writeText(currentRoomOtp);
+    copyOtpBtn.innerText = `✅ Copied Code: ${currentRoomOtp}!`;
+    setTimeout(() => {
+        copyOtpBtn.innerText = "📋 Copy 6-Digit Code";
+    }, 2500);
 });
 
-// Check if joined via link
+// 2. Guest: Connect with 6-Digit OTP
+joinWithOtpBtn.addEventListener('click', () => {
+    const rawOtp = joinOtpInput.value.trim().replace(/\D/g, '');
+    if (rawOtp.length !== 6) {
+        alert("⚠️ Please enter a valid 6-digit duel code!");
+        joinOtpInput.focus();
+        return;
+    }
+
+    myUsername = playerNickname || "Guest Raider";
+    joinWithOtpBtn.innerText = `⏳ Connecting to #${rawOtp}...`;
+    joinWithOtpBtn.disabled = true;
+
+    if (joinStatusText) {
+        joinStatusText.innerText = "📡 Punching NAT & establishing P2P tunnel...";
+        joinStatusText.classList.remove('hidden');
+    }
+
+    const guestPeerId = 'vibe-guest-' + Math.random().toString(36).substr(2, 6);
+    const targetHostId = 'vibe-duel-' + rawOtp;
+
+    initPeerWithCustomId(guestPeerId, (myId) => {
+        p2pConnection = peer.connect(targetHostId, {
+            reliable: true
+        });
+        isHost = false;
+        isMultiplayer = true;
+
+        let timeoutId = setTimeout(() => {
+            if (!p2pConnection || !p2pConnection.open) {
+                joinWithOtpBtn.innerText = "🔄 Retry Code " + rawOtp;
+                joinWithOtpBtn.disabled = false;
+                if (joinStatusText) {
+                    joinStatusText.innerText = `⚠️ Timed out connecting to #${rawOtp}. Ensure Host is waiting on that screen and retry.`;
+                }
+            }
+        }, 14000);
+
+        p2pConnection.on('open', () => {
+            clearTimeout(timeoutId);
+            if (joinStatusText) joinStatusText.innerText = "✅ Connected to Host!";
+        });
+
+        setupConnectionLogic();
+    });
+});
+
+// Auto-format OTP input: digits only, max 6
+joinOtpInput.addEventListener('input', () => {
+    joinOtpInput.value = joinOtpInput.value.replace(/\D/g, '').slice(0, 6);
+    if (joinOtpInput.value.length === 6) {
+        joinWithOtpBtn.style.boxShadow = "0 0 15px var(--vibe-gold)";
+    } else {
+        joinWithOtpBtn.style.boxShadow = "none";
+    }
+});
+
+// Auto-submit OTP on Enter key
+joinOtpInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && joinOtpInput.value.length === 6) {
+        joinWithOtpBtn.click();
+    }
+});
+
+// Check if joined via URL with pre-filled duel ID or OTP
 window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const duelId = urlParams.get('duel');
+    const duelParam = urlParams.get('duel');
     
-    if (duelId) {
-        stateCreate.classList.add('hidden');
-        stateWaiting.classList.add('hidden');
-        stateJoining.classList.remove('hidden');
-        
+    if (duelParam) {
+        const cleanOtp = duelParam.replace('vibe-duel-', '').replace(/\D/g, '');
+        if (cleanOtp.length === 6) {
+            joinOtpInput.value = cleanOtp;
+        }
+
         const openJoinModal = () => {
             multiplayerModal.classList.remove('hidden');
+            switchMultiplayerTab('join');
         };
 
-        // If they don't have a nickname, they are forced to do the onboarding.
-        // We will wait until the tutorial is closed before showing the join modal.
         if (!playerNickname) {
             closeTutorialBtn.addEventListener('click', () => {
-                setTimeout(openJoinModal, 500); // Show join modal right after tutorial closes
+                setTimeout(openJoinModal, 500);
             });
         } else {
             openJoinModal();
         }
-        
-        joinRoomBtn.addEventListener('click', () => {
-            myUsername = playerNickname || "Guest Raider";
-            joinRoomBtn.innerText = "⏳ Connecting...";
-            joinRoomBtn.disabled = true;
-
-            const statusEl = document.getElementById('joinStatusText');
-            if (statusEl) {
-                statusEl.innerText = "📡 Punching NAT & establishing P2P tunnel...";
-                statusEl.classList.remove('hidden');
-            }
-
-            initPeer((myId) => {
-                p2pConnection = peer.connect(duelId, {
-                    reliable: true
-                });
-                isHost = false;
-                isMultiplayer = true;
-
-                let timeoutId = setTimeout(() => {
-                    if (!p2pConnection || !p2pConnection.open) {
-                        joinRoomBtn.innerText = "🔄 Retry Join Match";
-                        joinRoomBtn.disabled = false;
-                        if (statusEl) {
-                            statusEl.innerText = "⚠️ Direct P2P tunnel timed out. Ensure Host's browser tab is still open and click Retry!";
-                        }
-                    }
-                }, 14000);
-
-                p2pConnection.on('open', () => {
-                    clearTimeout(timeoutId);
-                    if (statusEl) statusEl.innerText = "✅ Connected!";
-                });
-
-                setupConnectionLogic();
-            });
-        });
     }
 });
 
