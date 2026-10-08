@@ -146,6 +146,12 @@ teamBCard.addEventListener('click', () => selectTeam('B'));
 
 function selectTeam(team) {
     if (roundLocked) return;
+    
+    if (typeof isMultiplayer !== 'undefined' && isMultiplayer) {
+        if (isHost && team === 'B') return;
+        if (!isHost && team === 'A') return;
+    }
+    
     selectedTeam = team;
     
     if (team === 'A') {
@@ -761,14 +767,13 @@ function setupConnectionLogic() {
         // Lock Teams: Host is always Team A, Guest is always Team B to avoid conflict
         if (isHost) {
             selectTeam('A');
-            document.getElementById('teamB').style.pointerEvents = 'none';
-            document.getElementById('teamB').style.opacity = '0.7';
-            // Force Guest to match Host's current dropdowns
+            document.getElementById('assetB').disabled = true;
+            // Force Guest to match Host's current dropdowns initially
             p2pConnection.send({ type: 'SELECTION_FORCE', assetA: selectA.value, assetB: selectB.value });
         } else {
             selectTeam('B');
-            document.getElementById('teamA').style.pointerEvents = 'none';
-            document.getElementById('teamA').style.opacity = '0.7';
+            document.getElementById('assetA').disabled = true;
+            // Guest's dropdowns will be driven by the Host or their own selections synced over
         }
         // Show Chat
         const chatContainer = document.getElementById('pvpChatContainer');
