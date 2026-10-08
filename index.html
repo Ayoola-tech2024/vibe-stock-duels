@@ -206,12 +206,13 @@
                 <p>Send this link to your opponent:</p>
                 <input type="text" id="inviteLink" readonly style="width: 100%; padding: 10px; background: #111; color: var(--vibe-gold); border: 2px solid var(--vibe-purple); margin-bottom: 10px; font-family: monospace;">
                 <button id="copyLinkBtn" class="btn-action" style="background: var(--vibe-cyan); color: #000;">📋 Copy Link</button>
-                <p style="margin-top: 15px; color: var(--vibe-purple);" id="waitingText">⏳ Waiting for opponent to join...</p>
+                <p style="margin-top: 15px; color: var(--vibe-purple);" id="waitingText">⏳ Waiting for opponent to join...<br><span style="font-size: 0.8rem; opacity: 0.8; color: #fff;">(Keep this tab open while your friend connects)</span></p>
             </div>
             
             <div id="lobbyStateJoining" class="hidden" style="margin: 20px 0;">
                 <h3 style="color: var(--vibe-gold);">You were invited to a Duel!</h3>
                 <button id="joinRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; margin-top: 10px;">Join Match</button>
+                <p id="joinStatusText" style="margin-top: 12px; font-size: 0.85rem; color: var(--vibe-cyan);" class="hidden"></p>
             </div>
         </div>
     </div>

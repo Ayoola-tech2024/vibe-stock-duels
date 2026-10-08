@@ -673,11 +673,44 @@ closeMultiplayer.addEventListener('click', () => {
     multiplayerModal.classList.add('hidden');
 });
 
+const PEER_ICE_CONFIG = {
+    debug: 1,
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            { urls: 'stun:stun.cloudflare.com:3478' },
+            { urls: 'stun:global.stun.twilio.com:3478' },
+            { urls: 'stun:stun.services.mozilla.com' },
+            { urls: 'stun:openrelay.metered.ca:80' },
+            {
+                urls: 'turn:openrelay.metered.ca:80',
+                username: 'openrelay',
+                credential: 'openrelay'
+            },
+            {
+                urls: 'turn:openrelay.metered.ca:443',
+                username: 'openrelay',
+                credential: 'openrelay'
+            },
+            {
+                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                username: 'openrelay',
+                credential: 'openrelay'
+            }
+        ],
+        iceCandidatePoolSize: 10
+    }
+};
+
 function initPeer(onOpenCallback) {
-    if (peer) return onOpenCallback(peer.id);
+    if (peer && !peer.destroyed && peer.id) return onOpenCallback(peer.id);
     
     const randomId = 'vibe-' + Math.random().toString(36).substr(2, 6);
-    peer = new Peer(randomId, { debug: 2 });
+    peer = new Peer(randomId, PEER_ICE_CONFIG);
     
     peer.on('open', (id) => {
         onOpenCallback(id);
@@ -692,8 +725,17 @@ function initPeer(onOpenCallback) {
     });
     
     peer.on('error', (err) => {
-        console.error(err);
-        alert("P2P Connection Error: " + err.type);
+        console.error("PeerJS Network Error:", err);
+        if (err.type === 'peer-unavailable') {
+            alert("❌ Room Not Found! The host closed or refreshed their tab, or the invite link has expired. Ask your host for a fresh link!");
+            const joinBtn = document.getElementById('joinRoomBtn');
+            if (joinBtn) {
+                joinBtn.innerText = "Room Expired (Ask for new link)";
+                joinBtn.disabled = false;
+            }
+        } else {
+            console.warn("PeerJS Notice: " + (err.type || err.message));
+        }
     });
 }
 
@@ -731,7 +773,6 @@ window.addEventListener('DOMContentLoaded', () => {
         // If they don't have a nickname, they are forced to do the onboarding.
         // We will wait until the tutorial is closed before showing the join modal.
         if (!playerNickname) {
-            // We append to the existing closeTutorialBtn listener
             closeTutorialBtn.addEventListener('click', () => {
                 setTimeout(openJoinModal, 500); // Show join modal right after tutorial closes
             });
@@ -741,11 +782,37 @@ window.addEventListener('DOMContentLoaded', () => {
         
         joinRoomBtn.addEventListener('click', () => {
             myUsername = playerNickname || "Guest Raider";
-            joinRoomBtn.innerText = "Connecting...";
+            joinRoomBtn.innerText = "⏳ Connecting...";
+            joinRoomBtn.disabled = true;
+
+            const statusEl = document.getElementById('joinStatusText');
+            if (statusEl) {
+                statusEl.innerText = "📡 Punching NAT & establishing P2P tunnel...";
+                statusEl.classList.remove('hidden');
+            }
+
             initPeer((myId) => {
-                p2pConnection = peer.connect(duelId);
+                p2pConnection = peer.connect(duelId, {
+                    reliable: true
+                });
                 isHost = false;
                 isMultiplayer = true;
+
+                let timeoutId = setTimeout(() => {
+                    if (!p2pConnection || !p2pConnection.open) {
+                        joinRoomBtn.innerText = "🔄 Retry Join Match";
+                        joinRoomBtn.disabled = false;
+                        if (statusEl) {
+                            statusEl.innerText = "⚠️ Direct P2P tunnel timed out. Ensure Host's browser tab is still open and click Retry!";
+                        }
+                    }
+                }, 14000);
+
+                p2pConnection.on('open', () => {
+                    clearTimeout(timeoutId);
+                    if (statusEl) statusEl.innerText = "✅ Connected!";
+                });
+
                 setupConnectionLogic();
             });
         });
@@ -753,8 +820,12 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupConnectionLogic() {
-    p2pConnection.on('open', () => {
-        console.log("P2P Connected!");
+    let connected = false;
+
+    const onConnected = () => {
+        if (connected) return;
+        connected = true;
+        console.log("P2P Connected successfully!");
         multiplayerModal.classList.add('hidden');
         
         // Exchange Usernames
@@ -780,6 +851,20 @@ function setupConnectionLogic() {
         if (chatContainer) chatContainer.classList.remove('hidden');
         
         p2pConnection.on('data', (data) => handleP2PData(data));
+    };
+
+    if (p2pConnection.open) {
+        onConnected();
+    } else {
+        p2pConnection.on('open', onConnected);
+    }
+
+    p2pConnection.on('error', (err) => {
+        console.error("p2pConnection error:", err);
+    });
+
+    p2pConnection.on('close', () => {
+        console.log("p2pConnection closed");
     });
 }
 
