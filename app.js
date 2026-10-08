@@ -705,35 +705,14 @@ closeMultiplayer.addEventListener('click', () => {
 });
 
 const PEER_ICE_CONFIG = {
-    debug: 1,
+    debug: 2,
     config: {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'stun:stun4.l.google.com:19302' },
-            { urls: 'stun:stun.cloudflare.com:3478' },
-            { urls: 'stun:global.stun.twilio.com:3478' },
-            { urls: 'stun:stun.services.mozilla.com' },
-            { urls: 'stun:openrelay.metered.ca:80' },
-            {
-                urls: 'turn:openrelay.metered.ca:80',
-                username: 'openrelay',
-                credential: 'openrelay'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:443',
-                username: 'openrelay',
-                credential: 'openrelay'
-            },
-            {
-                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-                username: 'openrelay',
-                credential: 'openrelay'
-            }
-        ],
-        iceCandidatePoolSize: 10
+            { urls: 'stun:stun.cloudflare.com:3478' }
+        ]
     }
 };
 
@@ -742,17 +721,19 @@ function initPeerWithCustomId(customId, onOpenCallback) {
         return onOpenCallback(peer.id);
     }
     if (peer && !peer.destroyed) {
-        peer.destroy();
+        try { peer.destroy(); } catch (e) {}
     }
     
     peer = new Peer(customId, PEER_ICE_CONFIG);
     
     peer.on('open', (id) => {
+        console.log("Peer registered with ID:", id);
         onOpenCallback(id);
     });
     
     peer.on('connection', (c) => {
         // Someone entered my OTP! (I am Host)
+        console.log("Host received connection from peer:", c.peer);
         p2pConnection = c;
         isHost = true;
         isMultiplayer = true;
@@ -824,7 +805,7 @@ joinWithOtpBtn.addEventListener('click', () => {
     joinWithOtpBtn.disabled = true;
 
     if (joinStatusText) {
-        joinStatusText.innerText = "📡 Punching NAT & establishing P2P tunnel...";
+        joinStatusText.innerText = `📡 Connecting to Host #${rawOtp}...`;
         joinStatusText.classList.remove('hidden');
     }
 
@@ -832,6 +813,7 @@ joinWithOtpBtn.addEventListener('click', () => {
     const targetHostId = 'vibe-duel-' + rawOtp;
 
     initPeerWithCustomId(guestPeerId, (myId) => {
+        console.log("Guest peer registered:", myId, "initiating connection to host:", targetHostId);
         p2pConnection = peer.connect(targetHostId, {
             reliable: true
         });
@@ -846,7 +828,7 @@ joinWithOtpBtn.addEventListener('click', () => {
                     joinStatusText.innerText = `⚠️ Timed out connecting to #${rawOtp}. Ensure Host is waiting on that screen and retry.`;
                 }
             }
-        }, 14000);
+        }, 12000);
 
         p2pConnection.on('open', () => {
             clearTimeout(timeoutId);
@@ -903,10 +885,17 @@ window.addEventListener('DOMContentLoaded', () => {
 function setupConnectionLogic() {
     let connected = false;
 
+    // Attach data listener IMMEDIATELY so initial packets are never lost
+    p2pConnection.on('data', (data) => {
+        console.log("P2P Data received:", data);
+        handleP2PData(data);
+    });
+
     const onConnected = () => {
         if (connected) return;
         connected = true;
         console.log("P2P Connected successfully!");
+        
         multiplayerModal.classList.add('hidden');
         
         // Exchange Usernames
@@ -930,8 +919,6 @@ function setupConnectionLogic() {
         // Show Chat
         const chatContainer = document.getElementById('pvpChatContainer');
         if (chatContainer) chatContainer.classList.remove('hidden');
-        
-        p2pConnection.on('data', (data) => handleP2PData(data));
     };
 
     if (p2pConnection.open) {
@@ -942,6 +929,14 @@ function setupConnectionLogic() {
 
     p2pConnection.on('error', (err) => {
         console.error("p2pConnection error:", err);
+        if (joinStatusText) {
+            joinStatusText.innerText = "⚠️ Connection error: " + (err.message || err.type || err);
+            joinStatusText.classList.remove('hidden');
+        }
+        if (joinWithOtpBtn) {
+            joinWithOtpBtn.innerText = "⚡ Connect & Fight ➔";
+            joinWithOtpBtn.disabled = false;
+        }
     });
 
     p2pConnection.on('close', () => {
