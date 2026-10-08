@@ -101,7 +101,7 @@ function simulatePrivyLogin(method) {
         
         balancePill.innerText = `${userBalance} $VCT`;
         balancePill.classList.remove('hidden');
-    }, 1500);
+    }, 500);
 }
 
 async function initWeb3Real() {
