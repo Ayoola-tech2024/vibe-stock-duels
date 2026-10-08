@@ -62,6 +62,168 @@ saveNicknameBtn.addEventListener('click', () => {
 tutorialBtn.addEventListener('click', () => tutorialModal.classList.remove('hidden'));
 closeTutorialBtn.addEventListener('click', () => tutorialModal.classList.add('hidden'));
 
+// ==========================================
+// RETRO 8-BIT ARCADE SOUND ENGINE (WEB AUDIO API)
+// 100% Zero External Files - Instant & Reliable
+// ==========================================
+let soundEnabled = true;
+let audioCtx = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+const soundToggleBtn = document.getElementById('soundToggleBtn');
+if (soundToggleBtn) {
+    soundToggleBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        soundToggleBtn.innerText = soundEnabled ? '🔊 SFX' : '🔇 MUTED';
+        soundToggleBtn.style.color = soundEnabled ? '#fff' : '#888';
+        if (soundEnabled) playCoinSound();
+    });
+}
+
+function playHitSound() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+    } catch (e) {}
+}
+
+function playCritSound() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.35, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+    } catch (e) {}
+}
+
+function playCoinSound() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, now); // B5
+        osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.3);
+    } catch (e) {}
+}
+
+function playWinSound() {
+    if (!soundEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const startTime = ctx.currentTime + (idx * 0.09);
+            gain.gain.setValueAtTime(0.25, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + 0.22);
+        });
+    } catch (e) {}
+}
+
+// Spawns RPG-style floating combat numbers & battle hype
+function spawnCombatFloatText(targetEl, text, isCrit = false) {
+    if (!targetEl) return;
+    const floatEl = document.createElement('div');
+    floatEl.className = 'combat-float-text ' + (isCrit ? 'crit-float' : 'damage-float');
+    floatEl.innerText = text;
+    targetEl.appendChild(floatEl);
+    setTimeout(() => {
+        if (floatEl.parentNode) floatEl.parentNode.removeChild(floatEl);
+    }, 1200);
+}
+
+// 🎲 Random Matchup Shuffle Feature
+const shuffleMatchupBtn = document.getElementById('shuffleMatchupBtn');
+if (shuffleMatchupBtn) {
+    shuffleMatchupBtn.addEventListener('click', () => {
+        if (roundLocked) return;
+        playCoinSound();
+        const assetKeys = Object.keys(ASSETS);
+        let randomA = assetKeys[Math.floor(Math.random() * assetKeys.length)];
+        let randomB = assetKeys[Math.floor(Math.random() * assetKeys.length)];
+        while (randomB === randomA) {
+            randomB = assetKeys[Math.floor(Math.random() * assetKeys.length)];
+        }
+        
+        if (!isMultiplayer || isHost) {
+            selectA.value = randomA;
+            updateAvatar(selectA, 'avatarA');
+            if (isMultiplayer && p2pConnection && isHost) {
+                p2pConnection.send({ type: 'SELECTION', team: 'A', asset: randomA });
+            }
+        }
+        if (!isMultiplayer || !isHost) {
+            selectB.value = randomB;
+            updateAvatar(selectB, 'avatarB');
+            if (isMultiplayer && p2pConnection && !isHost) {
+                p2pConnection.send({ type: 'SELECTION', team: 'B', asset: randomB });
+            }
+        }
+        if (selectedTeam === 'A') {
+            placeBetBtn.innerText = `Place Bet on ${ASSETS[selectA.value].ticker}`;
+        } else if (selectedTeam === 'B') {
+            placeBetBtn.innerText = `Place Bet on ${ASSETS[selectB.value].ticker}`;
+        }
+        
+        avatarA.style.transform = 'scale(1.2) rotate(15deg)';
+        avatarB.style.transform = 'scale(1.2) rotate(-15deg)';
+        setTimeout(() => {
+            avatarA.style.transform = '';
+            avatarB.style.transform = '';
+        }, 300);
+    });
+}
+
 let userWallet = null;
 let userBalance = 0;
 let selectedTeam = null;
@@ -289,6 +451,8 @@ placeBetBtn.addEventListener('click', async () => {
     if (!amount || amount <= 0) return;
     if (amount > userBalance) { alert("❌ Insufficient $VCT balance!"); return; }
     
+    playCoinSound();
+
     // REAL WEB3 TRANSACTION LOCK (If using MetaMask)
     if (!isSimulated && vctContract) {
         try {
@@ -441,14 +605,33 @@ function triggerCombatAnimations(changeA, changeB) {
     void avatarA.offsetWidth; 
     void avatarB.offsetWidth;
     
+    const diff = Math.abs(changeA - changeB);
+    const isCrit = diff >= 2.0;
+
     if (changeA > changeB && hpA > 0 && hpB > 0) {
-        // A is winning
+        // A is winning - deals damage to B
         avatarA.classList.add('advancing-a', 'attacking-a');
         avatarB.classList.add('retreating', 'taking-damage');
+        
+        if (isCrit) {
+            spawnCombatFloatText(teamBCard, `💥 CRIT +${diff.toFixed(1)}%!`, true);
+            playCritSound();
+        } else {
+            spawnCombatFloatText(teamBCard, `-${Math.max(1, Math.round(diff * 5))} HP`);
+            playHitSound();
+        }
     } else if (changeB > changeA && hpA > 0 && hpB > 0) {
-        // B is winning
+        // B is winning - deals damage to A
         avatarB.classList.add('advancing-b', 'attacking-b');
         avatarA.classList.add('retreating', 'taking-damage');
+        
+        if (isCrit) {
+            spawnCombatFloatText(teamACard, `💥 CRIT +${diff.toFixed(1)}%!`, true);
+            playCritSound();
+        } else {
+            spawnCombatFloatText(teamACard, `-${Math.max(1, Math.round(diff * 5))} HP`);
+            playHitSound();
+        }
     }
 }
 
@@ -571,10 +754,12 @@ function resolveRound(finalPriceA = null, finalPriceB = null) {
 
     if (roundLocked && currentBet > 0) {
         if (selectedTeam === winner) {
+            playWinSound();
             const winnings = Math.floor(currentBet * 1.95);
             userBalance += winnings;
             showCustomModal(`🎉 YOU WON!`, `Your asset outperformed!`, `+${winnings} $VCT`, 'var(--vibe-cyan)', receiptHTML);
         } else {
+            playCritSound();
             showCustomModal(`💀 YOU LOST`, `Your asset was outperformed.`, `-${currentBet} $VCT`, 'var(--alert-red)', receiptHTML);
         }
     }

@@ -17,6 +17,7 @@
         <header class="top-nav tactile-card">
             <div class="logo">⚔️ Vibe Duels</div>
             <div class="user-controls" style="display: flex; align-items: center; gap: 15px;">
+                <button id="soundToggleBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer;">🔊 SFX</button>
                 <button id="tutorialBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px;">❓ How to Play</button>
                 <div class="online-counter" style="color: var(--vibe-cyan); font-weight: bold;">🟢 <span id="onlineCount">1,402</span> Online</div>
                 <button id="multiplayerBtn" class="btn-action" style="background: var(--vibe-purple);">👥 Challenge Friend</button>
@@ -93,6 +94,7 @@
 
                 <div class="vs-center">
                     <div class="vs-badge" id="vsBadge">VS</div>
+                    <button id="shuffleMatchupBtn" class="tactile-icon-btn" style="margin-top: 10px; font-size: 0.8rem; background: #111; color: var(--vibe-gold); border: 2px solid var(--vibe-gold); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk';">🎲 Random Duel</button>
                     
                     <!-- Live Chart container -->
                     <div class="chart-container hidden" id="chartBox">

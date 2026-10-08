@@ -203,3 +203,45 @@ input[type="number"] { padding: 12px; border: 3px solid var(--charcoal-ink); bor
         gap: 10px;
     }
 }
+
+/* Floating Combat Damage & Hype Text */
+.combat-float-text {
+    position: absolute;
+    top: 25%;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 1.35rem;
+    pointer-events: none;
+    z-index: 60;
+    animation: floatCombatAnim 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+    white-space: nowrap;
+}
+
+@keyframes floatCombatAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.6) rotate(-4deg);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-8px) scale(1.2) rotate(3deg);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(-38px) scale(1.0) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-55px) scale(0.7) rotate(2deg);
+    }
+}
+
+.crit-float {
+    color: #FFD700 !important;
+    font-size: 1.65rem !important;
+}
+
+.damage-float {
+    color: #FF0055 !important;
+}
