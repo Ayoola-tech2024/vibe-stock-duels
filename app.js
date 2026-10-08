@@ -201,11 +201,21 @@ function updateAvatar(selectEl, avatarId) {
 
 selectA.addEventListener('change', () => {
     updateAvatar(selectA, 'avatarA');
-    if (isMultiplayer && p2pConnection && isHost) p2pConnection.send({ type: 'SELECTION', team: 'A', asset: selectA.value });
+    if (selectedTeam === 'A') {
+        placeBetBtn.innerText = `Place Bet on ${ASSETS[selectA.value].ticker}`;
+    }
+    if (isMultiplayer && p2pConnection && isHost) {
+        p2pConnection.send({ type: 'SELECTION', team: 'A', asset: selectA.value });
+    }
 });
 selectB.addEventListener('change', () => {
     updateAvatar(selectB, 'avatarB');
-    if (isMultiplayer && p2pConnection && !isHost) p2pConnection.send({ type: 'SELECTION', team: 'B', asset: selectB.value });
+    if (selectedTeam === 'B') {
+        placeBetBtn.innerText = `Place Bet on ${ASSETS[selectB.value].ticker}`;
+    }
+    if (isMultiplayer && p2pConnection && !isHost) {
+        p2pConnection.send({ type: 'SELECTION', team: 'B', asset: selectB.value });
+    }
 });
 
 // Oracle Data State
@@ -592,35 +602,101 @@ function showCustomModal(title, msg, amountStr, color, receiptHTML = "") {
 
 closeResultBtn.addEventListener('click', () => {
     resultModal.classList.add('hidden');
-    resetBoard();
+    if (isMultiplayer && p2pConnection) {
+        try {
+            p2pConnection.send({ type: 'NEXT_ROUND' });
+        } catch (e) {
+            console.error("Error broadcasting NEXT_ROUND:", e);
+        }
+    }
+    resetBoard(true);
 });
 
-function resetBoard() {
+function resetBoard(shouldBroadcast = false) {
+    clearInterval(priceInterval);
+    clearInterval(timerInterval);
+    
     currentBet = 0;
+    pendingBetAmount = 0;
     roundLocked = false;
     timer = 60;
     countdownEl.innerText = timer;
     
+    // Clear multiplayer locks for clean next round!
+    myLock = false;
+    oppLock = false;
+    
+    // Clear price and chart histories
+    currentPriceA = 0;
+    currentPriceB = 0;
+    startPriceA = 0;
+    startPriceB = 0;
+    historyA = [];
+    historyB = [];
+    
     document.getElementById('poolA').innerText = '0';
     document.getElementById('poolB').innerText = '0';
     
+    document.getElementById('hpA').style.width = '100%';
+    document.getElementById('hpB').style.width = '100%';
     document.getElementById('hpBoxA').classList.add('hidden');
     document.getElementById('hpBoxB').classList.add('hidden');
-    avatarA.classList.remove('ko-state');
-    avatarB.classList.remove('ko-state');
     
-    teamACard.classList.remove('winner-card', 'loser-card', 'selected');
-    teamBCard.classList.remove('winner-card', 'loser-card', 'selected');
-    selectedTeam = null;
+    avatarA.classList.remove('ko-state', 'advancing-a', 'retreating', 'taking-damage', 'attacking-a');
+    avatarB.classList.remove('ko-state', 'advancing-b', 'retreating', 'taking-damage', 'attacking-b');
     
-    selectA.disabled = false;
-    selectB.disabled = false;
+    teamACard.classList.remove('winner-card', 'loser-card', 'fighting');
+    teamBCard.classList.remove('winner-card', 'loser-card', 'fighting');
     
-    betInput.disabled = true;
-    placeBetBtn.disabled = true;
-    placeBetBtn.innerText = `Select a Team First`;
-    placeBetBtn.style.background = "var(--vibe-purple)";
+    vsBadge.classList.remove('hidden');
+    chartBox.classList.add('hidden');
+    
     betInput.value = '';
+    betInput.disabled = false;
+    
+    if (isMultiplayer) {
+        // Enforce deterministic multiplayer team assignments across rounds
+        if (isHost) {
+            selectedTeam = 'A';
+            teamACard.classList.add('selected');
+            teamBCard.classList.remove('selected');
+            selectA.disabled = false; // Host controls Asset A
+            selectB.disabled = true;  // Host cannot change opponent's Asset B
+            placeBetBtn.innerText = `Place Bet on ${ASSETS[selectA.value].ticker}`;
+            if (shouldBroadcast && p2pConnection) {
+                try {
+                    p2pConnection.send({ type: 'SELECTION', team: 'A', asset: selectA.value });
+                } catch (e) {}
+            }
+        } else {
+            selectedTeam = 'B';
+            teamBCard.classList.add('selected');
+            teamACard.classList.remove('selected');
+            selectB.disabled = false; // Guest controls Asset B
+            selectA.disabled = true;  // Guest cannot change opponent's Asset A
+            placeBetBtn.innerText = `Place Bet on ${ASSETS[selectB.value].ticker}`;
+            if (shouldBroadcast && p2pConnection) {
+                try {
+                    p2pConnection.send({ type: 'SELECTION', team: 'B', asset: selectB.value });
+                } catch (e) {}
+            }
+        }
+        placeBetBtn.disabled = false;
+        placeBetBtn.style.background = "var(--vibe-purple)";
+    } else {
+        teamACard.classList.remove('selected');
+        teamBCard.classList.remove('selected');
+        selectedTeam = null;
+        
+        selectA.disabled = false;
+        selectB.disabled = false;
+        
+        betInput.disabled = true;
+        placeBetBtn.disabled = true;
+        placeBetBtn.innerText = `Select a Team First`;
+        placeBetBtn.style.background = "var(--vibe-purple)";
+        startTimer();
+    }
 }
 
 startTimer();
@@ -1004,6 +1080,11 @@ function handleP2PData(data) {
     
     if (data.type === 'RESOLVE') {
         setTimeout(() => { timer = 0; resolveRound(data.finalPriceA, data.finalPriceB); }, 1000);
+    }
+    
+    if (data.type === 'NEXT_ROUND') {
+        resultModal.classList.add('hidden');
+        resetBoard(false);
     }
 }
 
