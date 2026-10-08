@@ -37,11 +37,22 @@ loginBtn.addEventListener('click', () => {
 });
 closePrivy.addEventListener('click', () => privyModal.classList.add('hidden'));
 
+let isSimulated = false;
+let vctContract = null;
+const VCT_ADDRESS = "0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697";
+const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
+const ERC20_ABI = [
+    "function balanceOf(address owner) view returns (uint256)",
+    "function transfer(address to, uint amount) returns (bool)",
+    "function decimals() view returns (uint8)"
+];
+
 function simulatePrivyLogin(method) {
     const btns = document.querySelectorAll('.privy-btn');
     btns[0].innerHTML = "⏳ Authenticating securely...";
     
     setTimeout(() => {
+        isSimulated = true;
         userWallet = "0x" + Math.random().toString(16).slice(2, 8) + "..." + Math.random().toString(16).slice(2, 6);
         userBalance = 5000;
         
@@ -53,6 +64,42 @@ function simulatePrivyLogin(method) {
         balancePill.innerText = `${userBalance} $VCT`;
         balancePill.classList.remove('hidden');
     }, 1500);
+}
+
+async function initWeb3Real() {
+    if (window.ethereum == null) {
+        alert("⚠️ Please install MetaMask or use the Email/Google login!");
+        return;
+    }
+
+    try {
+        const btn = document.querySelector('.privy-btn-outline');
+        btn.innerHTML = "⏳ Connecting...";
+        
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = await provider.getSigner();
+        userWallet = await signer.getAddress();
+        
+        vctContract = new ethers.Contract(VCT_ADDRESS, ERC20_ABI, signer);
+        
+        const balWei = await vctContract.balanceOf(userWallet);
+        userBalance = parseFloat(ethers.formatUnits(balWei, 18)).toFixed(2);
+        
+        isSimulated = false;
+        privyModal.classList.add('hidden');
+        loginBtn.innerHTML = `🟢 ${userWallet.substring(0,6)}...${userWallet.substring(userWallet.length-4)}`;
+        loginBtn.style.background = "var(--vibe-cyan)";
+        loginBtn.style.color = "var(--charcoal-ink)";
+        
+        balancePill.innerText = `${userBalance} $VCT`;
+        balancePill.classList.remove('hidden');
+        btn.innerHTML = "🦊 Connect MetaMask";
+    } catch (err) {
+        console.error(err);
+        alert("❌ Failed to connect wallet.");
+        document.querySelector('.privy-btn-outline').innerHTML = "🦊 Connect MetaMask";
+    }
 }
 
 // Team Selection Logic
@@ -187,6 +234,22 @@ placeBetBtn.addEventListener('click', async () => {
     const amount = parseInt(betInput.value);
     if (!amount || amount <= 0) return;
     if (amount > userBalance) { alert("❌ Insufficient $VCT balance!"); return; }
+    
+    // REAL WEB3 TRANSACTION LOCK (If using MetaMask)
+    if (!isSimulated && vctContract) {
+        try {
+            placeBetBtn.innerText = "⏳ Confirm in Wallet...";
+            const tx = await vctContract.transfer(BURN_ADDRESS, ethers.parseUnits(amount.toString(), 18));
+            placeBetBtn.innerText = "⏳ Mining Vault Lock...";
+            await tx.wait();
+            placeBetBtn.innerText = "FIGHTING! ⚔️";
+        } catch (err) {
+            console.error("Tx error", err);
+            alert("❌ Transaction failed or rejected.");
+            placeBetBtn.innerText = "LOCK & BATTLE";
+            return;
+        }
+    }
     
     // MULTIPLAYER INTERCEPT
     if (isMultiplayer && p2pConnection) {

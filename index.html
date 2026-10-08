@@ -136,28 +136,29 @@
         </div>
     </div>
 
-    <!-- Phase 2: Privy Auth Modal Simulation -->
+    <!-- Phase 2: Privy Auth Modal Simulation & Real Web3 -->
     <div id="privyModal" class="privy-overlay hidden">
-        <div class="privy-modal">
-            <div class="privy-header">
-                <h4>Log in or sign up</h4>
-                <button id="closePrivy" class="close-btn">&times;</button>
+        <div class="privy-modal" style="padding: 25px; position: relative;">
+            <div class="privy-header" style="background: none; border-bottom: none; text-align: left; padding: 0;">
+                <h4 style="font-size: 1.4rem; color: #18181b; margin-bottom: 5px;">Log in or sign up</h4>
+                <p style="color: #4b5563; font-size: 0.9rem; font-weight: 600;">Welcome to Vibe Stock Duels</p>
             </div>
-            <div class="privy-body">
-                <button class="privy-btn" onclick="simulatePrivyLogin('Google')">
+            <div class="privy-body" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button class="privy-btn" onclick="simulatePrivyLogin('Google')" style="background: #ffffff; color: #18181b; border: 1px solid #ccc; justify-content: center; width: 100%;">
                     <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="20" alt="Google"> Continue with Google
                 </button>
-                <button class="privy-btn" onclick="simulatePrivyLogin('Discord')">
+                <button class="privy-btn" onclick="simulatePrivyLogin('Discord')" style="background: #5865F2; color: #ffffff; justify-content: center; width: 100%;">
                     <img src="https://img.icons8.com/color/48/000000/discord-logo.png" width="20" alt="Discord"> Continue with Discord
                 </button>
-                <div class="privy-divider"><span>or</span></div>
-                <button class="privy-btn-outline" onclick="simulatePrivyLogin('External Wallet')">
-                    🔗 Connect External Wallet
+                <div class="privy-divider"><span>OR</span></div>
+                <button class="privy-btn-outline" onclick="initWeb3Real()" style="background: var(--charcoal-ink); color: #fff; justify-content: center; width: 100%;">
+                    🦊 Connect MetaMask
                 </button>
             </div>
-            <div class="privy-footer">
+            <div class="privy-footer" style="margin-top: 20px; text-align: center; color: #a1a1aa; font-size: 0.75rem;">
                 Protected by <strong>Privy</strong>
             </div>
+            <button id="closePrivy" class="close-btn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #000; box-shadow: none;">&times;</button>
         </div>
     </div>
 
@@ -190,6 +191,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
