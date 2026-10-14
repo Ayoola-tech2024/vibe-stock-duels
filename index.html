@@ -311,11 +311,11 @@
                     5,000 $VCT
                 </div>
 
-                <!-- Wallet / Login Button -->
-                <button id="loginBtn" class="btn-neubrutal bg-white text-[#111] px-3 py-1.5 text-xs sm:text-sm rounded-full">
-                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Login" width="16" onerror="this.style.display='none'">
-                    <span id="loginBtnText">Connect Wallet</span>
-                </button>
+                <!-- Auto-Generated Testnet Wallet Badge -->
+                <div id="walletBadge" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-[#111] text-[#00F0FF] border-2 border-black font-mono-num font-extrabold text-[11px] sm:text-xs shadow-[2px_3px_0_#111] flex items-center gap-1.5" title="Testnet Auto-Wallet">
+                    <span class="w-2 h-2 rounded-full bg-[#00FF88] inline-block animate-pulse"></span>
+                    <span id="walletAddressDisplay">0x...</span>
+                </div>
             </div>
         </header>
 
@@ -941,29 +941,6 @@
             </div>
             <div id="tutStepInstruction" class="text-xs sm:text-sm font-black text-white leading-snug">
                 Step 1: Equip your weapon! Tap the weapon selector under Corner A to try out different 3D weapons in the Colosseum.
-            </div>
-        </div>
-    </div>
-
-    <!-- =======================================================================
-         MODAL 6: PRIVY SOCIAL & METAMASK WEB3 MODAL
-         ======================================================================= -->
-    <div id="privyModal" class="modal-backdrop hidden">
-        <div class="danfo-sheet max-w-sm w-full p-6 text-left relative">
-            <button id="closePrivy" class="btn-neubrutal bg-[#111] text-white px-2.5 py-0.5 text-xs absolute top-4 right-4">✕</button>
-            <h4 class="text-xl font-black text-[#111]">Connect Wallet or Social</h4>
-            <p class="text-xs font-bold text-neutral-600 mb-4">Instant Web2.5 Privy Wallet (+5,000 Starter $VCT) or Real Web3 MetaMask</p>
-            <div class="flex flex-col gap-2.5">
-                <button onclick="simulatePrivyLogin('Google')" class="btn-neubrutal w-full py-3 bg-white text-[#111] text-sm">
-                    🟢 Continue with Google (+5,000 $VCT)
-                </button>
-                <button onclick="simulatePrivyLogin('Discord')" class="btn-neubrutal w-full py-3 bg-[#5865F2] text-white text-sm">
-                    👾 Continue with Discord (+5,000 $VCT)
-                </button>
-                <div class="text-center text-xs font-extrabold text-neutral-500 my-1">— OR ON-CHAIN ERC-20 —</div>
-                <button id="metamaskConnectBtn" onclick="initWeb3Real()" class="btn-neubrutal w-full py-3 bg-[#111] text-[#FFD700] text-sm">
-                    🦊 Connect MetaMask ($VCT Contract)
-                </button>
             </div>
         </div>
     </div>
@@ -2080,8 +2057,18 @@
             scythe: { name: "⚡ Void Scythe", type: "scythe" }
         };
 
+        function getOrGenerateTestnetWallet() {
+            let saved = localStorage.getItem('vibe_wallet_addr');
+            if (!saved || saved === '0xVibe...3D99' || !saved.startsWith('0x')) {
+                const hex = Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+                saved = `0x${hex.slice(0, 4).toUpperCase()}...${hex.slice(-4).toUpperCase()}`;
+                localStorage.setItem('vibe_wallet_addr', saved);
+            }
+            return saved;
+        }
+
         let playerNickname = localStorage.getItem('vibe_stock_nickname') || '';
-        let userWallet = localStorage.getItem('vibe_wallet_addr') || '0xVibe...3D99';
+        let userWallet = getOrGenerateTestnetWallet();
         let userBalance = parseInt(localStorage.getItem('vibe_vct_balance') || '5000');
         let winStreak = parseInt(localStorage.getItem('vibe_win_streak') || '0');
         let isSimulated = true;
@@ -2115,6 +2102,8 @@
             localStorage.setItem('vibe_win_streak', winStreak);
             document.getElementById('balancePill').innerText = `${Number(userBalance).toLocaleString()} $VCT`;
             document.getElementById('streakDisplay').innerText = winStreak;
+            const walletDisplay = document.getElementById('walletAddressDisplay');
+            if (walletDisplay) walletDisplay.innerText = userWallet;
         }
 
         // Update Fighter Card UI & Rebuild 3D Voxel Fighter when dropdown changes
@@ -3494,44 +3483,9 @@
             }
         });
 
-        // Privy & MetaMask Login Simulation / Ethers v6
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            document.getElementById('privyModal').classList.remove('hidden');
-        });
-        document.getElementById('closePrivy').addEventListener('click', () => {
-            document.getElementById('privyModal').classList.add('hidden');
-        });
-
-        window.simulatePrivyLogin = function(providerName) {
-            playSfx('coin');
-            userWallet = "0x" + Math.random().toString(16).slice(2, 6).toUpperCase() + "..." + Math.random().toString(16).slice(2, 6).toUpperCase();
-            localStorage.setItem('vibe_wallet_addr', userWallet);
-            if (userBalance < 1000) userBalance += 5000;
-            savePlayerState();
-            document.getElementById('loginBtnText').innerText = `🟢 ${userWallet}`;
-            document.getElementById('privyModal').classList.add('hidden');
-            appendChatMessage("🔐 PRIVY", `Connected via ${providerName} (${userWallet})`, "#00F0FF");
-        };
-
-        window.initWeb3Real = async function() {
-            if (!window.ethereum) {
-                window.simulatePrivyLogin('Embedded Wallet');
-                return;
-            }
-            try {
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = await provider.getSigner();
-                const addr = await signer.getAddress();
-                userWallet = `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-                localStorage.setItem('vibe_wallet_addr', userWallet);
-                document.getElementById('loginBtnText').innerText = `🦊 ${userWallet}`;
-                document.getElementById('privyModal').classList.add('hidden');
-                playSfx('win');
-            } catch (e) {
-                window.simulatePrivyLogin('Fallback Wallet');
-            }
-        };
+        // Auto-Generated Testnet Web3 Wallet Sync
+        const walletDisplay = document.getElementById('walletAddressDisplay');
+        if (walletDisplay) walletDisplay.innerText = userWallet;
 
         // Initialize Everything on Load
         window.onload = function() {
