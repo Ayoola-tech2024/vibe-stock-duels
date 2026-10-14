@@ -2974,6 +2974,10 @@
                 clearInterval(window.peerHeartbeatInterval);
                 window.peerHeartbeatInterval = null;
             }
+            if (window.guestHandshakeTimer) {
+                clearInterval(window.guestHandshakeTimer);
+                window.guestHandshakeTimer = null;
+            }
             if (relayWs && fullDestroy) {
                 try { relayWs.close(); } catch(e) {}
                 relayWs = null;
@@ -3002,10 +3006,9 @@
                 ts: Date.now()
             };
 
-            // 1. Send via High-Speed Cloud WebSocket Relay (100% Delivery Across Any Network)
+            // 1. Send via High-Speed Cloud Relay (Text payload avoids CORS preflight roundtrips)
             fetch(`https://ntfy.sh/vibe_duel_${currentRoomOtp}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).catch(e => console.warn("Relay POST notice:", e));
 
@@ -3051,7 +3054,8 @@
             }
 
             try {
-                relayWs = new WebSocket(`wss://ntfy.sh/vibe_duel_${otp}/ws`);
+                // Connect with ?since=30s so any buffered packets are replayed immediately
+                relayWs = new WebSocket(`wss://ntfy.sh/vibe_duel_${otp}/ws?since=30s`);
 
                 relayWs.onopen = () => {
                     console.log(`🟢 Connected to Duel Relay Room #${otp}`);
@@ -3067,13 +3071,27 @@
                             statusEl.innerText = `📡 Connected to Room #${otp}! Handshaking...`;
                             statusEl.className = "mt-2.5 text-xs font-bold text-emerald-700 animate-pulse";
                         }
-                        // Announce Guest arrival immediately
-                        sendRoomMessage({
-                            type: 'HELLO',
-                            username: playerNickname || 'Guest Raider',
-                            asset: selectB.value,
-                            weapon: currentWeaponB || 'KATANA'
-                        });
+                        
+                        // Repeat HELLO every 1s until isMultiplayer is confirmed
+                        function sendGuestHello() {
+                            if (isMultiplayer) return;
+                            sendRoomMessage({
+                                type: 'HELLO',
+                                username: playerNickname || 'Guest Raider',
+                                asset: selectB.value,
+                                weapon: currentWeaponB || 'KATANA'
+                            });
+                        }
+                        sendGuestHello();
+                        if (window.guestHandshakeTimer) clearInterval(window.guestHandshakeTimer);
+                        window.guestHandshakeTimer = setInterval(() => {
+                            if (isMultiplayer) {
+                                clearInterval(window.guestHandshakeTimer);
+                                window.guestHandshakeTimer = null;
+                                return;
+                            }
+                            sendGuestHello();
+                        }, 1000);
                     }
                 };
 
@@ -3099,6 +3117,25 @@
                         setTimeout(() => connectToRelayRoom(currentRoomOtp), 1500);
                     }
                 };
+
+                // Immediate HTTP poll fallback to catch buffered handshake packets
+                fetch(`https://ntfy.sh/vibe_duel_${otp}/json?poll=1&since=30s`)
+                    .then(r => r.text())
+                    .then(text => {
+                        if (!text) return;
+                        const lines = text.trim().split('\n');
+                        lines.forEach(line => {
+                            try {
+                                const envelope = JSON.parse(line);
+                                if (envelope.event === 'message' && envelope.message) {
+                                    const packet = JSON.parse(envelope.message);
+                                    if (packet.senderId !== p2pClientId) {
+                                        handleDuelMessage(packet);
+                                    }
+                                }
+                            } catch(e) {}
+                        });
+                    }).catch(() => {});
             } catch(e) {
                 console.error("Relay connection failed:", e);
             }
@@ -3147,9 +3184,15 @@
                     if (msg.weapon && weaponASelect) { currentWeaponA = msg.weapon; weaponASelect.value = msg.weapon; }
                     syncFighterSelectionUI();
                 }
-                activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                if (!isMultiplayer) {
+                    activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                }
             } else if (msg.type === 'HELLO_ACK') {
                 oppUsername = msg.username || (isHost ? 'Guest' : 'Host');
+                if (window.guestHandshakeTimer) {
+                    clearInterval(window.guestHandshakeTimer);
+                    window.guestHandshakeTimer = null;
+                }
                 if (isHost && msg.asset) {
                     selectB.value = msg.asset;
                     if (msg.weapon && weaponBSelect) { currentWeaponB = msg.weapon; weaponBSelect.value = msg.weapon; }
@@ -3159,7 +3202,9 @@
                     if (msg.weapon && weaponASelect) { currentWeaponA = msg.weapon; weaponASelect.value = msg.weapon; }
                     syncFighterSelectionUI();
                 }
-                activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                if (!isMultiplayer) {
+                    activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                }
             } else if (msg.type === 'SELECT') {
                 if (msg.team === 'A' && !isHost) { selectA.value = msg.asset; syncFighterSelectionUI(); }
                 if (msg.team === 'B' && isHost) { selectB.value = msg.asset; syncFighterSelectionUI(); }
@@ -3450,6 +3495,10 @@
 
         function activatePvPArenaUI(hostName, guestName) {
             isMultiplayer = true;
+            if (window.guestHandshakeTimer) {
+                clearInterval(window.guestHandshakeTimer);
+                window.guestHandshakeTimer = null;
+            }
             const joinStatus = document.getElementById('joinStatusText');
             if (joinStatus) joinStatus.classList.add('hidden');
             document.getElementById('multiplayerModal').classList.add('hidden');
