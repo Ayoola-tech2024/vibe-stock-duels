@@ -157,7 +157,27 @@
 
         @media (max-width: 768px) {
             #arena-3d-wrapper {
-                height: 330px;
+                height: 295px;
+                border-width: 3px;
+                border-radius: 14px;
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.3), 4px 5px 0 var(--vibe-purple);
+            }
+            .fighter-hud-card {
+                border-width: 3px;
+                border-radius: 12px;
+                box-shadow: 3px 4px 0px var(--charcoal-ink);
+            }
+            .fighter-hud-card.selected-a {
+                box-shadow: 0 0 15px rgba(0, 240, 255, 0.6), 3px 4px 0 var(--vibe-cyan);
+            }
+            .fighter-hud-card.selected-b {
+                box-shadow: 0 0 15px rgba(255, 51, 102, 0.6), 3px 4px 0 var(--alert-red);
+            }
+        }
+
+        @media (max-width: 420px) {
+            #arena-3d-wrapper {
+                height: 265px;
             }
         }
 
@@ -245,10 +265,12 @@
             transition: opacity 0.3s ease;
         }
 
-        /* Custom Scrollbar */
+        /* Custom Scrollbar & No-Scrollbar utility */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: var(--vibe-cyan); border-radius: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="pb-10">
@@ -257,64 +279,67 @@
     <div class="max-w-[1220px] mx-auto px-3 sm:px-5 pt-3 flex flex-col gap-4 relative z-10">
 
         <!-- 1. TOP NEUBRUTALIST NAVIGATION BAR -->
-        <header class="tactile-card px-3 sm:px-5 py-3 flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center gap-2 sm:gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#111] text-[#00F0FF] flex items-center justify-center text-xl font-black border-2 border-black shadow-[2px_3px_0_#8A2BE2]">
-                    ⚔️
+        <header class="tactile-card px-3 sm:px-5 py-2.5 sm:py-3 flex flex-col gap-2.5">
+            <!-- Top Row: Brand & Live Stats on Left | Balance, Wallet & Sound on Right -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#111] text-[#00F0FF] flex items-center justify-center text-lg sm:text-xl font-black border-2 border-black shadow-[2px_3px_0_#8A2BE2] shrink-0">
+                        ⚔️
+                    </div>
+                    <div>
+                        <div class="text-base sm:text-xl font-black tracking-tight uppercase leading-none flex items-center gap-1.5">
+                            <span>VIBE DUELS</span>
+                            <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-[#8A2BE2] text-white rounded-md border border-black">3D</span>
+                        </div>
+                        <div class="text-[10px] sm:text-[11px] font-bold text-neutral-600 flex items-center gap-1.5 mt-0.5">
+                            <span class="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span id="onlineCount">1</span> Live
+                            </span>
+                            <span class="hidden sm:inline">•</span>
+                            <span id="cloudStatusBadge" class="text-purple-700 font-bold hidden sm:inline">⚡ Hybrid Oracle</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-lg sm:text-xl font-black tracking-tight uppercase leading-none flex items-center gap-1.5">
-                        <span>VIBE DUELS</span>
-                        <span class="text-xs px-2 py-0.5 bg-[#8A2BE2] text-white rounded-md border border-black">3D ARENA</span>
+
+                <!-- Right Top Essentials: Balance, Auto-Wallet, Sound -->
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- $VCT Balance Pill -->
+                    <div id="balancePill" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num font-extrabold text-xs sm:text-sm shadow-[2px_2px_0_#111]">
+                        5,000 $VCT
                     </div>
-                    <div class="text-[11px] font-bold text-neutral-600 flex items-center gap-2 mt-0.5">
-                        <span class="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                            <span id="onlineCount">1</span> Live in Arena
-                        </span>
-                        <span>•</span>
-                        <span id="cloudStatusBadge" class="text-purple-700 font-bold">⚡ Hybrid Oracle Live</span>
+
+                    <!-- Auto-Generated Testnet Wallet Badge -->
+                    <div id="walletBadge" class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#111] text-[#00F0FF] border-2 border-black font-mono-num font-extrabold text-[10px] sm:text-xs shadow-[2px_2px_0_#111] flex items-center gap-1" title="Testnet Auto-Wallet">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#00FF88] inline-block animate-pulse"></span>
+                        <span id="walletAddressDisplay">0x...</span>
                     </div>
+
+                    <button id="soundToggleBtn" class="btn-neubrutal bg-[#111] text-white px-2 py-1 text-xs shrink-0" title="Toggle 8-Bit SFX">
+                        🔊
+                    </button>
                 </div>
             </div>
 
-            <!-- Right Controls -->
-            <div class="flex flex-wrap items-center gap-2">
-                <button id="analyticsBtn" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-3 py-1.5 text-xs sm:text-sm">
-                    📊 Analytics <span id="analyticsLiveDot" class="w-2 h-2 rounded-full bg-[#00FF88]"></span>
-                </button>
-                <button id="leaderboardBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-3 py-1.5 text-xs sm:text-sm">
-                    🏆 Ranks
-                </button>
-                <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-3 py-1.5 text-xs sm:text-sm">
+            <!-- Bottom Row: Sleek Action Bar with Quick Scroll on Mobile -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-black/10">
+                <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2.5 sm:px-3 py-1 text-xs font-black shrink-0">
                     👥 PvP Arena
                 </button>
-                <button id="tutorialBtn" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-1.5 text-xs sm:text-sm font-black" title="How to Duel Combat Manual">
+                <button id="leaderboardBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0">
+                    🏆 Ranks
+                </button>
+                <button id="analyticsBtn" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0 flex items-center gap-1">
+                    📊 Stats <span id="analyticsLiveDot" class="w-1.5 h-1.5 rounded-full bg-[#00FF88]"></span>
+                </button>
+                <button id="tutorialBtn" class="btn-neubrutal bg-[#00FF88] text-[#111] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0" title="Combat Manual">
                     📖 Guide
                 </button>
-                <button id="soundToggleBtn" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1.5 text-xs sm:text-sm" title="Toggle 8-Bit Arcade Audio">
-                    🔊 SFX
-                </button>
-
-                <!-- Streak Pill -->
-                <div id="streakPill" class="px-2.5 py-1.5 rounded-lg bg-orange-500 text-white border-2 border-black font-extrabold text-xs shadow-[2px_3px_0_#111]" title="Win Streak Multiplier">
-                    🔥 <span id="streakDisplay">0</span>x
-                </div>
-
-                <!-- Player Nickname Pill -->
-                <button id="nicknamePill" class="hidden px-2.5 py-1.5 rounded-lg bg-[#FF3366] text-white border-2 border-black font-extrabold text-xs shadow-[2px_3px_0_#111] cursor-pointer" title="Click to change Raider Name">
+                <button id="nicknamePill" class="hidden px-2 py-1 rounded-lg bg-[#FF3366] text-white border-2 border-black font-extrabold text-xs shadow-[2px_2px_0_#111] cursor-pointer shrink-0" title="Change Name">
                     👤 <span id="playerNameDisplay">Raider</span>
                 </button>
-
-                <!-- $VCT Balance Pill -->
-                <div id="balancePill" class="px-3 py-1.5 rounded-full bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num font-extrabold text-xs sm:text-sm shadow-[2px_3px_0_#111]">
-                    5,000 $VCT
-                </div>
-
-                <!-- Auto-Generated Testnet Wallet Badge -->
-                <div id="walletBadge" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-[#111] text-[#00F0FF] border-2 border-black font-mono-num font-extrabold text-[11px] sm:text-xs shadow-[2px_3px_0_#111] flex items-center gap-1.5" title="Testnet Auto-Wallet">
-                    <span class="w-2 h-2 rounded-full bg-[#00FF88] inline-block animate-pulse"></span>
-                    <span id="walletAddressDisplay">0x...</span>
+                <div id="streakPill" class="px-2 py-1 rounded-lg bg-orange-500 text-white border-2 border-black font-extrabold text-xs shadow-[2px_2px_0_#111] shrink-0" title="Win Streak">
+                    🔥 <span id="streakDisplay">0</span>x
                 </div>
             </div>
         </header>
@@ -337,47 +362,48 @@
             </div>
         </div>
 
-        <!-- 2. MAIN ARENA GRID: LEFT FIGHTER HUD | CENTER 3D COLOSSEUM | RIGHT FIGHTER HUD -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <!-- 2. MAIN ARENA GRID: 3D CYBER-COLOSSEUM (TOP ON MOBILE) & SPLIT FIGHTER CORNERS -->
+        <div class="grid grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-4 items-stretch">
 
-            <!-- TEAM A FIGHTER CARD (Left Column - 3 cols on Desktop) -->
-            <div id="teamA" class="fighter-hud-card lg:col-span-3 p-4 flex flex-col justify-between">
+            <!-- TEAM A FIGHTER CARD (Left Column - 1 col on mobile, 3 cols on Desktop) -->
+            <div id="teamA" class="fighter-hud-card col-span-1 lg:col-span-3 order-2 lg:order-1 p-2.5 sm:p-4 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="px-2.5 py-0.5 rounded-md bg-[#111] text-[#00F0FF] font-extrabold text-xs uppercase tracking-wider">
-                            CORNER A (CYAN)
+                    <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                        <span class="px-1.5 sm:px-2.5 py-0.5 rounded-md bg-[#111] text-[#00F0FF] font-extrabold text-[10px] sm:text-xs uppercase tracking-wider">
+                            CORNER A
                         </span>
-                        <span id="oracleBadgeA" class="text-[11px] font-bold px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
-                            BINANCE LIVE
+                        <span id="oracleBadgeA" class="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
+                            LIVE
                         </span>
                     </div>
 
                     <!-- HP Bar A -->
-                    <div class="mb-3">
-                        <div class="flex justify-between text-xs font-extrabold mb-1">
-                            <span>ARMOR INTEGRITY</span>
-                            <span id="hpTextA" class="font-mono-num">100 / 100 HP</span>
+                    <div class="mb-2 sm:mb-3">
+                        <div class="flex justify-between text-[10px] sm:text-xs font-extrabold mb-1">
+                            <span class="hidden sm:inline">ARMOR INTEGRITY</span>
+                            <span class="sm:hidden">ARMOR</span>
+                            <span id="hpTextA" class="font-mono-num">100 HP</span>
                         </div>
-                        <div class="w-full h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
+                        <div class="w-full h-3 sm:h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
                             <div id="hpA" class="h-full bg-gradient-to-r from-[#00F0FF] to-[#00FF88] rounded transition-all duration-300" style="width: 100%;"></div>
                         </div>
                     </div>
 
                     <!-- 3D Mecha Class Preview Badge -->
-                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-3">
-                        <div id="miniSwatchA" class="w-12 h-12 rounded-lg border-2 border-[#00F0FF] flex items-center justify-center text-2xl font-black shrink-0" style="background: #2a1b12;">
+                    <div class="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-3">
+                        <div id="miniSwatchA" class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg border-2 border-[#00F0FF] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0" style="background: #2a1b12;">
                             🤖
                         </div>
                         <div class="min-w-0 flex-1">
-                            <div id="mechaNameA" class="font-extrabold text-sm text-[#FFD700] truncate">Satoshi Prime V1</div>
-                            <div id="weaponNameA" class="text-xs text-neutral-300 truncate">🗡️ Cyber Broadsword</div>
-                            <div id="statusBuffA" class="text-[11px] text-[#00F0FF] font-bold mt-0.5">Ready for Combat</div>
+                            <div id="mechaNameA" class="font-extrabold text-xs sm:text-sm text-[#FFD700] truncate">Satoshi Prime</div>
+                            <div id="weaponNameA" class="text-[10px] sm:text-xs text-neutral-300 truncate">🗡️ Greatsword</div>
+                            <div id="statusBuffA" class="text-[9px] sm:text-[11px] text-[#00F0FF] font-bold mt-0.5 hidden sm:block">Ready for Combat</div>
                         </div>
                     </div>
 
                     <!-- Asset Selector Dropdown A (All 15 Vibers) -->
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-1">Select Fighter Asset</label>
-                    <select id="assetA" class="w-full bg-[#111] text-[#F4F1EB] border-3 border-black rounded-lg px-3 py-2.5 font-extrabold text-sm cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
+                    <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-0.5 sm:mb-1">Asset</label>
+                    <select id="assetA" class="w-full bg-[#111] text-[#F4F1EB] border-2 sm:border-3 border-black rounded-lg px-2 sm:px-3 py-1.5 sm:py-2.5 font-extrabold text-xs sm:text-sm cursor-pointer shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
                         <optgroup label="🟢 Live Crypto (Binance API)">
                             <option value="BTC" selected>Bitcoin ($BTC) — Viber #1</option>
                             <option value="ETH">Ethereum ($ETH) — Viber #2</option>
@@ -402,8 +428,8 @@
                     </select>
 
                     <!-- Combat Weapon Selection A -->
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-2 mb-1">Combat Weapon</label>
-                    <select id="weaponA" class="w-full bg-[#111] text-[#00F0FF] border-3 border-black rounded-lg px-2.5 py-2 font-extrabold text-xs cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
+                    <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-1.5 sm:mt-2 mb-0.5 sm:mb-1">Weapon</label>
+                    <select id="weaponA" class="w-full bg-[#111] text-[#00F0FF] border-2 sm:border-3 border-black rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 font-extrabold text-[11px] sm:text-xs cursor-pointer shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
                         <option value="katana">🗡️ Cyber Katana (Swift Precision)</option>
                         <option value="hammer">🔨 Gravity Warhammer (Heavy Impact)</option>
                         <option value="trident">🔱 Plasma Trident (Long Thrust)</option>
@@ -414,63 +440,63 @@
                 </div>
 
                 <!-- Live Price & % Delta Readout A -->
-                <div class="mt-4 pt-3 border-t-2 border-black/15">
+                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t-2 border-black/15">
                     <div class="flex items-baseline justify-between">
-                        <span class="text-xs font-extrabold uppercase text-neutral-600">Live Oracle Price</span>
-                        <span id="deltaBadgeA" class="font-mono-num text-xs font-black px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
+                        <span class="text-[10px] sm:text-xs font-extrabold uppercase text-neutral-600">Price</span>
+                        <span id="deltaBadgeA" class="font-mono-num text-[10px] sm:text-xs font-black px-1.5 sm:px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
                     </div>
-                    <div id="livePriceA" class="font-mono-num text-xl sm:text-2xl font-black tracking-tight mt-0.5">$85,000.00</div>
-                    <div class="mt-2 flex items-center justify-between bg-[#111] text-[#00F0FF] px-3 py-1.5 rounded-lg text-xs font-extrabold">
-                        <span>POOL STAKED:</span>
+                    <div id="livePriceA" class="font-mono-num text-sm sm:text-2xl font-black tracking-tight mt-0.5 truncate">$85,000.00</div>
+                    <div class="mt-1 sm:mt-2 flex items-center justify-between bg-[#111] text-[#00F0FF] px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-extrabold">
+                        <span>POOL:</span>
                         <span class="font-mono-num"><span id="poolA">0</span> $VCT</span>
                     </div>
                 </div>
             </div>
 
-            <!-- CENTER 3D CYBER-COLOSSEUM STAGE (6 cols on Desktop) -->
-            <div class="lg:col-span-6 flex flex-col gap-3">
+            <!-- CENTER 3D CYBER-COLOSSEUM STAGE (Full 2 cols on mobile, 6 cols on Desktop) -->
+            <div class="col-span-2 lg:col-span-6 order-1 lg:order-2 flex flex-col gap-2.5 sm:gap-3">
                 <div id="arena-3d-wrapper">
                     <!-- Top Floating Timer & Camera Controls inside 3D Viewport -->
-                    <div class="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+                    <div class="absolute top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 z-20 flex items-center justify-between pointer-events-none gap-1 sm:gap-2">
                         <!-- Round Countdown Pill -->
-                        <div class="pointer-events-auto bg-[#111]/90 border-2 border-[#00F0FF] rounded-xl px-3.5 py-1.5 flex items-center gap-2.5 shadow-[3px_4px_0_#00F0FF]">
-                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-300 leading-tight">
-                                ROUND<br>CLOCK
+                        <div class="pointer-events-auto bg-[#111]/90 border-2 border-[#00F0FF] rounded-lg sm:rounded-xl px-2 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2.5 shadow-[2px_3px_0_#00F0FF] sm:shadow-[3px_4px_0_#00F0FF]">
+                            <div class="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-neutral-300 leading-tight">
+                                ROUND<br class="hidden sm:inline"> CLOCK
                             </div>
-                            <div class="font-mono-num text-2xl sm:text-3xl font-black text-[#00F0FF] leading-none">
+                            <div class="font-mono-num text-xl sm:text-3xl font-black text-[#00F0FF] leading-none">
                                 <span id="countdown">60</span>s
                             </div>
                         </div>
 
                         <!-- Match Status Banner -->
-                        <div id="arenaCenterBanner" class="px-3.5 py-1.5 rounded-xl bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-[3px_3px_0_#000]">
-                            ⚔️ Select a Fighter & Lock Bet
+                        <div id="arenaCenterBanner" class="px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-[10px] sm:text-sm uppercase tracking-wider shadow-[2px_2px_0_#000] truncate max-w-[135px] sm:max-w-none">
+                            ⚔️ Ready to Lock
                         </div>
 
                         <!-- 3D Camera Angle & Random Matchup Controls -->
-                        <div class="pointer-events-auto flex items-center gap-1.5">
-                            <button id="shuffleMatchupBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1.5 text-xs" title="Randomize Matchup">
-                                🎲 Shuffle
+                        <div class="pointer-events-auto flex items-center gap-1 sm:gap-1.5 shrink-0">
+                            <button id="shuffleMatchupBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs" title="Randomize Matchup">
+                                🎲 <span class="hidden sm:inline">Shuffle</span>
                             </button>
-                            <button id="camToggleBtn" class="btn-neubrutal bg-[#111] text-white border-white/30 px-2.5 py-1.5 text-xs" title="Switch 3D Camera Angle">
-                                🎥 Cam
+                            <button id="camToggleBtn" class="btn-neubrutal bg-[#111] text-white border-white/30 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs" title="Switch 3D Camera Angle">
+                                🎥 <span class="hidden sm:inline">Cam</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- 3D Floating Nameplate A -->
                     <div id="label3dA" class="fighter-3d-label">
-                        <div class="px-2.5 py-1 rounded-lg bg-[#111]/90 border-2 border-[#00F0FF] text-white text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
+                        <div class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-[#111]/90 border-2 border-[#00F0FF] text-white text-[11px] sm:text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
                             <span id="labelTickerA" class="text-[#00F0FF]">$BTC</span>
-                            <span id="labelDeltaA" class="font-mono-num text-[11px] text-emerald-400">+0.00%</span>
+                            <span id="labelDeltaA" class="font-mono-num text-[10px] sm:text-[11px] text-emerald-400">+0.00%</span>
                         </div>
                     </div>
 
                     <!-- 3D Floating Nameplate B -->
                     <div id="label3dB" class="fighter-3d-label">
-                        <div class="px-2.5 py-1 rounded-lg bg-[#111]/90 border-2 border-[#FF3366] text-white text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
+                        <div class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-[#111]/90 border-2 border-[#FF3366] text-white text-[11px] sm:text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
                             <span id="labelTickerB" class="text-[#FF3366]">$SOL</span>
-                            <span id="labelDeltaB" class="font-mono-num text-[11px] text-emerald-400">+0.00%</span>
+                            <span id="labelDeltaB" class="font-mono-num text-[10px] sm:text-[11px] text-emerald-400">+0.00%</span>
                         </div>
                     </div>
 
@@ -481,86 +507,87 @@
                     <div id="threeCanvasMount" class="w-full h-full"></div>
 
                     <!-- Bottom Overlay inside 3D Arena: Active Mid-Fight Overdrive Skills & Emotes -->
-                    <div class="absolute bottom-2.5 left-2.5 right-2.5 z-20 flex flex-wrap items-center justify-between gap-2 bg-[#111]/90 backdrop-blur-md border-2 border-white/15 rounded-xl px-3 py-2">
+                    <div class="absolute bottom-2 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-1 sm:gap-2 bg-[#111]/95 backdrop-blur-md border-2 border-white/15 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2">
                         <!-- Overdrive / Rage Meter -->
-                        <div class="flex items-center gap-2 flex-1 min-w-[160px]">
-                            <span class="text-xs font-black uppercase text-[#FFD700] whitespace-nowrap">⚡ RAGE: <span id="ragePctText" class="font-mono-num">0%</span></span>
-                            <div class="flex-1 h-3 bg-black border border-white/25 rounded-full overflow-hidden p-0.5">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[120px] sm:min-w-[160px]">
+                            <span class="text-[10px] sm:text-xs font-black uppercase text-[#FFD700] whitespace-nowrap">⚡ <span class="hidden sm:inline">RAGE:</span> <span id="ragePctText" class="font-mono-num">0%</span></span>
+                            <div class="flex-1 h-2.5 sm:h-3 bg-black border border-white/25 rounded-full overflow-hidden p-0.5">
                                 <div id="rageBarFill" class="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-full transition-all duration-200" style="width: 0%;"></div>
                             </div>
                         </div>
 
                         <!-- Active Mid-Fight Skills -->
-                        <div class="flex items-center gap-1.5">
-                            <button id="skillShieldBtn" disabled class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2.5 py-1 text-xs font-extrabold" title="Costs 50% Rage: Blocks incoming HP damage for 3 ticks!">
-                                🛡️ Shield (50%)
+                        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                            <button id="skillShieldBtn" disabled class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 50% Rage: Blocks incoming HP damage for 3 ticks!">
+                                🛡️ Shield
                             </button>
-                            <button id="skillLeverageBtn" disabled class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1 text-xs font-extrabold" title="Costs 75% Rage: 2x Attack Damage for 4 ticks!">
-                                ⚡ 2x Strike (75%)
+                            <button id="skillLeverageBtn" disabled class="btn-neubrutal bg-[#FFD700] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 75% Rage: 2x Attack Damage for 4 ticks!">
+                                ⚡ 2x Strike
                             </button>
                         </div>
 
                         <!-- Quick Hype Emotes -->
-                        <div class="flex items-center gap-1 border-l border-white/15 pl-2">
-                            <button onclick="triggerArenaEmote('🚀 PUMP IT!')" class="hover:scale-125 transition-transform text-base px-1" title="Pump Emote">🚀</button>
-                            <button onclick="triggerArenaEmote('📉 DUMPING!')" class="hover:scale-125 transition-transform text-base px-1" title="Dump Emote">📉</button>
-                            <button onclick="triggerArenaEmote('💎🙌 DIAMOND')" class="hover:scale-125 transition-transform text-base px-1" title="Diamond Hands">💎</button>
-                            <button onclick="triggerArenaEmote('💀 COOKED!')" class="hover:scale-125 transition-transform text-base px-1" title="Cooked">💀</button>
+                        <div class="flex items-center gap-0.5 sm:gap-1 border-l border-white/15 pl-1 sm:pl-2 shrink-0">
+                            <button onclick="triggerArenaEmote('🚀 PUMP IT!')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Pump Emote">🚀</button>
+                            <button onclick="triggerArenaEmote('📉 DUMPING!')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Dump Emote">📉</button>
+                            <button onclick="triggerArenaEmote('💎🙌 DIAMOND')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Diamond Hands">💎</button>
+                            <button onclick="triggerArenaEmote('💀 COOKED!')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Cooked">💀</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- LIVE PERFORMANCE TELEMETRY CHART (Calibrated 40-Tick Full-Width Canvas) -->
-                <div class="tactile-dark p-3 flex flex-col gap-1.5">
-                    <div class="flex items-center justify-between text-xs font-bold">
-                        <span class="uppercase tracking-wider text-[#00F0FF] flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-[#00F0FF] animate-pulse"></span>
-                            LIVE ORACLE RELATIVE PERFORMANCE (% DELTA)
+                <div class="tactile-dark p-2.5 sm:p-3 flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] sm:text-xs font-bold">
+                        <span class="uppercase tracking-wider text-[#00F0FF] flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse shrink-0"></span>
+                            <span class="hidden sm:inline">LIVE ORACLE </span>RELATIVE PERFORMANCE (% DELTA)
                         </span>
-                        <span id="tickCounterText" class="font-mono-num text-neutral-400">Tick 0 / 40</span>
+                        <span id="tickCounterText" class="font-mono-num text-neutral-400 shrink-0">Tick 0 / 40</span>
                     </div>
-                    <canvas id="liveChart" width="600" height="135" class="w-full h-[125px] bg-[#08080c] rounded-lg border border-white/10"></canvas>
+                    <canvas id="liveChart" width="600" height="135" class="w-full h-[95px] sm:h-[125px] bg-[#08080c] rounded-lg border border-white/10"></canvas>
                 </div>
             </div>
 
-            <!-- TEAM B FIGHTER CARD (Right Column - 3 cols on Desktop) -->
-            <div id="teamB" class="fighter-hud-card lg:col-span-3 p-4 flex flex-col justify-between">
+            <!-- TEAM B FIGHTER CARD (Right Column - 1 col on mobile, 3 cols on Desktop) -->
+            <div id="teamB" class="fighter-hud-card col-span-1 lg:col-span-3 order-3 lg:order-3 p-2.5 sm:p-4 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="px-2.5 py-0.5 rounded-md bg-[#111] text-[#FF3366] font-extrabold text-xs uppercase tracking-wider">
-                            CORNER B (RUBY)
+                    <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                        <span class="px-1.5 sm:px-2.5 py-0.5 rounded-md bg-[#111] text-[#FF3366] font-extrabold text-[10px] sm:text-xs uppercase tracking-wider">
+                            CORNER B
                         </span>
-                        <span id="oracleBadgeB" class="text-[11px] font-bold px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
-                            BINANCE LIVE
+                        <span id="oracleBadgeB" class="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
+                            LIVE
                         </span>
                     </div>
 
                     <!-- HP Bar B -->
-                    <div class="mb-3">
-                        <div class="flex justify-between text-xs font-extrabold mb-1">
-                            <span>ARMOR INTEGRITY</span>
-                            <span id="hpTextB" class="font-mono-num">100 / 100 HP</span>
+                    <div class="mb-2 sm:mb-3">
+                        <div class="flex justify-between text-[10px] sm:text-xs font-extrabold mb-1">
+                            <span class="hidden sm:inline">ARMOR INTEGRITY</span>
+                            <span class="sm:hidden">ARMOR</span>
+                            <span id="hpTextB" class="font-mono-num">100 HP</span>
                         </div>
-                        <div class="w-full h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
+                        <div class="w-full h-3 sm:h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
                             <div id="hpB" class="h-full bg-gradient-to-r from-[#FF3366] to-[#FFD700] rounded transition-all duration-300" style="width: 100%;"></div>
                         </div>
                     </div>
 
                     <!-- 3D Mecha Class Preview Badge B -->
-                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-3">
-                        <div id="miniSwatchB" class="w-12 h-12 rounded-lg border-2 border-[#FF3366] flex items-center justify-center text-2xl font-black shrink-0" style="background: #1e242b;">
+                    <div class="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-3">
+                        <div id="miniSwatchB" class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg border-2 border-[#FF3366] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0" style="background: #1e242b;">
                             🦾
                         </div>
                         <div class="min-w-0 flex-1">
-                            <div id="mechaNameB" class="font-extrabold text-sm text-[#00F0FF] truncate">Solana Vanguard V4</div>
-                            <div id="weaponNameB" class="text-xs text-neutral-300 truncate">🔨 Gravity Hammer</div>
-                            <div id="statusBuffB" class="text-[11px] text-[#FF3366] font-bold mt-0.5">Ready for Combat</div>
+                            <div id="mechaNameB" class="font-extrabold text-xs sm:text-sm text-[#00F0FF] truncate">Solana Vanguard</div>
+                            <div id="weaponNameB" class="text-[10px] sm:text-xs text-neutral-300 truncate">🔨 Gravity Hammer</div>
+                            <div id="statusBuffB" class="text-[9px] sm:text-[11px] text-[#FF3366] font-bold mt-0.5 hidden sm:block">Ready for Combat</div>
                         </div>
                     </div>
 
                     <!-- Asset Selector Dropdown B (All 15 Vibers) -->
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-1">Select Fighter Asset</label>
-                    <select id="assetB" class="w-full bg-[#111] text-[#F4F1EB] border-3 border-black rounded-lg px-3 py-2.5 font-extrabold text-sm cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
+                    <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-0.5 sm:mb-1">Asset</label>
+                    <select id="assetB" class="w-full bg-[#111] text-[#F4F1EB] border-2 sm:border-3 border-black rounded-lg px-2 sm:px-3 py-1.5 sm:py-2.5 font-extrabold text-xs sm:text-sm cursor-pointer shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
                         <optgroup label="🟢 Live Crypto (Binance API)">
                             <option value="BTC">Bitcoin ($BTC) — Viber #1</option>
                             <option value="ETH">Ethereum ($ETH) — Viber #2</option>
@@ -585,8 +612,8 @@
                     </select>
 
                     <!-- Combat Weapon Selection B -->
-                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-2 mb-1">Combat Weapon</label>
-                    <select id="weaponB" class="w-full bg-[#111] text-[#FF3366] border-3 border-black rounded-lg px-2.5 py-2 font-extrabold text-xs cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
+                    <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-1.5 sm:mt-2 mb-0.5 sm:mb-1">Weapon</label>
+                    <select id="weaponB" class="w-full bg-[#111] text-[#FF3366] border-2 sm:border-3 border-black rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 font-extrabold text-[11px] sm:text-xs cursor-pointer shadow-[2px_2px_0_#000] sm:shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
                         <option value="katana">🗡️ Cyber Katana (Swift Precision)</option>
                         <option value="hammer" selected>🔨 Gravity Warhammer (Heavy Impact)</option>
                         <option value="trident">🔱 Plasma Trident (Long Thrust)</option>
@@ -597,14 +624,14 @@
                 </div>
 
                 <!-- Live Price & % Delta Readout B -->
-                <div class="mt-4 pt-3 border-t-2 border-black/15">
+                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t-2 border-black/15">
                     <div class="flex items-baseline justify-between">
-                        <span class="text-xs font-extrabold uppercase text-neutral-600">Live Oracle Price</span>
-                        <span id="deltaBadgeB" class="font-mono-num text-xs font-black px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
+                        <span class="text-[10px] sm:text-xs font-extrabold uppercase text-neutral-600">Price</span>
+                        <span id="deltaBadgeB" class="font-mono-num text-[10px] sm:text-xs font-black px-1.5 sm:px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
                     </div>
-                    <div id="livePriceB" class="font-mono-num text-xl sm:text-2xl font-black tracking-tight mt-0.5">$118.60</div>
-                    <div class="mt-2 flex items-center justify-between bg-[#111] text-[#FF3366] px-3 py-1.5 rounded-lg text-xs font-extrabold">
-                        <span>POOL STAKED:</span>
+                    <div id="livePriceB" class="font-mono-num text-sm sm:text-2xl font-black tracking-tight mt-0.5 truncate">$118.60</div>
+                    <div class="mt-1 sm:mt-2 flex items-center justify-between bg-[#111] text-[#FF3366] px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-extrabold">
+                        <span>POOL:</span>
                         <span class="font-mono-num"><span id="poolB">0</span> $VCT</span>
                     </div>
                 </div>
@@ -612,32 +639,32 @@
         </div>
 
         <!-- 3. BOTTOM BETTING CONSOLE & LIVE PVP CHAT -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-stretch">
             <!-- Wager Console -->
-            <div id="bettingConsole" class="danfo-sheet lg:col-span-8 p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div id="bettingConsole" class="danfo-sheet lg:col-span-8 p-3 sm:p-5 flex flex-col justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
                     <div class="text-left">
-                        <h3 class="text-lg sm:text-xl font-black uppercase tracking-tight">Lock In Your Wager</h3>
-                        <p class="text-xs sm:text-sm font-semibold text-neutral-700">
+                        <h3 class="text-base sm:text-xl font-black uppercase tracking-tight">Lock In Your Wager</h3>
+                        <p class="text-[11px] sm:text-sm font-semibold text-neutral-700 hidden sm:block">
                             Pick which 3D Mecha's asset will outperform over the 60s duel (or score an early KO).
                         </p>
                     </div>
                     <!-- Quick Wager Chips -->
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <button type="button" onclick="setQuickBet(100)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+100</button>
-                        <button type="button" id="quickBet500Btn" onclick="setQuickBet(500)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+500</button>
-                        <button type="button" onclick="setQuickBet(1000)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+1K</button>
-                        <button type="button" onclick="setQuickBet('HALF')" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-2.5 py-1 text-xs">1/2</button>
-                        <button type="button" onclick="setQuickBet('MAX')" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1 text-xs">MAX</button>
+                    <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                        <button type="button" onclick="setQuickBet(100)" class="btn-neubrutal bg-white text-[#111] px-2 sm:px-2.5 py-1 text-xs font-mono-num">+100</button>
+                        <button type="button" id="quickBet500Btn" onclick="setQuickBet(500)" class="btn-neubrutal bg-white text-[#111] px-2 sm:px-2.5 py-1 text-xs font-mono-num">+500</button>
+                        <button type="button" onclick="setQuickBet(1000)" class="btn-neubrutal bg-white text-[#111] px-2 sm:px-2.5 py-1 text-xs font-mono-num">+1K</button>
+                        <button type="button" onclick="setQuickBet('HALF')" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-2 sm:px-2.5 py-1 text-xs">1/2</button>
+                        <button type="button" onclick="setQuickBet('MAX')" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2 sm:px-2.5 py-1 text-xs">MAX</button>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 items-stretch">
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch">
                     <div class="relative flex-1">
                         <input type="number" id="betAmount" placeholder="Enter $VCT Wager (e.g. 500)" disabled
-                            class="w-full h-full px-4 py-3 bg-white text-[#111] border-3 border-black rounded-xl font-mono-num font-black text-base sm:text-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] focus:outline-none focus:border-[#8A2BE2]">
+                            class="w-full h-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white text-[#111] border-2 sm:border-3 border-black rounded-xl font-mono-num font-black text-sm sm:text-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] focus:outline-none focus:border-[#8A2BE2]">
                     </div>
-                    <button id="placeBetBtn" disabled class="btn-neubrutal bg-[#8A2BE2] text-white px-6 py-3.5 text-base sm:text-lg uppercase tracking-wide sm:min-w-[260px]">
+                    <button id="placeBetBtn" disabled class="btn-neubrutal bg-[#8A2BE2] text-white px-4 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-lg uppercase tracking-wide sm:min-w-[260px]">
                         Select a Fighter Card First
                     </button>
                 </div>
@@ -926,20 +953,20 @@
          ======================================================================= -->
     <div id="tutorialOverlayDim" class="tut-overlay-dim hidden"></div>
 
-    <div id="interactiveTutorialBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-xl w-[94%] bg-[#111]/95 backdrop-blur-md text-white border-4 border-[#00F0FF] rounded-2xl p-4 shadow-[0_0_35px_rgba(0,240,255,0.45),5px_5px_0_#000] flex items-center gap-3.5 transition-all duration-300">
-        <div class="w-12 h-12 rounded-xl bg-[#00F0FF] text-[#111] flex items-center justify-center text-2xl font-black shrink-0 animate-bounce shadow-md">
+    <div id="interactiveTutorialBanner" class="hidden fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-xl w-[94%] bg-[#111]/95 backdrop-blur-md text-white border-3 sm:border-4 border-[#00F0FF] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-[0_0_35px_rgba(0,240,255,0.45),4px_4px_0_#000] flex items-center gap-2.5 sm:gap-3.5 transition-all duration-300">
+        <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#00F0FF] text-[#111] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0 animate-bounce shadow-md">
             🤖
         </div>
         <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-2 mb-1">
-                <span id="tutStepBadge" class="px-2 py-0.5 rounded bg-[#8A2BE2] text-white text-[10px] font-black tracking-wider uppercase">
+            <div class="flex items-center justify-between gap-2 mb-0.5 sm:mb-1">
+                <span id="tutStepBadge" class="px-2 py-0.5 rounded bg-[#8A2BE2] text-white text-[9px] sm:text-[10px] font-black tracking-wider uppercase">
                     QUEST • STEP 1 OF 5
                 </span>
-                <button id="skipTutorialBtn" class="text-[11px] font-extrabold text-neutral-400 hover:text-white underline cursor-pointer">
+                <button id="skipTutorialBtn" class="text-[10px] sm:text-[11px] font-extrabold text-neutral-400 hover:text-white underline cursor-pointer">
                     ✕ Exit Guide
                 </button>
             </div>
-            <div id="tutStepInstruction" class="text-xs sm:text-sm font-black text-white leading-snug">
+            <div id="tutStepInstruction" class="text-[11px] sm:text-sm font-black text-white leading-tight sm:leading-snug">
                 Step 1: Equip your weapon! Tap the weapon selector under Corner A to try out different 3D weapons in the Colosseum.
             </div>
         </div>
@@ -1754,12 +1781,19 @@
             update3DNameplates();
         }
 
-        window.addEventListener('resize', () => {
-            if (!mountEl) return;
-            camera.aspect = mountEl.clientWidth / mountEl.clientHeight;
+        function update3DArenaSize() {
+            if (!mountEl || !camera || !renderer) return;
+            const w = mountEl.clientWidth;
+            const h = mountEl.clientHeight;
+            camera.aspect = w / h;
+            // Adaptive mobile FOV: wide enough to frame both fighters comfortably on mobile screens
+            camera.fov = w < 640 ? 52 : 42;
             camera.updateProjectionMatrix();
-            renderer.setSize(mountEl.clientWidth, mountEl.clientHeight);
-        });
+            renderer.setSize(w, h);
+        }
+
+        window.addEventListener('resize', update3DArenaSize);
+        update3DArenaSize();
 
         document.getElementById('camToggleBtn').addEventListener('click', () => {
             currentCamIdx = (currentCamIdx + 1) % CAM_PRESETS.length;
