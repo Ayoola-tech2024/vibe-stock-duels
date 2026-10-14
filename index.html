@@ -2939,6 +2939,38 @@
         let oppUsername = "Challenger";
         let pendingWager = 0;
 
+        // Multi-STUN public ICE servers for 100% resilient NAT/Carrier traversal
+        const PEER_CONFIG = {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    { urls: 'stun:stun.services.mozilla.com' },
+                    { urls: 'stun:stun.sipgate.net:10000' }
+                ],
+                sdpSemantics: 'unified-plan'
+            },
+            debug: 1
+        };
+
+        function cleanupP2P(fullDestroy = false) {
+            if (window.peerHeartbeatInterval) {
+                clearInterval(window.peerHeartbeatInterval);
+                window.peerHeartbeatInterval = null;
+            }
+            if (p2pConn) {
+                try { p2pConn.close(); } catch(e) {}
+                p2pConn = null;
+            }
+            if (fullDestroy && peer) {
+                try { peer.destroy(); } catch(e) {}
+                peer = null;
+            }
+        }
+
         function switchMultiplayerTab(mode) {
             const pHost = document.getElementById('panelHost');
             const pJoin = document.getElementById('panelJoin');
@@ -2965,12 +2997,18 @@
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             currentRoomOtp = otp;
             isHost = true;
+            cleanupP2P(true);
 
             document.getElementById('hostPreGenerate').classList.add('hidden');
             document.getElementById('hostCodeDisplay').classList.remove('hidden');
             document.getElementById('roomOtpBadge').innerText = otp;
+            const waitingText = document.getElementById('waitingText');
+            if (waitingText) {
+                waitingText.innerText = "⏳ Registering room on WebRTC mesh...";
+                waitingText.className = "text-xs font-bold text-neutral-600 animate-pulse";
+            }
 
-            // 1. Create Cloud Room in Firestore for guaranteed NAT-free signaling
+            // 1. Create Cloud Room in Firestore for guaranteed NAT-free signaling (if available)
             if (db && currentUser) {
                 try {
                     const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', otp);
@@ -2980,6 +3018,8 @@
                         guestName: '',
                         assetA: selectA.value,
                         assetB: selectB.value,
+                        weaponA: currentWeaponA || 'KATANA',
+                        weaponB: currentWeaponB || 'KATANA',
                         hostLock: 0,
                         guestLock: 0,
                         status: 'WAITING',
@@ -2989,39 +3029,63 @@
                 } catch (e) {}
             }
 
-            // 2. Also register PeerJS ID for low-latency direct P2P packets
+            // 2. Also register PeerJS ID with multi-STUN config for high-speed P2P packets
             try {
-                if (peer) peer.destroy();
-                peer = new Peer('vibe-duel-' + otp);
+                peer = new Peer('vibe-duel-' + otp, PEER_CONFIG);
+
+                peer.on('open', (id) => {
+                    console.log("🟢 Host peer live with ID:", id);
+                    if (waitingText) {
+                        waitingText.innerHTML = `🟢 <strong>Room #${otp} is LIVE.</strong> Waiting for challenger to join...`;
+                        waitingText.className = "text-xs font-bold text-emerald-800";
+                    }
+                });
+
                 peer.on('connection', (conn) => {
+                    console.log("⚡ Host received inbound P2P connection from challenger!");
+                    cleanupP2P(false);
                     p2pConn = conn;
                     setupPeerChannel(conn);
                 });
-            } catch (e) {}
+
+                peer.on('error', (err) => {
+                    console.warn("Host peer notice/error:", err);
+                    if (err.type === 'unavailable-id') {
+                        setTimeout(() => {
+                            if (isHost && !isMultiplayer) document.getElementById('createRoomBtn').click();
+                        }, 400);
+                    } else if (waitingText) {
+                        waitingText.innerText = `⚠️ Notice (${err.type || 'retrying'})... Still listening!`;
+                    }
+                });
+            } catch (e) {
+                console.error("Host peer init error:", e);
+            }
         });
 
-        // Guest Joins 6-Digit OTP Room
+        // Guest Joins 6-Digit OTP Room (With automated retry resilience)
         document.getElementById('joinWithOtpBtn').addEventListener('click', async () => {
             const otp = document.getElementById('joinOtpInput').value.trim().replace(/\D/g, '');
             const statusEl = document.getElementById('joinStatusText');
             if (otp.length !== 6) {
                 statusEl.innerText = "⚠️ Enter a valid 6-digit OTP code!";
                 statusEl.classList.remove('hidden');
+                statusEl.className = "mt-2.5 text-xs font-bold text-rose-700";
                 return;
             }
 
             currentRoomOtp = otp;
             isHost = false;
-            statusEl.innerText = `📡 Connecting to Room #${otp}...`;
+            statusEl.innerText = `📡 Contacting Room #${otp}...`;
             statusEl.classList.remove('hidden');
+            statusEl.className = "mt-2.5 text-xs font-bold text-cyan-700 animate-pulse";
 
-            let joinedViaCloud = false;
+            // 1. Cloud room join (Firestore)
             if (db && currentUser) {
                 try {
                     const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', otp);
                     const snap = await getDoc(roomRef);
                     if (snap.exists()) {
-                        joinedViaCloud = true;
                         await updateDoc(roomRef, {
                             guestName: playerNickname || 'Guest Raider',
                             status: 'CONNECTED',
@@ -3033,16 +3097,55 @@
                 } catch (e) {}
             }
 
-            // Also connect via PeerJS
+            // 2. Direct WebRTC P2P connection with auto-retry
+            cleanupP2P(true);
+            const guestPeerId = 'vibe-guest-' + Math.random().toString(36).slice(2, 8);
+            let attempt = 0;
+            const maxAttempts = 6;
+            let retryTimer = null;
+
             try {
-                if (peer) peer.destroy();
-                peer = new Peer('vibe-guest-' + Math.random().toString(36).slice(2, 7));
-                peer.on('open', () => {
+                peer = new Peer(guestPeerId, PEER_CONFIG);
+
+                function connectToHost() {
+                    if (isMultiplayer) return;
+                    attempt++;
+                    statusEl.innerText = `📡 Connecting to Room #${otp} (attempt ${attempt}/${maxAttempts})...`;
+
+                    if (p2pConn) {
+                        try { p2pConn.close(); } catch(e) {}
+                        p2pConn = null;
+                    }
+
                     const conn = peer.connect('vibe-duel-' + otp, { reliable: true });
                     p2pConn = conn;
                     setupPeerChannel(conn);
+                }
+
+                peer.on('open', () => {
+                    connectToHost();
                 });
-            } catch (e) {}
+
+                peer.on('error', (err) => {
+                    console.warn("Guest peer error:", err);
+                    if (err.type === 'peer-unavailable') {
+                        if (attempt < maxAttempts && !isMultiplayer) {
+                            statusEl.innerText = `⏳ Host room registering... Retrying (${attempt}/${maxAttempts})...`;
+                            clearTimeout(retryTimer);
+                            retryTimer = setTimeout(connectToHost, 1200);
+                        } else {
+                            statusEl.innerText = `❌ Room #${otp} not found. Ensure host clicked 'Generate OTP'!`;
+                            statusEl.className = "mt-2.5 text-xs font-bold text-rose-700";
+                        }
+                    } else {
+                        statusEl.innerText = `⚠️ Connection notice (${err.type || 'P2P'}). Checking route...`;
+                    }
+                });
+            } catch (e) {
+                console.error("Guest peer init error:", e);
+                statusEl.innerText = "❌ Failed to initialize P2P engine.";
+                statusEl.className = "mt-2.5 text-xs font-bold text-rose-700";
+            }
         });
 
         function listenToCloudRoom(otp) {
@@ -3114,12 +3217,85 @@
         }
 
         function setupPeerChannel(conn) {
-            conn.on('open', () => {
-                conn.send({ type: 'HELLO', username: playerNickname || (isHost ? 'Host' : 'Guest') });
-            });
+            // Heartbeat Keep-Alive to prevent cellular/router NAT timeout drops
+            if (window.peerHeartbeatInterval) clearInterval(window.peerHeartbeatInterval);
+            window.peerHeartbeatInterval = setInterval(() => {
+                if (p2pConn && p2pConn.open) {
+                    try { p2pConn.send({ type: 'PING' }); } catch(e) {}
+                }
+            }, 4000);
+
+            function sendHello() {
+                try {
+                    conn.send({
+                        type: 'HELLO',
+                        username: playerNickname || (isHost ? 'Host' : 'Guest'),
+                        isHost: isHost,
+                        asset: isHost ? selectA.value : selectB.value,
+                        weapon: isHost ? (currentWeaponA || 'KATANA') : (currentWeaponB || 'KATANA')
+                    });
+                } catch(e) {
+                    console.warn("Failed sending initial HELLO:", e);
+                }
+            }
+
+            // Immediately send HELLO if socket is already open, or wait for open event
+            if (conn.open) {
+                sendHello();
+            } else {
+                conn.on('open', () => {
+                    sendHello();
+                });
+            }
+
             conn.on('data', (msg) => {
+                if (!msg || !msg.type) return;
+
+                if (msg.type === 'PING') {
+                    if (p2pConn && p2pConn.open) {
+                        try { p2pConn.send({ type: 'PONG' }); } catch(e) {}
+                    }
+                    return;
+                }
+                if (msg.type === 'PONG') return;
+
                 if (msg.type === 'HELLO') {
-                    oppUsername = msg.username;
+                    oppUsername = msg.username || (isHost ? 'Guest' : 'Host');
+                    // Respond with HELLO_ACK so remote peer is 100% confirmed connected
+                    try {
+                        conn.send({
+                            type: 'HELLO_ACK',
+                            username: playerNickname || (isHost ? 'Host' : 'Guest'),
+                            isHost: isHost,
+                            asset: isHost ? selectA.value : selectB.value,
+                            weapon: isHost ? (currentWeaponA || 'KATANA') : (currentWeaponB || 'KATANA')
+                        });
+                    } catch(e) {}
+
+                    // Sync remote initial selections
+                    if (isHost && msg.asset) {
+                        selectB.value = msg.asset;
+                        if (msg.weapon && weaponBSelect) { currentWeaponB = msg.weapon; weaponBSelect.value = msg.weapon; }
+                        syncFighterSelectionUI();
+                    } else if (!isHost && msg.asset) {
+                        selectA.value = msg.asset;
+                        if (msg.weapon && weaponASelect) { currentWeaponA = msg.weapon; weaponASelect.value = msg.weapon; }
+                        syncFighterSelectionUI();
+                    }
+
+                    activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                } else if (msg.type === 'HELLO_ACK') {
+                    oppUsername = msg.username || (isHost ? 'Guest' : 'Host');
+                    if (isHost && msg.asset) {
+                        selectB.value = msg.asset;
+                        if (msg.weapon && weaponBSelect) { currentWeaponB = msg.weapon; weaponBSelect.value = msg.weapon; }
+                        syncFighterSelectionUI();
+                    } else if (!isHost && msg.asset) {
+                        selectA.value = msg.asset;
+                        if (msg.weapon && weaponASelect) { currentWeaponA = msg.weapon; weaponASelect.value = msg.weapon; }
+                        syncFighterSelectionUI();
+                    }
+
                     activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
                 } else if (msg.type === 'SELECT') {
                     if (msg.team === 'A' && !isHost) { selectA.value = msg.asset; syncFighterSelectionUI(); }
@@ -3170,10 +3346,23 @@
                     resetArenaForNextRound();
                 }
             });
+
+            conn.on('close', () => {
+                console.warn("P2P connection closed by remote peer");
+                if (isMultiplayer) {
+                    appendChatMessage("⚔️ ARENA", `⚠️ ${oppUsername} disconnected from room!`, "#FF3366");
+                }
+            });
+
+            conn.on('error', (err) => {
+                console.error("P2P connection channel error:", err);
+            });
         }
 
         function activatePvPArenaUI(hostName, guestName) {
             isMultiplayer = true;
+            const joinStatus = document.getElementById('joinStatusText');
+            if (joinStatus) joinStatus.classList.add('hidden');
             document.getElementById('multiplayerModal').classList.add('hidden');
             document.getElementById('pvpHeader').classList.remove('hidden');
             document.getElementById('activeRoomCodeBadge').innerText = currentRoomOtp || 'LIVE';
@@ -3276,7 +3465,7 @@
         document.getElementById('leavePvpBtn').addEventListener('click', () => {
             isMultiplayer = false;
             if (roomUnsubscribe) roomUnsubscribe();
-            if (peer) peer.destroy();
+            cleanupP2P(true);
             document.getElementById('pvpHeader').classList.add('hidden');
             resetArenaForNextRound();
         });
@@ -3550,9 +3739,13 @@
             const params = new URLSearchParams(window.location.search);
             const duelOtp = params.get('duel');
             if (duelOtp && duelOtp.replace(/\D/g, '').length === 6) {
-                document.getElementById('joinOtpInput').value = duelOtp.replace(/\D/g, '');
+                const cleanedOtp = duelOtp.replace(/\D/g, '');
+                document.getElementById('joinOtpInput').value = cleanedOtp;
                 document.getElementById('multiplayerModal').classList.remove('hidden');
                 switchMultiplayerTab('join');
+                setTimeout(() => {
+                    document.getElementById('joinWithOtpBtn').click();
+                }, 500);
             }
         };
     </script>
