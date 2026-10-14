@@ -2,237 +2,2967 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vibe Stock Duels</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vibe Stock Duels 3D — Cyber-Colosseum Brawler</title>
+    <!-- Tailwind CSS for responsive layout & telemetry grids -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Space Grotesk & JetBrains Mono Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Three.js & OrbitControls for Full 3D Voxel Arena -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Ethers.js v6 & PeerJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+
+    <style>
+        :root {
+            --vibe-cyan: #00F0FF;
+            --vibe-purple: #8A2BE2;
+            --vibe-gold: #FFD700;
+            --charcoal-ink: #111111;
+            --cream-paper: #F4F1EB;
+            --alert-red: #FF3366;
+            --vibe-green: #00FF88;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--charcoal-ink);
+            color: var(--cream-paper);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 25%, #2a114d 0%, #0d0b14 65%, #070709 100%);
+        }
+
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Signature Neubrutalist Danfo-Cyber Components */
+        .tactile-card {
+            background: var(--cream-paper);
+            color: var(--charcoal-ink);
+            border: 3px solid var(--charcoal-ink);
+            border-radius: 14px;
+            box-shadow: 4px 6px 0px var(--vibe-purple);
+        }
+
+        .tactile-dark {
+            background: #14141d;
+            color: var(--cream-paper);
+            border: 3px solid var(--charcoal-ink);
+            border-radius: 14px;
+            box-shadow: 4px 6px 0px var(--vibe-cyan);
+        }
+
+        .danfo-sheet {
+            background: var(--cream-paper);
+            color: var(--charcoal-ink);
+            border: 4px solid var(--charcoal-ink);
+            border-radius: 20px;
+            box-shadow: 0 -8px 0 var(--vibe-cyan), 6px 8px 0 var(--charcoal-ink);
+        }
+
+        .btn-neubrutal {
+            border: 3px solid var(--charcoal-ink);
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 3px 4px 0 var(--charcoal-ink);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-neubrutal:hover:not(:disabled) {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+            box-shadow: 4px 5px 0 var(--charcoal-ink);
+        }
+
+        .btn-neubrutal:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--charcoal-ink);
+        }
+
+        .btn-neubrutal:disabled {
+            background: #555 !important;
+            color: #999 !important;
+            cursor: not-allowed;
+            box-shadow: none;
+            border-color: #333;
+        }
+
+        /* Team Fighter Cards */
+        .fighter-hud-card {
+            background: var(--cream-paper);
+            color: var(--charcoal-ink);
+            border: 4px solid var(--charcoal-ink);
+            border-radius: 16px;
+            box-shadow: 5px 7px 0px var(--charcoal-ink);
+            transition: all 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .fighter-hud-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .fighter-hud-card.selected-a {
+            background: #fff9db;
+            border-color: var(--charcoal-ink);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7), 6px 8px 0 var(--vibe-cyan);
+        }
+
+        .fighter-hud-card.selected-b {
+            background: #fff0f4;
+            border-color: var(--charcoal-ink);
+            box-shadow: 0 0 25px rgba(255, 51, 102, 0.7), 6px 8px 0 var(--alert-red);
+        }
+
+        .winner-glow {
+            border-color: var(--vibe-gold) !important;
+            box-shadow: 0 0 40px var(--vibe-gold), 6px 8px 0 var(--charcoal-ink) !important;
+            transform: scale(1.03) !important;
+        }
+
+        .loser-dim {
+            filter: grayscale(85%) opacity(0.65);
+            transform: scale(0.97) !important;
+        }
+
+        /* 3D Viewport Wrapper */
+        #arena-3d-wrapper {
+            position: relative;
+            width: 100%;
+            height: 410px;
+            background: radial-gradient(circle at 50% 60%, #1d1138 0%, #09080f 100%);
+            border: 4px solid var(--charcoal-ink);
+            border-radius: 18px;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.35), 6px 8px 0 var(--vibe-purple);
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            #arena-3d-wrapper {
+                height: 330px;
+            }
+        }
+
+        /* 3D Floating Nameplates inside Arena */
+        .fighter-3d-label {
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            z-index: 15;
+            transition: transform 0.05s linear;
+        }
+
+        /* Floating Combat Damage & Emote Popups */
+        .combat-float-text {
+            position: absolute;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.4rem;
+            pointer-events: none;
+            z-index: 40;
+            animation: floatCombatAnim 1.15s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            white-space: nowrap;
+        }
+
+        @keyframes floatCombatAnim {
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5) rotate(-5deg); }
+            20% { opacity: 1; transform: translate(-50%, -12px) scale(1.25) rotate(3deg); }
+            80% { opacity: 1; transform: translate(-50%, -42px) scale(1.0) rotate(0deg); }
+            100% { opacity: 0; transform: translate(-50%, -65px) scale(0.75) rotate(2deg); }
+        }
+
+        /* Screen Shake on Crit */
+        @keyframes arenaShake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-7px, 5px); }
+            40% { transform: translate(7px, -6px); }
+            60% { transform: translate(-5px, -4px); }
+            80% { transform: translate(5px, 4px); }
+        }
+        .shake-crit {
+            animation: arenaShake 0.32s ease-in-out;
+        }
+
+        /* Custom Modal Overlay */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 10, 0.82);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: var(--vibe-cyan); border-radius: 4px; }
+    </style>
 </head>
-<body class="cyber-skyline-bg">
-    <div class="sky-cyber-gradient"></div>
-    
-    <div class="app-container">
-        <!-- Navigation / Header -->
-        <header class="top-nav tactile-card">
-            <div class="logo">⚔️ Vibe Duels</div>
-            <div class="user-controls" style="display: flex; align-items: center; gap: 15px;">
-                <button id="soundToggleBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer;">🔊 SFX</button>
-                <button id="tutorialBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px;">❓ How to Play</button>
-                <div class="online-counter" style="color: var(--vibe-cyan); font-weight: bold;">🟢 <span id="onlineCount">1,402</span> Online</div>
-                <button id="multiplayerBtn" class="btn-action" style="background: var(--vibe-purple);">👥 Challenge Friend</button>
-                <div class="tactile-card hidden" id="nicknamePill" style="padding: 8px 12px; font-weight: bold; font-size: 0.9rem; background: var(--alert-red); color: white;">👤 <span id="playerNameDisplay">Raider</span></div>
-                <div class="token-balance hidden" id="balancePill">0 $VCT</div>
-                <button id="loginBtn" class="btn-google-pill">
-                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" width="18">
-                    Connect to Play
+<body class="pb-10">
+
+    <!-- MAIN CONTAINER -->
+    <div class="max-w-[1220px] mx-auto px-3 sm:px-5 pt-3 flex flex-col gap-4 relative z-10">
+
+        <!-- 1. TOP NEUBRUTALIST NAVIGATION BAR -->
+        <header class="tactile-card px-3 sm:px-5 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#111] text-[#00F0FF] flex items-center justify-center text-xl font-black border-2 border-black shadow-[2px_3px_0_#8A2BE2]">
+                    ⚔️
+                </div>
+                <div>
+                    <div class="text-lg sm:text-xl font-black tracking-tight uppercase leading-none flex items-center gap-1.5">
+                        <span>VIBE DUELS</span>
+                        <span class="text-xs px-2 py-0.5 bg-[#8A2BE2] text-white rounded-md border border-black">3D ARENA</span>
+                    </div>
+                    <div class="text-[11px] font-bold text-neutral-600 flex items-center gap-2 mt-0.5">
+                        <span class="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span id="onlineCount">1,428</span> Raiders Active
+                        </span>
+                        <span>•</span>
+                        <span id="cloudStatusBadge" class="text-purple-700 font-bold">⚡ Hybrid Oracle Live</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="analyticsBtn" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-3 py-1.5 text-xs sm:text-sm">
+                    📊 Analytics <span id="analyticsLiveDot" class="w-2 h-2 rounded-full bg-[#00FF88]"></span>
+                </button>
+                <button id="leaderboardBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-3 py-1.5 text-xs sm:text-sm">
+                    🏆 Ranks
+                </button>
+                <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-3 py-1.5 text-xs sm:text-sm">
+                    👥 PvP Arena
+                </button>
+                <button id="tutorialBtn" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1.5 text-xs sm:text-sm" title="How to Play">
+                    ❓ Rules
+                </button>
+                <button id="soundToggleBtn" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1.5 text-xs sm:text-sm" title="Toggle 8-Bit Arcade Audio">
+                    🔊 SFX
+                </button>
+
+                <!-- Streak Pill -->
+                <div id="streakPill" class="px-2.5 py-1.5 rounded-lg bg-orange-500 text-white border-2 border-black font-extrabold text-xs shadow-[2px_3px_0_#111]" title="Win Streak Multiplier">
+                    🔥 <span id="streakDisplay">0</span>x
+                </div>
+
+                <!-- Player Nickname Pill -->
+                <button id="nicknamePill" class="hidden px-2.5 py-1.5 rounded-lg bg-[#FF3366] text-white border-2 border-black font-extrabold text-xs shadow-[2px_3px_0_#111] cursor-pointer" title="Click to change Raider Name">
+                    👤 <span id="playerNameDisplay">Raider</span>
+                </button>
+
+                <!-- $VCT Balance Pill -->
+                <div id="balancePill" class="px-3 py-1.5 rounded-full bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num font-extrabold text-xs sm:text-sm shadow-[2px_3px_0_#111]">
+                    5,000 $VCT
+                </div>
+
+                <!-- Wallet / Login Button -->
+                <button id="loginBtn" class="btn-neubrutal bg-white text-[#111] px-3 py-1.5 text-xs sm:text-sm rounded-full">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Login" width="16" onerror="this.style.display='none'">
+                    <span id="loginBtnText">Connect Wallet</span>
                 </button>
             </div>
         </header>
 
-        <!-- Modals for Onboarding -->
-        <div id="nicknameModal" class="privy-overlay hidden">
-            <div class="danfo-sheet result-card">
-                <h2 style="color: var(--vibe-gold); margin-bottom: 10px;">Enter the Arena</h2>
-                <p style="margin-bottom: 20px;">What should we call you on the leaderboard?</p>
-                <input type="text" id="nicknameInput" placeholder="Enter Nickname (e.g. Satoshi)" style="width: 100%; padding: 12px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-cyan); margin-bottom: 15px; font-family: 'Space Grotesk'; text-align: center; font-size: 1.1rem;">
-                <button id="saveNicknameBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000;">Save & Continue ➔</button>
+        <!-- PVP MATCH BANNER (Visible when in Live Room) -->
+        <div id="pvpHeader" class="hidden tactile-dark px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-2 border-[#00F0FF]">
+            <div class="flex items-center gap-2 text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#00F0FF]">
+                <span>⚔️ LIVE ROOM #<span id="activeRoomCodeBadge">------</span>:</span>
+                <span id="pvpHostName" class="text-white underline decoration-[#00F0FF]">Host</span>
+                <span class="text-[#FF3366] px-1">VS</span>
+                <span id="pvpGuestName" class="text-[#FFD700] underline decoration-[#FFD700]">Guest</span>
             </div>
-        </div>
-
-        <div id="tutorialModal" class="privy-overlay hidden">
-            <div class="danfo-sheet result-card" style="text-align: left;">
-                <h2 style="color: var(--vibe-cyan); margin-bottom: 15px; text-align: center;">How to Play ⚔️</h2>
-                <ul style="line-height: 1.6; margin-bottom: 20px; padding-left: 20px; font-size: 0.95rem;">
-                    <li><strong>1. Pick Your Asset:</strong> Select a crypto or stock for both sides (e.g. $BTC vs $TSLA).</li>
-                    <li><strong>2. Place Your Bet:</strong> Enter how many $VCT tokens you want to wager.</li>
-                    <li><strong>3. Lock In:</strong> Click "Place Bet" and confirm the Web3 transaction to lock your tokens in the Smart Vault.</li>
-                    <li><strong>4. 60-Second Duel:</strong> The arena pulls <strong>live</strong> market prices. The asset whose price goes up the most (or down the least) in 60 seconds wins!</li>
-                    <li><strong>5. Payout:</strong> The winner takes the combined prize pool (minus a protocol burn fee).</li>
-                </ul>
-                <button id="closeTutorialBtn" class="btn-action" style="width: 100%; background: var(--vibe-purple);">Let's Duel! 🚀</button>
-            </div>
-        </div>
-
-        <!-- Main Arena -->
-        <main class="duel-arena">
-            <!-- Timer -->
-            <div class="timer-display tactile-card">
-                <div class="timer-label">Round Ends In</div>
-                <div class="countdown-text"><span id="countdown">60</span>s</div>
-            </div>
-
-            <!-- The Duel -->
-            <h2 id="pvpHeader" class="hidden" style="text-align: center; color: var(--vibe-cyan); margin-bottom: 20px; font-weight: 700; text-transform: uppercase;">⚔️ <span id="pvpHostName">Host</span> vs <span id="pvpGuestName">Guest</span> ⚔️</h2>
-            <div class="versus-container">
-                <!-- Team A -->
-                <div class="team-card tactile-card" id="teamA">
-                    <div class="health-bar-wrapper hidden" id="hpBoxA">
-                        <div class="health-fill" id="hpA" style="width: 100%; background: var(--vibe-cyan);"></div>
-                    </div>
-                    <div class="viber-avatar" id="avatarA" style="background-image: url('assets/vibers/viber1.webp'); box-shadow: 0 0 15px var(--vibe-cyan);">
-                        <div class="weapon weapon-a" id="weaponA">🗡️</div>
-                    </div>
-                    <div class="stock-info">
-                        <select id="assetA" class="asset-dropdown">
-                            <optgroup label="Live Crypto (Binance API)">
-                                <option value="BTC" selected>Bitcoin ($BTC)</option>
-                                <option value="ETH">Ethereum ($ETH)</option>
-                                <option value="SOL">Solana ($SOL)</option>
-                            </optgroup>
-                            <optgroup label="Live Stocks (Yahoo Finance API)">
-                                <option value="TSLA">Tesla ($TSLA)</option>
-                                <option value="AAPL">Apple ($AAPL)</option>
-                                <option value="NVDA">NVIDIA ($NVDA)</option>
-                                <option value="MSFT">Microsoft ($MSFT)</option>
-                                <option value="AMZN">Amazon ($AMZN)</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div class="pool-amount">Prize Pool: <span id="poolA">0</span> VCT</div>
-                </div>
-
-                <div class="vs-center">
-                    <div class="vs-badge" id="vsBadge">VS</div>
-                    <button id="shuffleMatchupBtn" class="tactile-icon-btn" style="margin-top: 10px; font-size: 0.8rem; background: #111; color: var(--vibe-gold); border: 2px solid var(--vibe-gold); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk';">🎲 Random Duel</button>
-                    
-                    <!-- Live Chart container -->
-                    <div class="chart-container hidden" id="chartBox">
-                        <div class="chart-label">🔴 Live Performance Chart 🟢</div>
-                        <canvas id="liveChart" width="300" height="180"></canvas>
-                    </div>
-                </div>
-
-                <!-- Team B -->
-                <div class="team-card tactile-card" id="teamB">
-                    <div class="health-bar-wrapper hidden" id="hpBoxB">
-                        <div class="health-fill" id="hpB" style="width: 100%; background: var(--alert-red);"></div>
-                    </div>
-                    <div class="viber-avatar" id="avatarB" style="background-image: url('assets/vibers/viber4.webp'); box-shadow: 0 0 15px var(--alert-red);">
-                        <div class="weapon weapon-b" id="weaponB">🔨</div>
-                    </div>
-                    <div class="stock-info">
-                        <select id="assetB" class="asset-dropdown">
-                            <optgroup label="Live Crypto (Binance API)">
-                                <option value="BTC">Bitcoin ($BTC)</option>
-                                <option value="ETH">Ethereum ($ETH)</option>
-                                <option value="SOL" selected>Solana ($SOL)</option>
-                            </optgroup>
-                            <optgroup label="Live Stocks (Yahoo Finance API)">
-                                <option value="TSLA">Tesla ($TSLA)</option>
-                                <option value="AAPL">Apple ($AAPL)</option>
-                                <option value="NVDA">NVIDIA ($NVDA)</option>
-                                <option value="MSFT">Microsoft ($MSFT)</option>
-                                <option value="AMZN">Amazon ($AMZN)</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div class="pool-amount">Prize Pool: <span id="poolB">0</span> VCT</div>
-                </div>
-            </div>
-
-            <!-- Betting Controls -->
-            <div class="betting-panel danfo-sheet">
-                <h3>Predict the Winner</h3>
-                <p>Which asset will perform better in the next 60 seconds?</p>
-                <div class="bet-controls">
-                    <input type="number" id="betAmount" placeholder="Amount of $VCT" disabled>
-                    <button id="placeBetBtn" class="btn-action" disabled>Select a Team First</button>
-                </div>
-            </div>
-            
-            <!-- PvP Chat Box (Hidden by default) -->
-            <div id="pvpChatContainer" class="hidden tactile-card" style="margin-top: 20px; padding: 10px; background: var(--charcoal-ink); border: 2px solid var(--vibe-purple);">
-                <div style="color: var(--vibe-cyan); font-weight: bold; margin-bottom: 5px;">💬 Live Match Chat</div>
-                <div id="chatMessages" style="height: 120px; overflow-y: auto; color: var(--cream-paper); font-size: 0.9rem; margin-bottom: 10px; background: #000; border: 1px solid #333; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
-                    <div style="color: #666; font-style: italic;">Waiting for opponent to connect...</div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="chatInput" placeholder="Trash talk here..." style="flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid var(--vibe-cyan); font-family: 'Space Grotesk';">
-                    <button id="sendChatBtn" class="btn-action" style="padding: 5px 15px; font-size: 0.9rem; background: var(--vibe-gold); color: #000;">Send</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Custom Result Modal (Replaces Browser Alert) -->
-    <div id="resultModal" class="privy-overlay hidden">
-        <div class="danfo-sheet result-card">
-            <h2 id="resultTitle">Round Over!</h2>
-            <div id="resultIcon" style="font-size: 4rem; margin: 10px 0;">🔔</div>
-            <p id="resultMessage" style="font-size: 1.2rem; margin-bottom: 20px;">The Oracle has spoken.</p>
-            <button class="btn-action" id="closeResultBtn">Next Round</button>
-        </div>
-    </div>
-
-    <!-- Phase 2: Privy Auth Modal Simulation & Real Web3 -->
-    <div id="privyModal" class="privy-overlay hidden">
-        <div class="privy-modal" style="padding: 25px; position: relative;">
-            <div class="privy-header" style="background: none; border-bottom: none; text-align: left; padding: 0;">
-                <h4 style="font-size: 1.4rem; color: #18181b; margin-bottom: 5px;">Log in or sign up</h4>
-                <p style="color: #4b5563; font-size: 0.9rem; font-weight: 600;">Welcome to Vibe Stock Duels</p>
-            </div>
-            <div class="privy-body" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                <button class="privy-btn" onclick="simulatePrivyLogin('Google')" style="background: #ffffff; color: #18181b; border: 1px solid #ccc; justify-content: center; width: 100%;">
-                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="20" alt="Google"> Continue with Google
-                </button>
-                <button class="privy-btn" onclick="simulatePrivyLogin('Discord')" style="background: #5865F2; color: #ffffff; justify-content: center; width: 100%;">
-                    <img src="https://img.icons8.com/color/48/000000/discord-logo.png" width="20" alt="Discord"> Continue with Discord
-                </button>
-                <div class="privy-divider"><span>OR</span></div>
-                <button class="privy-btn-outline" onclick="initWeb3Real()" style="background: var(--charcoal-ink); color: #fff; justify-content: center; width: 100%;">
-                    🦊 Connect MetaMask
+            <div class="flex items-center gap-2">
+                <span id="pvpSyncModeBadge" class="text-xs px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-bold">
+                    ☁️ Cloud + P2P Synced
+                </span>
+                <button id="leavePvpBtn" class="btn-neubrutal bg-[#FF3366] text-white px-2.5 py-1 text-xs">
+                    Exit Room
                 </button>
             </div>
-            <div class="privy-footer" style="margin-top: 20px; text-align: center; color: #a1a1aa; font-size: 0.75rem;">
-                Protected by <strong>Privy</strong>
+        </div>
+
+        <!-- 2. MAIN ARENA GRID: LEFT FIGHTER HUD | CENTER 3D COLOSSEUM | RIGHT FIGHTER HUD -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+            <!-- TEAM A FIGHTER CARD (Left Column - 3 cols on Desktop) -->
+            <div id="teamA" class="fighter-hud-card lg:col-span-3 p-4 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-[#111] text-[#00F0FF] font-extrabold text-xs uppercase tracking-wider">
+                            CORNER A (CYAN)
+                        </span>
+                        <span id="oracleBadgeA" class="text-[11px] font-bold px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
+                            BINANCE LIVE
+                        </span>
+                    </div>
+
+                    <!-- HP Bar A -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs font-extrabold mb-1">
+                            <span>ARMOR INTEGRITY</span>
+                            <span id="hpTextA" class="font-mono-num">100 / 100 HP</span>
+                        </div>
+                        <div class="w-full h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
+                            <div id="hpA" class="h-full bg-gradient-to-r from-[#00F0FF] to-[#00FF88] rounded transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3D Mecha Class Preview Badge -->
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-3">
+                        <div id="miniSwatchA" class="w-12 h-12 rounded-lg border-2 border-[#00F0FF] flex items-center justify-center text-2xl font-black shrink-0" style="background: #2a1b12;">
+                            🤖
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div id="mechaNameA" class="font-extrabold text-sm text-[#FFD700] truncate">Satoshi Prime V1</div>
+                            <div id="weaponNameA" class="text-xs text-neutral-300 truncate">🗡️ Cyber Broadsword</div>
+                            <div id="statusBuffA" class="text-[11px] text-[#00F0FF] font-bold mt-0.5">Ready for Combat</div>
+                        </div>
+                    </div>
+
+                    <!-- Asset Selector Dropdown A (All 15 Vibers) -->
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-1">Select Fighter Asset</label>
+                    <select id="assetA" class="w-full bg-[#111] text-[#F4F1EB] border-3 border-black rounded-lg px-3 py-2.5 font-extrabold text-sm cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
+                        <optgroup label="🟢 Live Crypto (Binance API)">
+                            <option value="BTC" selected>Bitcoin ($BTC) — Viber #1</option>
+                            <option value="ETH">Ethereum ($ETH) — Viber #2</option>
+                            <option value="SOL">Solana ($SOL) — Viber #4</option>
+                            <option value="BNB">BNB Chain ($BNB) — Viber #9</option>
+                            <option value="DOGE">Dogecoin ($DOGE) — Viber #10</option>
+                        </optgroup>
+                        <optgroup label="📈 Wall Street Stocks (Yahoo Hybrid)">
+                            <option value="TSLA">Tesla ($TSLA) — Viber #5</option>
+                            <option value="AAPL">Apple ($AAPL) — Viber #6</option>
+                            <option value="NVDA">NVIDIA ($NVDA) — Viber #8</option>
+                            <option value="MSFT">Microsoft ($MSFT) — Viber #7</option>
+                            <option value="AMZN">Amazon ($AMZN) — Viber #3</option>
+                        </optgroup>
+                        <optgroup label="⚡ Synthetic Private & African Titans">
+                            <option value="SPACEX">SpaceX ($SPACEX) — Viber #11</option>
+                            <option value="DANGOTE">Dangote ($DANGOTE) — Viber #12</option>
+                            <option value="OPENAI">OpenAI ($OPENAI) — Viber #13</option>
+                            <option value="STRIPE">Stripe ($STRIPE) — Viber #14</option>
+                            <option value="ANDURIL">Anduril ($ANDURIL) — Viber #15</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Live Price & % Delta Readout A -->
+                <div class="mt-4 pt-3 border-t-2 border-black/15">
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-xs font-extrabold uppercase text-neutral-600">Live Oracle Price</span>
+                        <span id="deltaBadgeA" class="font-mono-num text-xs font-black px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
+                    </div>
+                    <div id="livePriceA" class="font-mono-num text-xl sm:text-2xl font-black tracking-tight mt-0.5">$85,000.00</div>
+                    <div class="mt-2 flex items-center justify-between bg-[#111] text-[#00F0FF] px-3 py-1.5 rounded-lg text-xs font-extrabold">
+                        <span>POOL STAKED:</span>
+                        <span class="font-mono-num"><span id="poolA">0</span> $VCT</span>
+                    </div>
+                </div>
             </div>
-            <button id="closePrivy" class="close-btn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #000; box-shadow: none;">&times;</button>
+
+            <!-- CENTER 3D CYBER-COLOSSEUM STAGE (6 cols on Desktop) -->
+            <div class="lg:col-span-6 flex flex-col gap-3">
+                <div id="arena-3d-wrapper">
+                    <!-- Top Floating Timer & Camera Controls inside 3D Viewport -->
+                    <div class="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+                        <!-- Round Countdown Pill -->
+                        <div class="pointer-events-auto bg-[#111]/90 border-2 border-[#00F0FF] rounded-xl px-3.5 py-1.5 flex items-center gap-2.5 shadow-[3px_4px_0_#00F0FF]">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-neutral-300 leading-tight">
+                                ROUND<br>CLOCK
+                            </div>
+                            <div class="font-mono-num text-2xl sm:text-3xl font-black text-[#00F0FF] leading-none">
+                                <span id="countdown">60</span>s
+                            </div>
+                        </div>
+
+                        <!-- Match Status Banner -->
+                        <div id="arenaCenterBanner" class="px-3.5 py-1.5 rounded-xl bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-[3px_3px_0_#000]">
+                            ⚔️ Select a Fighter & Lock Bet
+                        </div>
+
+                        <!-- 3D Camera Angle & Random Matchup Controls -->
+                        <div class="pointer-events-auto flex items-center gap-1.5">
+                            <button id="shuffleMatchupBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1.5 text-xs" title="Randomize Matchup">
+                                🎲 Shuffle
+                            </button>
+                            <button id="camToggleBtn" class="btn-neubrutal bg-[#111] text-white border-white/30 px-2.5 py-1.5 text-xs" title="Switch 3D Camera Angle">
+                                🎥 Cam
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Floating Nameplate A -->
+                    <div id="label3dA" class="fighter-3d-label">
+                        <div class="px-2.5 py-1 rounded-lg bg-[#111]/90 border-2 border-[#00F0FF] text-white text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
+                            <span id="labelTickerA" class="text-[#00F0FF]">$BTC</span>
+                            <span id="labelDeltaA" class="font-mono-num text-[11px] text-emerald-400">+0.00%</span>
+                        </div>
+                    </div>
+
+                    <!-- 3D Floating Nameplate B -->
+                    <div id="label3dB" class="fighter-3d-label">
+                        <div class="px-2.5 py-1 rounded-lg bg-[#111]/90 border-2 border-[#FF3366] text-white text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1.5">
+                            <span id="labelTickerB" class="text-[#FF3366]">$SOL</span>
+                            <span id="labelDeltaB" class="font-mono-num text-[11px] text-emerald-400">+0.00%</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Combat Damage / Crit Container -->
+                    <div id="combatOverlayLayer" class="absolute inset-0 pointer-events-none overflow-hidden z-30"></div>
+
+                    <!-- Three.js WebGL Mount -->
+                    <div id="threeCanvasMount" class="w-full h-full"></div>
+
+                    <!-- Bottom Overlay inside 3D Arena: Active Mid-Fight Overdrive Skills & Emotes -->
+                    <div class="absolute bottom-2.5 left-2.5 right-2.5 z-20 flex flex-wrap items-center justify-between gap-2 bg-[#111]/90 backdrop-blur-md border-2 border-white/15 rounded-xl px-3 py-2">
+                        <!-- Overdrive / Rage Meter -->
+                        <div class="flex items-center gap-2 flex-1 min-w-[160px]">
+                            <span class="text-xs font-black uppercase text-[#FFD700] whitespace-nowrap">⚡ RAGE: <span id="ragePctText" class="font-mono-num">0%</span></span>
+                            <div class="flex-1 h-3 bg-black border border-white/25 rounded-full overflow-hidden p-0.5">
+                                <div id="rageBarFill" class="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-full transition-all duration-200" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Active Mid-Fight Skills -->
+                        <div class="flex items-center gap-1.5">
+                            <button id="skillShieldBtn" disabled class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2.5 py-1 text-xs font-extrabold" title="Costs 50% Rage: Blocks incoming HP damage for 3 ticks!">
+                                🛡️ Shield (50%)
+                            </button>
+                            <button id="skillLeverageBtn" disabled class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1 text-xs font-extrabold" title="Costs 75% Rage: 2x Attack Damage for 4 ticks!">
+                                ⚡ 2x Strike (75%)
+                            </button>
+                        </div>
+
+                        <!-- Quick Hype Emotes -->
+                        <div class="flex items-center gap-1 border-l border-white/15 pl-2">
+                            <button onclick="triggerArenaEmote('🚀 PUMP IT!')" class="hover:scale-125 transition-transform text-base px-1" title="Pump Emote">🚀</button>
+                            <button onclick="triggerArenaEmote('📉 DUMPING!')" class="hover:scale-125 transition-transform text-base px-1" title="Dump Emote">📉</button>
+                            <button onclick="triggerArenaEmote('💎🙌 DIAMOND')" class="hover:scale-125 transition-transform text-base px-1" title="Diamond Hands">💎</button>
+                            <button onclick="triggerArenaEmote('💀 COOKED!')" class="hover:scale-125 transition-transform text-base px-1" title="Cooked">💀</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIVE PERFORMANCE TELEMETRY CHART (Calibrated 40-Tick Full-Width Canvas) -->
+                <div class="tactile-dark p-3 flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="uppercase tracking-wider text-[#00F0FF] flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#00F0FF] animate-pulse"></span>
+                            LIVE ORACLE RELATIVE PERFORMANCE (% DELTA)
+                        </span>
+                        <span id="tickCounterText" class="font-mono-num text-neutral-400">Tick 0 / 40</span>
+                    </div>
+                    <canvas id="liveChart" width="600" height="135" class="w-full h-[125px] bg-[#08080c] rounded-lg border border-white/10"></canvas>
+                </div>
+            </div>
+
+            <!-- TEAM B FIGHTER CARD (Right Column - 3 cols on Desktop) -->
+            <div id="teamB" class="fighter-hud-card lg:col-span-3 p-4 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-[#111] text-[#FF3366] font-extrabold text-xs uppercase tracking-wider">
+                            CORNER B (RUBY)
+                        </span>
+                        <span id="oracleBadgeB" class="text-[11px] font-bold px-2 py-0.5 rounded bg-neutral-200 text-neutral-800">
+                            BINANCE LIVE
+                        </span>
+                    </div>
+
+                    <!-- HP Bar B -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs font-extrabold mb-1">
+                            <span>ARMOR INTEGRITY</span>
+                            <span id="hpTextB" class="font-mono-num">100 / 100 HP</span>
+                        </div>
+                        <div class="w-full h-4 bg-[#111] border-2 border-black rounded-lg overflow-hidden p-0.5">
+                            <div id="hpB" class="h-full bg-gradient-to-r from-[#FF3366] to-[#FFD700] rounded transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3D Mecha Class Preview Badge B -->
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-3">
+                        <div id="miniSwatchB" class="w-12 h-12 rounded-lg border-2 border-[#FF3366] flex items-center justify-center text-2xl font-black shrink-0" style="background: #1e242b;">
+                            🦾
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div id="mechaNameB" class="font-extrabold text-sm text-[#00F0FF] truncate">Solana Vanguard V4</div>
+                            <div id="weaponNameB" class="text-xs text-neutral-300 truncate">🔨 Gravity Hammer</div>
+                            <div id="statusBuffB" class="text-[11px] text-[#FF3366] font-bold mt-0.5">Ready for Combat</div>
+                        </div>
+                    </div>
+
+                    <!-- Asset Selector Dropdown B (All 15 Vibers) -->
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mb-1">Select Fighter Asset</label>
+                    <select id="assetB" class="w-full bg-[#111] text-[#F4F1EB] border-3 border-black rounded-lg px-3 py-2.5 font-extrabold text-sm cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
+                        <optgroup label="🟢 Live Crypto (Binance API)">
+                            <option value="BTC">Bitcoin ($BTC) — Viber #1</option>
+                            <option value="ETH">Ethereum ($ETH) — Viber #2</option>
+                            <option value="SOL" selected>Solana ($SOL) — Viber #4</option>
+                            <option value="BNB">BNB Chain ($BNB) — Viber #9</option>
+                            <option value="DOGE">Dogecoin ($DOGE) — Viber #10</option>
+                        </optgroup>
+                        <optgroup label="📈 Wall Street Stocks (Yahoo Hybrid)">
+                            <option value="TSLA">Tesla ($TSLA) — Viber #5</option>
+                            <option value="AAPL">Apple ($AAPL) — Viber #6</option>
+                            <option value="NVDA">NVIDIA ($NVDA) — Viber #8</option>
+                            <option value="MSFT">Microsoft ($MSFT) — Viber #7</option>
+                            <option value="AMZN">Amazon ($AMZN) — Viber #3</option>
+                        </optgroup>
+                        <optgroup label="⚡ Synthetic Private & African Titans">
+                            <option value="SPACEX">SpaceX ($SPACEX) — Viber #11</option>
+                            <option value="DANGOTE">Dangote ($DANGOTE) — Viber #12</option>
+                            <option value="OPENAI">OpenAI ($OPENAI) — Viber #13</option>
+                            <option value="STRIPE">Stripe ($STRIPE) — Viber #14</option>
+                            <option value="ANDURIL">Anduril ($ANDURIL) — Viber #15</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Live Price & % Delta Readout B -->
+                <div class="mt-4 pt-3 border-t-2 border-black/15">
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-xs font-extrabold uppercase text-neutral-600">Live Oracle Price</span>
+                        <span id="deltaBadgeB" class="font-mono-num text-xs font-black px-2 py-0.5 rounded bg-neutral-900 text-white">0.00%</span>
+                    </div>
+                    <div id="livePriceB" class="font-mono-num text-xl sm:text-2xl font-black tracking-tight mt-0.5">$118.60</div>
+                    <div class="mt-2 flex items-center justify-between bg-[#111] text-[#FF3366] px-3 py-1.5 rounded-lg text-xs font-extrabold">
+                        <span>POOL STAKED:</span>
+                        <span class="font-mono-num"><span id="poolB">0</span> $VCT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. BOTTOM BETTING CONSOLE & LIVE PVP CHAT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <!-- Wager Console -->
+            <div id="bettingConsole" class="danfo-sheet lg:col-span-8 p-4 sm:p-5 flex flex-col justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="text-left">
+                        <h3 class="text-lg sm:text-xl font-black uppercase tracking-tight">Lock In Your Wager</h3>
+                        <p class="text-xs sm:text-sm font-semibold text-neutral-700">
+                            Pick which 3D Mecha's asset will outperform over the 60s duel (or score an early KO).
+                        </p>
+                    </div>
+                    <!-- Quick Wager Chips -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <button type="button" onclick="setQuickBet(100)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+100</button>
+                        <button type="button" onclick="setQuickBet(500)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+500</button>
+                        <button type="button" onclick="setQuickBet(1000)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+1K</button>
+                        <button type="button" onclick="setQuickBet('HALF')" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-2.5 py-1 text-xs">1/2</button>
+                        <button type="button" onclick="setQuickBet('MAX')" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1 text-xs">MAX</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 items-stretch">
+                    <div class="relative flex-1">
+                        <input type="number" id="betAmount" placeholder="Enter $VCT Wager (e.g. 500)" disabled
+                            class="w-full h-full px-4 py-3 bg-white text-[#111] border-3 border-black rounded-xl font-mono-num font-black text-base sm:text-lg shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] focus:outline-none focus:border-[#8A2BE2]">
+                    </div>
+                    <button id="placeBetBtn" disabled class="btn-neubrutal bg-[#8A2BE2] text-white px-6 py-3.5 text-base sm:text-lg uppercase tracking-wide sm:min-w-[260px]">
+                        Select a Fighter Card First
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Global Ticker / PvP Trash-Talk Box -->
+            <div class="tactile-dark lg:col-span-4 p-4 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-[#00F0FF] flex items-center gap-1.5">
+                        💬 <span id="chatBoxTitle">Arena Comms & Match Feed</span>
+                    </span>
+                    <span class="text-[11px] text-neutral-400 font-mono-num" id="chatStatusTag">Global Feed</span>
+                </div>
+                <div id="chatMessages" class="h-[105px] overflow-y-auto bg-black/80 border-2 border-white/10 rounded-lg p-2.5 text-xs flex flex-col gap-1.5 mb-2">
+                    <div class="text-neutral-400 italic">⚡ Welcome to Vibe Stock Duels 3D! Pick a fighter card to begin.</div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="chatInput" maxlength="120" placeholder="Drop battle trash-talk..."
+                        class="flex-1 px-3 py-1.5 bg-black text-white border-2 border-[#00F0FF] rounded-lg text-xs font-semibold focus:outline-none">
+                    <button id="sendChatBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-3.5 py-1.5 text-xs">
+                        Send
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Multiplayer Lobby Modal (OTP Room Code System) -->
-    <div id="multiplayerModal" class="privy-overlay hidden">
-        <div class="danfo-sheet result-card" style="max-width: 420px;">
-            <div class="privy-header" style="justify-content: flex-end; margin-bottom: -15px; width: 100%;">
-                <button id="closeMultiplayer" class="close-btn">&times;</button>
+    <!-- =======================================================================
+         MODAL 1: CREATOR LIVE ANALYTICS & TELEMETRY DASHBOARD (FIRESTORE)
+         ======================================================================= -->
+    <div id="analyticsModal" class="modal-backdrop hidden">
+        <div class="tactile-dark max-w-4xl w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto border-4 border-[#00F0FF]">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-white/15">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">📊</span>
+                    <div>
+                        <h2 class="text-xl font-black text-[#00F0FF] uppercase tracking-wide">Creator Live Telemetry & Analytics</h2>
+                        <p class="text-xs text-neutral-400">Real-time player presence, $VCT volume, asset popularity & live match stream</p>
+                    </div>
+                </div>
+                <button id="closeAnalyticsBtn" class="btn-neubrutal bg-[#FF3366] text-white px-3 py-1 text-sm">✕ Close</button>
             </div>
-            <h2 style="color: var(--vibe-cyan); margin-bottom: 5px;">PvP Duel Arena</h2>
-            <p style="margin-bottom: 18px; font-size: 0.95rem; color: #ccc;">Fast, instant Web3 duel using a 6-digit OTP.</p>
 
-            <!-- Mode Selector Tabs: Host vs Join -->
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 18px;">
-                <button id="tabHostBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--vibe-purple);">👑 Host Match</button>
-                <button id="tabJoinBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--charcoal-ink); color: #ccc;">⚡ Join with OTP</button>
+            <!-- KPI Metric Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                <div class="bg-black/70 border-2 border-[#00FF88] rounded-xl p-3">
+                    <div class="text-[11px] font-bold uppercase text-neutral-400">Active Players Now</div>
+                    <div id="kpiActivePlayers" class="font-mono-num text-2xl font-black text-[#00FF88] mt-1">1</div>
+                    <div class="text-[10px] text-emerald-400 mt-0.5">● Real-time Heartbeat</div>
+                </div>
+                <div class="bg-black/70 border-2 border-[#00F0FF] rounded-xl p-3">
+                    <div class="text-[11px] font-bold uppercase text-neutral-400">Total Duels Fought</div>
+                    <div id="kpiTotalMatches" class="font-mono-num text-2xl font-black text-[#00F0FF] mt-1">0</div>
+                    <div class="text-[10px] text-cyan-300 mt-0.5">Synced + Local Arena</div>
+                </div>
+                <div class="bg-black/70 border-2 border-[#FFD700] rounded-xl p-3">
+                    <div class="text-[11px] font-bold uppercase text-neutral-400">$VCT Volume Wagered</div>
+                    <div id="kpiTotalVolume" class="font-mono-num text-2xl font-black text-[#FFD700] mt-1">0</div>
+                    <div class="text-[10px] text-amber-300 mt-0.5">Cumulative Stakes</div>
+                </div>
+                <div class="bg-black/70 border-2 border-[#FF3366] rounded-xl p-3">
+                    <div class="text-[11px] font-bold uppercase text-neutral-400">Protocol $VCT Burned</div>
+                    <div id="kpiTotalBurned" class="font-mono-num text-2xl font-black text-[#FF3366] mt-1">0</div>
+                    <div class="text-[10px] text-rose-300 mt-0.5">5% Deflationary Fee</div>
+                </div>
             </div>
 
-            <!-- Panel 1: Host Room (Generates 6-Digit OTP) -->
-            <div id="panelHost" style="width: 100%; text-align: center;">
+            <!-- Two-Column Breakdown: Most Picked Fighters & Global Live Match Feed -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-black/60 border-2 border-white/15 rounded-xl p-4">
+                    <h3 class="text-sm font-black uppercase text-[#FFD700] mb-3">🔥 Top Picked Fighter Assets</h3>
+                    <div id="analyticsAssetBars" class="flex flex-col gap-2 text-xs">
+                        <!-- Dynamically populated progress bars -->
+                    </div>
+                </div>
+
+                <div class="bg-black/60 border-2 border-white/15 rounded-xl p-4 flex flex-col">
+                    <h3 class="text-sm font-black uppercase text-[#00F0FF] mb-3">⚡ Live Global Match Feed</h3>
+                    <div id="analyticsLiveFeed" class="flex-1 max-h-[240px] overflow-y-auto flex flex-col gap-2 text-xs font-mono-num">
+                        <!-- Dynamically populated match events -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 2: LEADERBOARD & MATCH HISTORY MODAL
+         ======================================================================= -->
+    <div id="leaderboardModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-xl w-full p-5 sm:p-6 max-h-[88vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-black/15">
+                <h2 class="text-xl font-black uppercase">🏆 Top Arena Raiders</h2>
+                <button id="closeLeaderboardBtn" class="btn-neubrutal bg-[#111] text-white px-3 py-1 text-sm">✕</button>
+            </div>
+            <div id="leaderboardList" class="flex flex-col gap-2 text-left mb-4">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 3: HYBRID CLOUD + P2P 6-DIGIT OTP MULTIPLAYER LOBBY
+         ======================================================================= -->
+    <div id="multiplayerModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-6 text-center">
+            <div class="flex justify-end -mt-2 -mr-2">
+                <button id="closeMultiplayer" class="btn-neubrutal bg-[#111] text-white px-2.5 py-0.5 text-sm">✕</button>
+            </div>
+            <h2 class="text-2xl font-black uppercase text-[#111] mb-1">⚔️ PvP Duel Lobby</h2>
+            <p class="text-xs font-bold text-neutral-700 mb-4">
+                Instant 6-Digit OTP Matchmaking (Synced via Cloud + WebRTC so it works across any network!)
+            </p>
+
+            <!-- Mode Selector Tabs -->
+            <div class="flex gap-2 mb-4">
+                <button id="tabHostBtn" class="btn-neubrutal flex-1 py-2.5 text-sm bg-[#8A2BE2] text-white">👑 Host Room</button>
+                <button id="tabJoinBtn" class="btn-neubrutal flex-1 py-2.5 text-sm bg-[#111] text-neutral-300">⚡ Join with OTP</button>
+            </div>
+
+            <!-- Host Panel -->
+            <div id="panelHost" class="w-full">
                 <div id="hostPreGenerate">
-                    <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Create an arena room and get a 6-digit OTP code to share with your opponent.</p>
-                    <button id="createRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; font-size: 1.1rem;">🎲 Generate Duel OTP ➔</button>
+                    <p class="text-xs font-semibold text-neutral-700 mb-4">
+                        Generate a 6-digit Arena OTP code and share it with your friend on WhatsApp, Discord, or X.
+                    </p>
+                    <button id="createRoomBtn" class="btn-neubrutal w-full py-3 bg-[#00F0FF] text-[#111] text-base">
+                        🎲 Generate 6-Digit OTP ➔
+                    </button>
                 </div>
-                
-                <div id="hostCodeDisplay" class="hidden" style="margin-top: 5px;">
-                    <p style="font-size: 0.85rem; color: #bbb; margin-bottom: 8px;">SHARE THIS 6-DIGIT CODE WITH YOUR FRIEND:</p>
-                    <div id="roomOtpBadge" style="font-family: monospace; font-size: 2.5rem; letter-spacing: 8px; font-weight: 900; color: var(--vibe-gold); background: #000; border: 3px solid var(--vibe-gold); padding: 12px; border-radius: 12px; margin-bottom: 12px; text-shadow: 0 0 15px rgba(255,215,0,0.4);">------</div>
-                    <button id="copyOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; margin-bottom: 12px;">📋 Copy 6-Digit Code</button>
-                    <p style="color: var(--vibe-purple); font-size: 0.9rem;" id="waitingText">⏳ Waiting for opponent to enter code...<br><span style="font-size: 0.78rem; opacity: 0.8; color: #fff;">(Keep this tab open on your screen)</span></p>
+
+                <div id="hostCodeDisplay" class="hidden mt-2">
+                    <p class="text-xs font-extrabold uppercase text-neutral-700 mb-1">Share This 6-Digit Code:</p>
+                    <div id="roomOtpBadge" class="font-mono-num text-4xl tracking-[8px] font-black text-[#FFD700] bg-[#111] border-4 border-black py-3 rounded-xl mb-3 shadow-[4px_4px_0_#8A2BE2]">
+                        ------
+                    </div>
+                    <div class="flex gap-2 mb-3">
+                        <button id="copyOtpBtn" class="btn-neubrutal flex-1 py-2.5 bg-[#00F0FF] text-[#111] text-xs">
+                            📋 Copy OTP Code
+                        </button>
+                        <button id="copyInviteLinkBtn" class="btn-neubrutal flex-1 py-2.5 bg-[#FFD700] text-[#111] text-xs">
+                            🔗 Copy Invite Link
+                        </button>
+                    </div>
+                    <p id="waitingText" class="text-xs font-bold text-purple-900 animate-pulse">
+                        ⏳ Waiting for challenger to enter code...
+                    </p>
                 </div>
             </div>
 
-            <!-- Panel 2: Join Room (Input 6-Digit OTP) -->
-            <div id="panelJoin" class="hidden" style="width: 100%; text-align: center;">
-                <p style="font-size: 0.9rem; color: #bbb; margin-bottom: 10px;">Enter the 6-digit OTP from your friend:</p>
-                <input type="text" id="joinOtpInput" maxlength="6" placeholder="000000" inputmode="numeric" style="width: 100%; font-family: monospace; font-size: 2.2rem; letter-spacing: 8px; text-align: center; font-weight: 900; padding: 12px; background: #000; color: var(--vibe-cyan); border: 3px solid var(--vibe-cyan); border-radius: 12px; margin-bottom: 15px; outline: none;">
-                <button id="joinWithOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; font-size: 1.1rem;">⚡ Connect & Fight ➔</button>
-                <p id="joinStatusText" style="margin-top: 12px; font-size: 0.85rem; color: var(--vibe-cyan);" class="hidden"></p>
+            <!-- Join Panel -->
+            <div id="panelJoin" class="hidden w-full">
+                <p class="text-xs font-extrabold uppercase text-neutral-700 mb-2">Enter Friend's 6-Digit OTP:</p>
+                <input type="text" id="joinOtpInput" maxlength="6" placeholder="000000" inputmode="numeric"
+                    class="w-full font-mono-num text-3xl tracking-[8px] text-center font-black py-3 bg-[#111] text-[#00F0FF] border-4 border-black rounded-xl mb-3 focus:outline-none">
+                <button id="joinWithOtpBtn" class="btn-neubrutal w-full py-3 bg-[#FFD700] text-[#111] text-base">
+                    ⚡ Connect & Fight ➔
+                </button>
+                <p id="joinStatusText" class="mt-2.5 text-xs font-bold text-rose-700 hidden"></p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
-    <script src="app.js"></script>
+    <!-- =======================================================================
+         MODAL 4: ROUND RESULT & ON-CHAIN ORACLE RECEIPT
+         ======================================================================= -->
+    <div id="resultModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-6 text-center">
+            <h2 id="resultTitle" class="text-2xl sm:text-3xl font-black uppercase">ROUND OVER!</h2>
+            <div id="resultIcon" class="font-mono-num text-3xl sm:text-4xl font-black my-2 px-4 py-2 rounded-xl bg-[#111] text-[#00F0FF] inline-block border-3 border-black">
+                +0 $VCT
+            </div>
+            <p id="resultMessage" class="text-sm font-bold text-neutral-800 mb-2">The Oracle has spoken.</p>
+            <div id="oracleReceipt"></div>
+            <div class="flex gap-2 mt-4">
+                <button id="shareResultBtn" class="btn-neubrutal flex-1 py-3 bg-[#00F0FF] text-[#111] text-sm">
+                    📸 Copy Brag Receipt
+                </button>
+                <button id="closeResultBtn" class="btn-neubrutal flex-1 py-3 bg-[#8A2BE2] text-white text-sm">
+                    ⚔️ Next Duel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 5: NICKNAME & TUTORIAL ONBOARDING MODALS
+         ======================================================================= -->
+    <div id="nicknameModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-sm w-full p-6 text-center">
+            <h2 class="text-2xl font-black uppercase text-[#111] mb-1">⚔️ Enter the Colosseum</h2>
+            <p class="text-xs font-semibold text-neutral-700 mb-4">Choose your Raider callsign for the global leaderboard & live telemetry feed:</p>
+            <input type="text" id="nicknameInput" maxlength="18" placeholder="e.g. Ayoola_Raider"
+                class="w-full p-3 bg-[#111] text-[#00F0FF] border-3 border-black rounded-xl mb-3 font-extrabold text-center text-base focus:outline-none">
+            <button id="saveNicknameBtn" class="btn-neubrutal w-full py-3 bg-[#00F0FF] text-[#111] text-base">
+                Enter 3D Arena ➔
+            </button>
+        </div>
+    </div>
+
+    <div id="tutorialModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-6 text-left">
+            <h2 class="text-2xl font-black uppercase text-center mb-3">⚔️ How to Duel in 3D</h2>
+            <ul class="space-y-2 text-xs sm:text-sm font-semibold text-neutral-800 mb-5">
+                <li><strong>1. 15 3D Voxel Mechas:</strong> Pick any Crypto, Wall Street Stock, or Private Titan (`$BTC`, `$NVDA`, `$DANGOTE`, `$SPACEX`) for Corner A & Corner B.</li>
+                <li><strong>2. Wager $VCT:</strong> Use the quick-bet chips (`+100`, `+500`, `MAX`) and lock in your prediction.</li>
+                <li><strong>3. 60-Second Live 3D Brawler:</strong> Every 1.5s, live market ticks drive the 3D Voxel Robots to dash across the arena and clash weapons!</li>
+                <li><strong>4. Active Overdrive Skills:</strong> Spend your **⚡ Rage Bar** mid-fight to trigger a **🛡️ 3D Hex Shield** or **⚡ 2x Leverage Strike**!</li>
+                <li><strong>5. KO or Oracle Decision:</strong> Drain the rival's HP to 0 for an explosive 3D Voxel Shatter KO, or win by highest % gain at 0s.</li>
+            </ul>
+            <button id="closeTutorialBtn" class="btn-neubrutal w-full py-3 bg-[#8A2BE2] text-white text-base">
+                Let's Fight! 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 6: PRIVY SOCIAL & METAMASK WEB3 MODAL
+         ======================================================================= -->
+    <div id="privyModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-sm w-full p-6 text-left relative">
+            <button id="closePrivy" class="btn-neubrutal bg-[#111] text-white px-2.5 py-0.5 text-xs absolute top-4 right-4">✕</button>
+            <h4 class="text-xl font-black text-[#111]">Connect Wallet or Social</h4>
+            <p class="text-xs font-bold text-neutral-600 mb-4">Instant Web2.5 Privy Wallet (+5,000 Starter $VCT) or Real Web3 MetaMask</p>
+            <div class="flex flex-col gap-2.5">
+                <button onclick="simulatePrivyLogin('Google')" class="btn-neubrutal w-full py-3 bg-white text-[#111] text-sm">
+                    🟢 Continue with Google (+5,000 $VCT)
+                </button>
+                <button onclick="simulatePrivyLogin('Discord')" class="btn-neubrutal w-full py-3 bg-[#5865F2] text-white text-sm">
+                    👾 Continue with Discord (+5,000 $VCT)
+                </button>
+                <div class="text-center text-xs font-extrabold text-neutral-500 my-1">— OR ON-CHAIN ERC-20 —</div>
+                <button id="metamaskConnectBtn" onclick="initWeb3Real()" class="btn-neubrutal w-full py-3 bg-[#111] text-[#FFD700] text-sm">
+                    🦊 Connect MetaMask ($VCT Contract)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MAIN APPLICATION LOGIC (3D ENGINE + ORACLE + FIRESTORE ANALYTICS & PVP)
+         ======================================================================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        /***********************************************************************
+         * 1. COMPLETE 15-VIBER ASSET & 3D MECHA DESIGN REGISTRY
+         * Inspired directly by viber1.webp - viber15.webp voxel characters
+         ***********************************************************************/
+        const ASSETS = {
+            BTC: {
+                name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 85420,
+                mechaTitle: "Satoshi Prime V1", weaponName: "🗡️ Cyber Broadsword", weaponType: "sword",
+                color: "#FFD700", bodyHex: 0x5c3824, visorHex: 0xe6e1d6, antennaHex: 0x76ff7a, accentHex: 0xFFD700,
+                earStyle: "horn"
+            },
+            ETH: {
+                name: "Ethereum", ticker: "$ETH", type: "crypto", base: 4480,
+                mechaTitle: "Ether Sentinel V2", weaponName: "⚔️ Dual Ether Blades", weaponType: "katana",
+                color: "#00F0FF", bodyHex: 0x3b86b6, visorHex: 0x9cff9c, antennaHex: 0x00F0FF, accentHex: 0xA855F7,
+                earStyle: "twin_eyes"
+            },
+            SOL: {
+                name: "Solana", ticker: "$SOL", type: "crypto", base: 188.60,
+                mechaTitle: "Solana Vanguard V4", weaponName: "🔨 Gravity Hammer", weaponType: "hammer",
+                color: "#FF3366", bodyHex: 0x414852, visorHex: 0xffa654, antennaHex: 0xff9d42, accentHex: 0x00F0FF,
+                earStyle: "mono_visor"
+            },
+            BNB: {
+                name: "BNB Chain", ticker: "$BNB", type: "crypto", base: 642.10,
+                mechaTitle: "Bsc Imperator V9", weaponName: "🔱 Golden Halberd", weaponType: "spear",
+                color: "#F3BA2F", bodyHex: 0x2b2820, visorHex: 0xF3BA2F, antennaHex: 0xFFD700, accentHex: 0xF3BA2F,
+                earStyle: "crest"
+            },
+            DOGE: {
+                name: "Dogecoin", ticker: "$DOGE", type: "crypto", base: 0.342,
+                mechaTitle: "Shiba Mecha V10", weaponName: "🏏 Mega Bonk Club", weaponType: "hammer",
+                color: "#EAB308", bodyHex: 0xd49b35, visorHex: 0x98f598, antennaHex: 0xffe484, accentHex: 0xfef08a,
+                earStyle: "doge_ears"
+            },
+            TSLA: {
+                name: "Tesla", ticker: "$TSLA", type: "stock", base: 377.81,
+                mechaTitle: "Cybertruck Mecha V5", weaponName: "⚡ Gigafactory Maul", weaponType: "hammer",
+                color: "#FF3366", bodyHex: 0x991b1b, visorHex: 0xff3366, antennaHex: 0x00F0FF, accentHex: 0xFF3366,
+                earStyle: "mono_visor"
+            },
+            AAPL: {
+                name: "Apple", ticker: "$AAPL", type: "stock", base: 236.67,
+                mechaTitle: "Cupertino Core V6", weaponName: "🗡️ Titanium Katana", weaponType: "katana",
+                color: "#FDFBF7", bodyHex: 0xd4a238, visorHex: 0x8ef58e, antennaHex: 0xffffff, accentHex: 0x38bdf8,
+                earStyle: "doge_ears"
+            },
+            NVDA: {
+                name: "NVIDIA", ticker: "$NVDA", type: "stock", base: 138.50,
+                mechaTitle: "Blackwell GPU V8", weaponName: "🟢 Tensor Ray-Scythe", weaponType: "sword",
+                color: "#76B900", bodyHex: 0x1a2e05, visorHex: 0x76B900, antennaHex: 0xa3e635, accentHex: 0x76B900,
+                earStyle: "crest"
+            },
+            MSFT: {
+                name: "Microsoft", ticker: "$MSFT", type: "stock", base: 468.00,
+                mechaTitle: "Azure Titan V7", weaponName: "🔨 Cloud Warhammer", weaponType: "hammer",
+                color: "#00A4EF", bodyHex: 0x1e3a8a, visorHex: 0x38bdf8, antennaHex: 0x00A4EF, accentHex: 0x60a5fa,
+                earStyle: "twin_eyes"
+            },
+            AMZN: {
+                name: "Amazon", ticker: "$AMZN", type: "stock", base: 215.00,
+                mechaTitle: "Prime Automaton V3", weaponName: "🪓 Logistics Cleaver", weaponType: "spear",
+                color: "#FF9900", bodyHex: 0xe09f7d, visorHex: 0x18181b, antennaHex: 0xdc2626, accentHex: 0xFF9900,
+                earStyle: "cross_antenna"
+            },
+            SPACEX: {
+                name: "SpaceX", ticker: "$SPACEX", type: "synth", base: 350.00,
+                mechaTitle: "Starship Mecha V11", weaponName: "🚀 Raptor Plasma Lance", weaponType: "spear",
+                color: "#38BDF8", bodyHex: 0x94a3b8, visorHex: 0x38bdf8, antennaHex: 0xf97316, accentHex: 0x38BDF8,
+                earStyle: "horn"
+            },
+            DANGOTE: {
+                name: "Dangote Ind.", ticker: "$DANGOTE", type: "synth", base: 420.50,
+                mechaTitle: "Lagos Refinery V12", weaponName: "🔨 Crude Mega-Crusher", weaponType: "hammer",
+                color: "#00FF88", bodyHex: 0x065f46, visorHex: 0xFFD700, antennaHex: 0x00FF88, accentHex: 0xFFD700,
+                earStyle: "crest"
+            },
+            OPENAI: {
+                name: "OpenAI", ticker: "$OPENAI", type: "synth", base: 510.00,
+                mechaTitle: "Omni Singularity V13", weaponName: "⚡ Neural Scepter", weaponType: "sword",
+                color: "#A855F7", bodyHex: 0x2e1065, visorHex: 0xe9d5ff, antennaHex: 0xc084fc, accentHex: 0xA855F7,
+                earStyle: "mono_visor"
+            },
+            STRIPE: {
+                name: "Stripe", ticker: "$STRIPE", type: "synth", base: 195.00,
+                mechaTitle: "PayRail Strider V14", weaponName: "🗡️ Liquidity Katana", weaponType: "katana",
+                color: "#6366F1", bodyHex: 0x312e81, visorHex: 0x00F0FF, antennaHex: 0x818cf8, accentHex: 0x00F0FF,
+                earStyle: "twin_eyes"
+            },
+            ANDURIL: {
+                name: "Anduril", ticker: "$ANDURIL", type: "synth", base: 275.00,
+                mechaTitle: "Lattice Stealth V15", weaponName: "🗡️ Autonomous Rail-Blade", weaponType: "sword",
+                color: "#F43F5E", bodyHex: 0x18181b, visorHex: 0xf43f5e, antennaHex: 0xf43f5e, accentHex: 0xfb7185,
+                earStyle: "horn"
+            }
+        };
+
+        window.ASSETS = ASSETS;
+
+        /***********************************************************************
+         * 2. RETRO 8-BIT WEB AUDIO SYNTHESIZER (ZERO EXTERNAL SOUND FILES)
+         ***********************************************************************/
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioCtx = new AudioCtx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playSfx(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'hit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(290, now);
+                    osc.frequency.exponentialRampToValueAtTime(65, now + 0.14);
+                    gain.gain.setValueAtTime(0.24, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.14);
+                } else if (type === 'crit') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(48, now + 0.28);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.28);
+                } else if (type === 'coin') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(987.77, now);
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.28);
+                } else if (type === 'shield') {
+                    [440, 554.37, 659.25].forEach((f, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = f;
+                        gain.gain.setValueAtTime(0.18, now + i * 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + 0.2);
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.2);
+                    });
+                } else if (type === 'win') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = f;
+                        const st = now + idx * 0.09;
+                        gain.gain.setValueAtTime(0.25, st);
+                        gain.gain.exponentialRampToValueAtTime(0.01, st + 0.24);
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.start(st); osc.stop(st + 0.24);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        /***********************************************************************
+         * 3. FULL 3D THREE.JS VOXEL MECHA-VIBER ARENA ENGINE
+         ***********************************************************************/
+        const mountEl = document.getElementById('threeCanvasMount');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0b0816, 0.032);
+
+        const camera = new THREE.PerspectiveCamera(42, mountEl.clientWidth / mountEl.clientHeight, 0.1, 120);
+        const CAM_PRESETS = [
+            { pos: new THREE.Vector3(0, 6.2, 11.8), look: new THREE.Vector3(0, 1.8, 0) }, // Default Broadcast Side-Angle
+            { pos: new THREE.Vector3(-4.5, 4.5, 9.5), look: new THREE.Vector3(0, 1.8, 0) }, // Dramatic Corner A
+            { pos: new THREE.Vector3(0, 13.5, 4.5), look: new THREE.Vector3(0, 0.5, 0) }  // Tactical Top-Down
+        ];
+        let currentCamIdx = 0;
+        camera.position.copy(CAM_PRESETS[0].pos);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        renderer.setSize(mountEl.clientWidth, mountEl.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        mountEl.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+        controls.minDistance = 6;
+        controls.maxDistance = 22;
+        controls.target.copy(CAM_PRESETS[0].look);
+
+        // Lighting
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1a103c, 0.85);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xfff8e7, 1.4);
+        dirLight.position.set(6, 14, 8);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        const cyanSpot = new THREE.PointLight(0x00F0FF, 2.2, 18);
+        cyanSpot.position.set(-5, 4, 2);
+        scene.add(cyanSpot);
+
+        const redSpot = new THREE.PointLight(0xFF3366, 2.2, 18);
+        redSpot.position.set(5, 4, 2);
+        scene.add(redSpot);
+
+        // Build 3D Cyber-Colosseum Platform
+        const arenaGroup = new THREE.Group();
+        scene.add(arenaGroup);
+
+        function buildCyberColosseum() {
+            // Octagonal Neon Ring Base
+            const daisGeo = new THREE.CylinderGeometry(5.8, 6.6, 0.8, 8);
+            const daisMat = new THREE.MeshStandardMaterial({ color: 0x141321, roughness: 0.6, metalness: 0.3 });
+            const dais = new THREE.Mesh(daisGeo, daisMat);
+            dais.position.y = -0.4;
+            dais.receiveShadow = true;
+            arenaGroup.add(dais);
+
+            // Glowing Neon Trim Ring
+            const ringGeo = new THREE.RingGeometry(5.35, 5.55, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 0.01;
+            arenaGroup.add(ring);
+
+            // Center VS Line
+            const lineGeo = new THREE.PlaneGeometry(0.12, 8.5);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0x8A2BE2, side: THREE.DoubleSide });
+            const centerLine = new THREE.Mesh(lineGeo, lineMat);
+            centerLine.rotation.x = -Math.PI / 2;
+            centerLine.position.y = 0.015;
+            arenaGroup.add(centerLine);
+
+            // Cyber Grid Helper
+            const grid = new THREE.GridHelper(10, 10, 0x00F0FF, 0x2b1d52);
+            grid.position.y = 0.005;
+            arenaGroup.add(grid);
+
+            // Background Cyber Pillars
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2 + Math.PI / 8;
+                const px = Math.cos(angle) * 7.8;
+                const pz = Math.sin(angle) * 7.8;
+                if (pz > 3.5) continue; // Keep front camera view unobstructed
+
+                const pilGeo = new THREE.BoxGeometry(0.65, 5.5, 0.65);
+                const pilMat = new THREE.MeshStandardMaterial({ color: 0x191829, roughness: 0.4, metalness: 0.5 });
+                const pil = new THREE.Mesh(pilGeo, pilMat);
+                pil.position.set(px, 2.2, pz);
+                pil.castShadow = true;
+
+                // Neon Strip on Pillar
+                const stripGeo = new THREE.BoxGeometry(0.12, 4.8, 0.7);
+                const stripMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x00F0FF : 0xFF3366 });
+                const strip = new THREE.Mesh(stripGeo, stripMat);
+                pil.add(strip);
+
+                arenaGroup.add(pil);
+            }
+        }
+        buildCyberColosseum();
+
+        // Helper: Add Thick Black Cartoon/Voxel Outline to any Box Mesh
+        function createVoxelBox(w, h, d, hexColor, emissiveHex = 0x000000) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshStandardMaterial({
+                color: hexColor,
+                roughness: 0.32,
+                metalness: 0.18,
+                emissive: emissiveHex,
+                emissiveIntensity: emissiveHex ? 0.45 : 0
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+
+            // Neubrutalist black voxel edge outline
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x09090b }));
+            mesh.add(line);
+            return mesh;
+        }
+
+        // Build Procedural 3D Voxel Mecha Fighter matching the user's Viber WebP designs
+        function buildVoxelViberFighter(assetKey, isLeftCorner) {
+            const cfg = ASSETS[assetKey] || ASSETS.BTC;
+            const root = new THREE.Group();
+
+            // 1. Legs (Left & Right Pivots)
+            const leftLegPivot = new THREE.Group();
+            leftLegPivot.position.set(-0.28, 0.65, 0);
+            const leftLeg = createVoxelBox(0.38, 0.65, 0.42, 0x27272a);
+            leftLeg.position.y = -0.32;
+            const leftBoot = createVoxelBox(0.42, 0.22, 0.52, 0x111111);
+            leftBoot.position.set(0, -0.55, 0.05);
+            leftLegPivot.add(leftLeg, leftBoot);
+
+            const rightLegPivot = new THREE.Group();
+            rightLegPivot.position.set(0.28, 0.65, 0);
+            const rightLeg = createVoxelBox(0.38, 0.65, 0.42, 0x27272a);
+            rightLeg.position.y = -0.32;
+            const rightBoot = createVoxelBox(0.42, 0.22, 0.52, 0x111111);
+            rightBoot.position.set(0, -0.55, 0.05);
+            rightLegPivot.add(rightLeg, rightBoot);
+
+            root.add(leftLegPivot, rightLegPivot);
+
+            // 2. Blocky Torso & Glowing Core
+            const torso = createVoxelBox(1.05, 0.92, 0.72, cfg.bodyHex);
+            torso.position.y = 1.12;
+            const corePlate = createVoxelBox(0.55, 0.48, 0.12, 0x18181b);
+            corePlate.position.set(0, 0, 0.36);
+            const coreGem = createVoxelBox(0.24, 0.24, 0.16, cfg.accentHex, cfg.accentHex);
+            coreGem.position.set(0, 0, 0.38);
+            torso.add(corePlate, coreGem);
+            root.add(torso);
+
+            // 3. Oversized Voxel Head (Signature Viber Proportions)
+            const headGroup = new THREE.Group();
+            headGroup.position.y = 2.15;
+            const cranium = createVoxelBox(1.32, 1.12, 1.08, cfg.bodyHex);
+            headGroup.add(cranium);
+
+            // Visor / Eyes Variation based on Viber WebP art
+            if (cfg.earStyle === 'twin_eyes' || cfg.earStyle === 'doge_ears') {
+                const frameL = createVoxelBox(0.46, 0.52, 0.14, 0x111111);
+                frameL.position.set(-0.32, 0.02, 0.52);
+                const pupilL = createVoxelBox(0.24, 0.28, 0.16, cfg.visorHex, cfg.visorHex);
+                pupilL.position.set(-0.32, 0.02, 0.54);
+
+                const frameR = createVoxelBox(0.46, 0.52, 0.14, 0x111111);
+                frameR.position.set(0.32, 0.02, 0.52);
+                const pupilR = createVoxelBox(0.24, 0.28, 0.16, cfg.visorHex, cfg.visorHex);
+                pupilR.position.set(0.32, 0.02, 0.54);
+
+                headGroup.add(frameL, pupilL, frameR, pupilR);
+            } else {
+                // Wide Cyber Visor (Viber #1 & #4 style)
+                const visorFrame = createVoxelBox(1.18, 0.46, 0.16, 0x111111);
+                visorFrame.position.set(0, 0.04, 0.52);
+                const visorGlow = createVoxelBox(0.96, 0.32, 0.18, cfg.visorHex, cfg.visorHex);
+                visorGlow.position.set(0, 0.04, 0.53);
+                headGroup.add(visorFrame, visorGlow);
+            }
+
+            // Ear / Antenna Variations
+            const antennaStem = createVoxelBox(0.16, 0.48, 0.16, 0x111111);
+            antennaStem.position.set(0, 0.78, 0);
+            const antennaTip = createVoxelBox(0.22, 0.22, 0.22, cfg.antennaHex, cfg.antennaHex);
+            antennaTip.position.set(0, 1.06, 0);
+            headGroup.add(antennaStem, antennaTip);
+
+            if (cfg.earStyle === 'doge_ears') {
+                const earL = createVoxelBox(0.38, 0.44, 0.44, cfg.bodyHex);
+                earL.position.set(-0.78, 0.35, 0);
+                const earR = createVoxelBox(0.38, 0.44, 0.44, cfg.bodyHex);
+                earR.position.set(0.78, 0.35, 0);
+                headGroup.add(earL, earR);
+            } else if (cfg.earStyle === 'cross_antenna') {
+                const crossBar = createVoxelBox(0.52, 0.14, 0.16, cfg.antennaHex, cfg.antennaHex);
+                crossBar.position.set(0, 0.92, 0);
+                headGroup.add(crossBar);
+            }
+
+            root.add(headGroup);
+
+            // 4. Articulated Left & Right Arms + 3D Voxel Weapon
+            const leftArmPivot = new THREE.Group();
+            leftArmPivot.position.set(-0.72, 1.45, 0);
+            const leftArm = createVoxelBox(0.34, 0.75, 0.34, cfg.bodyHex);
+            leftArm.position.y = -0.32;
+            leftArmPivot.add(leftArm);
+
+            const rightArmPivot = new THREE.Group();
+            rightArmPivot.position.set(0.72, 1.45, 0);
+            const rightArm = createVoxelBox(0.34, 0.75, 0.34, cfg.bodyHex);
+            rightArm.position.y = -0.32;
+            rightArmPivot.add(rightArm);
+
+            // Build 3D Weapon attached to the front-facing hand
+            const weaponGroup = new THREE.Group();
+            weaponGroup.position.set(0, -0.62, 0.25);
+
+            const hilt = createVoxelBox(0.12, 0.12, 0.65, 0x27272a);
+            weaponGroup.add(hilt);
+
+            if (cfg.weaponType === 'hammer') {
+                const shaft = createVoxelBox(0.12, 1.25, 0.12, 0x52525b);
+                shaft.position.set(0, 0.55, 0.2);
+                const mallet = createVoxelBox(0.55, 0.42, 0.82, cfg.accentHex, cfg.accentHex);
+                mallet.position.set(0, 1.18, 0.2);
+                weaponGroup.add(shaft, mallet);
+            } else if (cfg.weaponType === 'spear') {
+                const pole = createVoxelBox(0.1, 1.65, 0.1, 0x71717a);
+                pole.position.set(0, 0.7, 0.2);
+                const tip = createVoxelBox(0.24, 0.52, 0.14, cfg.accentHex, cfg.accentHex);
+                tip.position.set(0, 1.6, 0.2);
+                weaponGroup.add(pole, tip);
+            } else {
+                // Cyber Broadsword / Katana
+                const guard = createVoxelBox(0.42, 0.12, 0.22, 0xFFD700);
+                guard.position.set(0, 0.15, 0.2);
+                const blade = createVoxelBox(0.1, 1.38, 0.24, cfg.accentHex, cfg.accentHex);
+                blade.position.set(0, 0.88, 0.2);
+                weaponGroup.add(guard, blade);
+            }
+
+            rightArmPivot.add(weaponGroup);
+            root.add(leftArmPivot, rightArmPivot);
+
+            // 5. 3D Hex Forcefield Dome (Hidden unless Shield Wall skill is active)
+            const shieldGeo = new THREE.IcosahedronGeometry(1.95, 1);
+            const shieldMat = new THREE.MeshBasicMaterial({
+                color: 0x00F0FF,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.0
+            });
+            const shieldDome = new THREE.Mesh(shieldGeo, shieldMat);
+            shieldDome.position.y = 1.4;
+            root.add(shieldDome);
+
+            // 6. 2x Leverage Overdrive Aura Ring (Hidden unless Overdrive skill is active)
+            const auraGeo = new THREE.TorusGeometry(1.15, 0.08, 8, 24);
+            const auraMat = new THREE.MeshBasicMaterial({
+                color: 0xFFD700,
+                transparent: true,
+                opacity: 0.0
+            });
+            const auraRing = new THREE.Mesh(auraGeo, auraMat);
+            auraRing.rotation.x = Math.PI / 2;
+            auraRing.position.y = 0.15;
+            root.add(auraRing);
+
+            // Position & Face Opponent
+            const homeX = isLeftCorner ? -2.45 : 2.45;
+            root.position.set(homeX, 0, 0);
+            root.rotation.y = isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
+
+            root.userData = {
+                assetKey,
+                isLeftCorner,
+                homeX,
+                headGroup,
+                torso,
+                leftArmPivot,
+                rightArmPivot,
+                leftLegPivot,
+                rightLegPivot,
+                weaponGroup,
+                shieldDome,
+                auraRing,
+                phase: isLeftCorner ? 0 : Math.PI,
+                isKO: false,
+                victorySpin: false
+            };
+
+            return root;
+        }
+
+        let fighterMeshA = null;
+        let fighterMeshB = null;
+        const voxelParticles = []; // 3D Hit Sparks & KO Voxel Shatter Blocks
+        let active3DStrike = null; // Current dash-and-slash animation state
+
+        function spawnFightersIn3D(keyA, keyB) {
+            if (fighterMeshA) scene.remove(fighterMeshA);
+            if (fighterMeshB) scene.remove(fighterMeshB);
+            fighterMeshA = buildVoxelViberFighter(keyA, true);
+            fighterMeshB = buildVoxelViberFighter(keyB, false);
+            scene.add(fighterMeshA, fighterMeshB);
+        }
+
+        // Spawn 3D Voxel Sparks on Weapon Impact or Full KO Explosion
+        function spawn3DVoxelBurst(worldPos, hexColor, count = 18, isKOExplosion = false) {
+            for (let i = 0; i < count; i++) {
+                const sz = isKOExplosion ? (0.14 + Math.random() * 0.22) : (0.08 + Math.random() * 0.12);
+                const cube = createVoxelBox(sz, sz, sz, hexColor, hexColor);
+                cube.position.set(
+                    worldPos.x + (Math.random() - 0.5) * 0.8,
+                    worldPos.y + 0.8 + Math.random() * 1.2,
+                    worldPos.z + (Math.random() - 0.5) * 0.8
+                );
+                const speed = isKOExplosion ? (3.5 + Math.random() * 5.5) : (2.0 + Math.random() * 3.8);
+                const angle = Math.random() * Math.PI * 2;
+                const vel = new THREE.Vector3(
+                    Math.cos(angle) * speed,
+                    2.5 + Math.random() * (isKOExplosion ? 5.5 : 3.2),
+                    Math.sin(angle) * speed
+                );
+                scene.add(cube);
+                voxelParticles.push({
+                    mesh: cube,
+                    vel,
+                    age: 0,
+                    maxAge: isKOExplosion ? 2.4 : 0.85
+                });
+            }
+        }
+
+        // Trigger 3D Dash, Weapon Slash & Knockback Animation
+        function trigger3DCombatClash(attackerSide, isCrit, damageDealt, blockedByShield) {
+            if (!fighterMeshA || !fighterMeshB) return;
+            const attacker = attackerSide === 'A' ? fighterMeshA : fighterMeshB;
+            const defender = attackerSide === 'A' ? fighterMeshB : fighterMeshA;
+            const startX = attacker.userData.homeX;
+            const targetX = defender.userData.homeX + (attackerSide === 'A' ? -1.15 : 1.15);
+
+            active3DStrike = {
+                attacker,
+                defender,
+                attackerSide,
+                startX,
+                targetX,
+                isCrit,
+                damageDealt,
+                blockedByShield,
+                elapsed: 0,
+                duration: 0.62,
+                impactTriggered: false
+            };
+        }
+
+        // Project 3D Fighter Head Coordinates to 2D Floating Nameplates
+        function update3DNameplates() {
+            if (!fighterMeshA || !fighterMeshB) return;
+            const pairs = [
+                { mesh: fighterMeshA, el: document.getElementById('label3dA') },
+                { mesh: fighterMeshB, el: document.getElementById('label3dB') }
+            ];
+            const width = mountEl.clientWidth;
+            const height = mountEl.clientHeight;
+
+            pairs.forEach(({ mesh, el }) => {
+                if (!el) return;
+                const pos = new THREE.Vector3();
+                mesh.getWorldPosition(pos);
+                pos.y += 3.35; // Above antenna
+                pos.project(camera);
+                const x = (pos.x * 0.5 + 0.5) * width;
+                const y = (-(pos.y * 0.5) + 0.5) * height;
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+            });
+        }
+
+        // Main Three.js Animation Loop
+        const clock = new THREE.Clock();
+        function animate3DArena() {
+            requestAnimationFrame(animate3DArena);
+            const dt = Math.min(clock.getDelta(), 0.1);
+            const t = clock.getElapsedTime();
+
+            // 1. Fighter Idle Breathing, Shield & Aura Visuals
+            [fighterMeshA, fighterMeshB].forEach((f, idx) => {
+                if (!f) return;
+                const ud = f.userData;
+
+                if (ud.isKO) {
+                    // Collapsed KO state on arena floor
+                    f.rotation.z = THREE.MathUtils.lerp(f.rotation.z, ud.isLeftCorner ? Math.PI / 2.2 : -Math.PI / 2.2, dt * 6);
+                    f.position.y = THREE.MathUtils.lerp(f.position.y, 0.35, dt * 6);
+                } else if (ud.victorySpin) {
+                    // Winner 360 jump celebration
+                    f.rotation.y += dt * 5.5;
+                    f.position.y = Math.abs(Math.sin(t * 6)) * 0.65;
+                    ud.rightArmPivot.rotation.x = -Math.PI * 0.75;
+                } else if (!active3DStrike) {
+                    // Normal combat ready stance
+                    f.rotation.z = 0;
+                    f.rotation.y = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
+                    f.position.y = Math.abs(Math.sin(t * 3.5 + ud.phase)) * 0.08;
+                    ud.headGroup.position.y = 2.15 + Math.sin(t * 3.5 + ud.phase) * 0.04;
+                    ud.rightArmPivot.rotation.x = -0.35 + Math.sin(t * 4 + ud.phase) * 0.18;
+                    ud.leftArmPivot.rotation.x = 0.2 - Math.sin(t * 4 + ud.phase) * 0.15;
+                }
+
+                // Shield Dome & Overdrive Aura animations
+                const side = idx === 0 ? 'A' : 'B';
+                const hasShield = (side === 'A' && shieldTicksA > 0) || (side === 'B' && shieldTicksB > 0);
+                const hasLeverage = (side === 'A' && leverageTicksA > 0) || (side === 'B' && leverageTicksB > 0);
+
+                ud.shieldDome.material.opacity = hasShield ? (0.32 + Math.sin(t * 8) * 0.1) : 0;
+                ud.shieldDome.rotation.y += dt * 1.5;
+
+                ud.auraRing.material.opacity = hasLeverage ? (0.75 + Math.sin(t * 10) * 0.2) : 0;
+                ud.auraRing.scale.setScalar(hasLeverage ? (1 + Math.sin(t * 12) * 0.08) : 1);
+            });
+
+            // 2. Step Active 3D Dash & Weapon Slash Animation
+            if (active3DStrike) {
+                active3DStrike.elapsed += dt;
+                const p = Math.min(1, active3DStrike.elapsed / active3DStrike.duration);
+                const { attacker, defender, startX, targetX, isCrit, blockedByShield, attackerSide } = active3DStrike;
+
+                if (p < 0.45) {
+                    // Dash forward & wind up weapon
+                    const dashT = p / 0.45;
+                    attacker.position.x = THREE.MathUtils.lerp(startX, targetX, dashT);
+                    attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.85 : 0.35);
+                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.1, dashT);
+                } else if (p < 0.65) {
+                    // Violent downward weapon cleave!
+                    const strikeT = (p - 0.45) / 0.2;
+                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.1, 0.65, strikeT);
+
+                    if (!active3DStrike.impactTriggered) {
+                        active3DStrike.impactTriggered = true;
+                        const defPos = defender.position.clone();
+                        const sparkHex = blockedByShield ? 0x00F0FF : (isCrit ? 0xFFD700 : 0xFF3366);
+                        spawn3DVoxelBurst(defPos, sparkHex, isCrit ? 28 : 14, false);
+
+                        if (isCrit && !blockedByShield) {
+                            const wrap = document.getElementById('arena-3d-wrapper');
+                            wrap.classList.remove('shake-crit');
+                            void wrap.offsetWidth;
+                            wrap.classList.add('shake-crit');
+                        }
+                    }
+                    // Defender recoil knockback
+                    defender.position.x = defender.userData.homeX + (attackerSide === 'A' ? 0.42 : -0.42);
+                } else {
+                    // Return back to home stance
+                    const backT = (p - 0.65) / 0.35;
+                    attacker.position.x = THREE.MathUtils.lerp(targetX, startX, backT);
+                    attacker.position.y = 0;
+                    defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX, backT);
+                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(0.65, -0.35, backT);
+                }
+
+                if (p >= 1) {
+                    attacker.position.x = startX;
+                    defender.position.x = defender.userData.homeX;
+                    active3DStrike = null;
+                }
+            }
+
+            // 3. Step 3D Voxel Sparks & Shatter Debris Physics
+            for (let i = voxelParticles.length - 1; i >= 0; i--) {
+                const pt = voxelParticles[i];
+                pt.age += dt;
+                pt.vel.y -= 14.5 * dt; // Gravity
+                pt.mesh.position.addScaledVector(pt.vel, dt);
+                pt.mesh.rotation.x += 6 * dt;
+                pt.mesh.rotation.y += 6 * dt;
+
+                if (pt.mesh.position.y < 0.1) {
+                    pt.mesh.position.y = 0.1;
+                    pt.vel.y *= -0.45;
+                    pt.vel.x *= 0.75;
+                    pt.vel.z *= 0.75;
+                }
+
+                if (pt.age >= pt.maxAge) {
+                    scene.remove(pt.mesh);
+                    voxelParticles.splice(i, 1);
+                }
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+            update3DNameplates();
+        }
+
+        window.addEventListener('resize', () => {
+            if (!mountEl) return;
+            camera.aspect = mountEl.clientWidth / mountEl.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(mountEl.clientWidth, mountEl.clientHeight);
+        });
+
+        document.getElementById('camToggleBtn').addEventListener('click', () => {
+            currentCamIdx = (currentCamIdx + 1) % CAM_PRESETS.length;
+            camera.position.copy(CAM_PRESETS[currentCamIdx].pos);
+            controls.target.copy(CAM_PRESETS[currentCamIdx].look);
+            playSfx('coin');
+        });
+
+        /***********************************************************************
+         * 4. FIREBASE BACKEND: LIVE CREATOR ANALYTICS & CLOUD MULTIPLAYER
+         ***********************************************************************/
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-stock-duels-3d';
+
+        // Local + Cloud Aggregated Analytics State
+        let telemetryState = {
+            activePlayers: 1,
+            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '18'),
+            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '42500'),
+            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '2125'),
+            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || '{"BTC":14,"SOL":11,"NVDA":9,"TSLA":7,"DANGOTE":6,"ETH":6,"SPACEX":5}'),
+            recentMatches: [
+                { winner: "Satoshi_NG", assetWin: "$BTC", assetLose: "$SOL", payout: 975, time: "Just now" },
+                { winner: "LagosWhale", assetWin: "$DANGOTE", assetLose: "$TSLA", payout: 1950, time: "1m ago" },
+                { winner: "CyberRaider", assetWin: "$NVDA", assetLose: "$AAPL", payout: 487, time: "3m ago" }
+            ]
+        };
+
+        async function initFirebaseBackend() {
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                    renderAnalyticsDashboard();
+                    return;
+                }
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, async (user) => {
+                    currentUser = user;
+                    if (user) {
+                        registerPlayerPresence(user.uid);
+                        subscribeToGlobalAnalytics();
+                    }
+                });
+            } catch (e) {
+                console.warn("Running in standalone local telemetry mode:", e);
+                renderAnalyticsDashboard();
+            }
+        }
+
+        async function registerPlayerPresence(uid) {
+            if (!db || !currentUser) return;
+            try {
+                const presRef = doc(db, 'artifacts', appId, 'public', 'data', 'presence', uid);
+                await setDoc(presRef, {
+                    uid,
+                    nickname: playerNickname || 'Raider',
+                    balance: userBalance,
+                    streak: winStreak,
+                    lastSeen: Date.now()
+                }, { merge: true });
+
+                // Update heartbeat every 25s
+                setInterval(() => {
+                    if (currentUser) {
+                        setDoc(presRef, {
+                            nickname: playerNickname || 'Raider',
+                            balance: userBalance,
+                            streak: winStreak,
+                            lastSeen: Date.now()
+                        }, { merge: true }).catch(() => {});
+                    }
+                }, 25000);
+            } catch (e) {}
+        }
+
+        function subscribeToGlobalAnalytics() {
+            if (!db || !currentUser) return;
+
+            // 1. Listen to Active Players & Leaderboard
+            const presCol = collection(db, 'artifacts', appId, 'public', 'data', 'presence');
+            onSnapshot(presCol, (snap) => {
+                const now = Date.now();
+                const players = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    players.push(data);
+                });
+                const recentActive = players.filter(p => (now - (p.lastSeen || 0)) < 120000).length;
+                telemetryState.activePlayers = Math.max(1, recentActive);
+                document.getElementById('onlineCount').innerText = (1420 + telemetryState.activePlayers).toLocaleString();
+                renderLeaderboardList(players);
+                renderAnalyticsDashboard();
+            }, (err) => console.warn("Presence listener warning:", err));
+
+            // 2. Listen to Global Match Feed
+            const matchesCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_logs');
+            onSnapshot(matchesCol, (snap) => {
+                const logs = [];
+                let vol = 42500;
+                let burned = 2125;
+                const picks = { BTC: 14, SOL: 11, NVDA: 9, TSLA: 7, DANGOTE: 6, ETH: 6, SPACEX: 5 };
+
+                snap.forEach(d => {
+                    const m = d.data();
+                    logs.push(m);
+                    vol += Number(m.wager || 0);
+                    burned += Math.floor(Number(m.wager || 0) * 0.05);
+                    if (m.assetA) picks[m.assetA] = (picks[m.assetA] || 0) + 1;
+                    if (m.assetB) picks[m.assetB] = (picks[m.assetB] || 0) + 1;
+                });
+
+                logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                if (logs.length > 0) {
+                    telemetryState.totalMatches = 18 + logs.length;
+                    telemetryState.totalVolume = vol;
+                    telemetryState.totalBurned = burned;
+                    telemetryState.assetPicks = picks;
+                    telemetryState.recentMatches = logs.slice(0, 12).map(m => ({
+                        winner: m.player || 'Raider',
+                        assetWin: `$${m.winnerAsset}`,
+                        assetLose: `$${m.loserAsset}`,
+                        payout: m.payout || 0,
+                        won: m.playerWon,
+                        time: new Date(m.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                    }));
+                }
+                renderAnalyticsDashboard();
+            }, (err) => console.warn("Matches listener warning:", err));
+        }
+
+        async function recordMatchTelemetry(matchData) {
+            // Always update local storage immediately
+            telemetryState.totalMatches++;
+            telemetryState.totalVolume += matchData.wager;
+            telemetryState.totalBurned += Math.floor(matchData.wager * 0.05);
+            telemetryState.assetPicks[matchData.assetA] = (telemetryState.assetPicks[matchData.assetA] || 0) + 1;
+            telemetryState.assetPicks[matchData.assetB] = (telemetryState.assetPicks[matchData.assetB] || 0) + 1;
+
+            localStorage.setItem('vibe_total_matches', telemetryState.totalMatches);
+            localStorage.setItem('vibe_total_volume', telemetryState.totalVolume);
+            localStorage.setItem('vibe_total_burned', telemetryState.totalBurned);
+            localStorage.setItem('vibe_asset_picks', JSON.stringify(telemetryState.assetPicks));
+
+            telemetryState.recentMatches.unshift({
+                winner: matchData.player,
+                assetWin: `$${matchData.winnerAsset}`,
+                assetLose: `$${matchData.loserAsset}`,
+                payout: matchData.payout,
+                won: matchData.playerWon,
+                time: "Just now"
+            });
+            renderAnalyticsDashboard();
+
+            // Broadcast to Global Arena Feed
+            appendChatMessage(
+                "📡 ORACLE",
+                `${matchData.player} ${matchData.playerWon ? 'WON +' + matchData.payout + ' $VCT' : 'fought hard'} in $${matchData.assetA} vs $${matchData.assetB}!`,
+                "#FFD700"
+            );
+
+            // Persist to Cloud Firestore if connected
+            if (db && currentUser) {
+                try {
+                    const matchesCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_logs');
+                    await addDoc(matchesCol, {
+                        ...matchData,
+                        uid: currentUser.uid,
+                        timestamp: Date.now()
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function renderAnalyticsDashboard() {
+            document.getElementById('kpiActivePlayers').innerText = telemetryState.activePlayers;
+            document.getElementById('kpiTotalMatches').innerText = telemetryState.totalMatches.toLocaleString();
+            document.getElementById('kpiTotalVolume').innerText = telemetryState.totalVolume.toLocaleString() + ' $VCT';
+            document.getElementById('kpiTotalBurned').innerText = telemetryState.totalBurned.toLocaleString() + ' $VCT';
+
+            // Top Picked Assets Bars
+            const barsEl = document.getElementById('analyticsAssetBars');
+            const entries = Object.entries(telemetryState.assetPicks).sort((a, b) => b[1] - a[1]).slice(0, 7);
+            const maxPick = Math.max(1, ...entries.map(e => e[1]));
+
+            barsEl.innerHTML = entries.map(([key, count]) => {
+                const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
+                const pct = Math.round((count / maxPick) * 100);
+                return `
+                    <div>
+                        <div class="flex justify-between font-bold mb-0.5">
+                            <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
+                            <span class="font-mono-num text-neutral-300">${count} picks</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-black rounded-full overflow-hidden border border-white/10">
+                            <div class="h-full rounded-full" style="width:${pct}%; background:${cfg.color}"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Live Match Feed
+            const feedEl = document.getElementById('analyticsLiveFeed');
+            feedEl.innerHTML = telemetryState.recentMatches.map(m => `
+                <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
+                    <div>
+                        <span class="font-bold text-[#00F0FF]">${escapeHtml(m.winner)}</span>
+                        <span class="text-neutral-300"> duelled </span>
+                        <span class="font-bold text-[#FFD700]">${escapeHtml(m.assetWin)}</span>
+                        <span class="text-neutral-400"> vs ${escapeHtml(m.assetLose)}</span>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="font-bold ${m.payout > 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
+                            ${m.payout > 0 ? '+' + m.payout + ' $VCT' : 'KO Loss'}
+                        </div>
+                        <div class="text-[10px] text-neutral-500">${escapeHtml(m.time)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLeaderboardList(cloudPlayers = []) {
+            const listEl = document.getElementById('leaderboardList');
+            const defaultRaiders = [
+                { nickname: "Satoshi_Prime", balance: 18450, streak: 5 },
+                { nickname: "Lagos_Whale", balance: 14200, streak: 3 },
+                { nickname: "Vibe_Archmage", balance: 9800, streak: 2 },
+                { nickname: playerNickname || "You (Raider)", balance: userBalance, streak: winStreak }
+            ];
+
+            const merged = [...cloudPlayers, ...defaultRaiders];
+            const uniqueMap = new Map();
+            merged.forEach(p => {
+                if (!p.nickname) return;
+                if (!uniqueMap.has(p.nickname) || uniqueMap.get(p.nickname).balance < p.balance) {
+                    uniqueMap.set(p.nickname, p);
+                }
+            });
+
+            const sorted = Array.from(uniqueMap.values()).sort((a, b) => (b.balance || 0) - (a.balance || 0)).slice(0, 8);
+            listEl.innerHTML = sorted.map((p, idx) => `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#111] text-white border-2 border-black">
+                    <div class="flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-lg bg-[#8A2BE2] text-white font-black flex items-center justify-center text-xs">
+                            #${idx + 1}
+                        </span>
+                        <div>
+                            <div class="font-extrabold text-sm text-[#00F0FF]">${escapeHtml(p.nickname)}</div>
+                            <div class="text-[11px] text-amber-400 font-bold">🔥 ${p.streak || 0} Win Streak</div>
+                        </div>
+                    </div>
+                    <div class="font-mono-num font-black text-base text-[#FFD700]">
+                        ${Number(p.balance || 0).toLocaleString()} $VCT
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, s => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[s]));
+        }
+
+        /***********************************************************************
+         * 5. GAME STATE, UNIFIED TIMER, UNBIASED ORACLE & COMBAT LOOP
+         ***********************************************************************/
+        const selectA = document.getElementById('assetA');
+        const selectB = document.getElementById('assetB');
+        const teamACard = document.getElementById('teamA');
+        const teamBCard = document.getElementById('teamB');
+        const betInput = document.getElementById('betAmount');
+        const placeBetBtn = document.getElementById('placeBetBtn');
+        const countdownEl = document.getElementById('countdown');
+        const chartCanvas = document.getElementById('liveChart');
+        const chartCtx = chartCanvas.getContext('2d');
+
+        let playerNickname = localStorage.getItem('vibe_stock_nickname') || '';
+        let userWallet = localStorage.getItem('vibe_wallet_addr') || '0xVibe...3D99';
+        let userBalance = parseInt(localStorage.getItem('vibe_vct_balance') || '5000');
+        let winStreak = parseInt(localStorage.getItem('vibe_win_streak') || '0');
+        let isSimulated = true;
+        let vctContract = null;
+
+        let selectedTeam = null;
+        let roundLocked = false;
+        let currentBet = 0;
+        let timer = 60;
+        let tickCount = 0;
+        const TOTAL_TICKS = 40; // 40 ticks * 1.5s = 60s
+
+        let unifiedClockInterval = null;
+        let oracleTickInterval = null;
+
+        // Oracle Prices & Histories
+        let startPriceA = 0, startPriceB = 0;
+        let currentPriceA = 0, currentPriceB = 0;
+        let prevPriceA = 0, prevPriceB = 0;
+        let historyA = [0], historyB = [0];
+
+        // Combat HP & Active Overdrive Skills
+        let hpA = 100, hpB = 100;
+        let playerRage = 0; // 0 to 100%
+        let shieldTicksA = 0, shieldTicksB = 0;
+        let leverageTicksA = 0, leverageTicksB = 0;
+
+        function savePlayerState() {
+            localStorage.setItem('vibe_vct_balance', userBalance);
+            localStorage.setItem('vibe_win_streak', winStreak);
+            document.getElementById('balancePill').innerText = `${Number(userBalance).toLocaleString()} $VCT`;
+            document.getElementById('streakDisplay').innerText = winStreak;
+        }
+
+        // Update Fighter Card UI & Rebuild 3D Voxel Fighter when dropdown changes
+        function syncFighterSelectionUI() {
+            const cfgA = ASSETS[selectA.value];
+            const cfgB = ASSETS[selectB.value];
+
+            document.getElementById('mechaNameA').innerText = cfgA.mechaTitle;
+            document.getElementById('weaponNameA').innerText = cfgA.weaponName;
+            document.getElementById('miniSwatchA').style.background = cfgA.color;
+            document.getElementById('oracleBadgeA').innerText = cfgA.type === 'crypto' ? 'BINANCE LIVE' : (cfgA.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
+            document.getElementById('livePriceA').innerText = `$${cfgA.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('labelTickerA').innerText = cfgA.ticker;
+
+            document.getElementById('mechaNameB').innerText = cfgB.mechaTitle;
+            document.getElementById('weaponNameB').innerText = cfgB.weaponName;
+            document.getElementById('miniSwatchB').style.background = cfgB.color;
+            document.getElementById('oracleBadgeB').innerText = cfgB.type === 'crypto' ? 'BINANCE LIVE' : (cfgB.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
+            document.getElementById('livePriceB').innerText = `$${cfgB.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('labelTickerB').innerText = cfgB.ticker;
+
+            spawnFightersIn3D(selectA.value, selectB.value);
+            drawTelemetryChart();
+
+            if (selectedTeam) {
+                const activeTicker = selectedTeam === 'A' ? cfgA.ticker : cfgB.ticker;
+                placeBetBtn.innerText = `⚔️ Lock Bet on ${activeTicker}`;
+            }
+        }
+
+        selectA.addEventListener('change', (e) => {
+            e.stopPropagation();
+            if (roundLocked) return;
+            syncFighterSelectionUI();
+            broadcastMultiplayerSelection('A', selectA.value);
+        });
+
+        selectB.addEventListener('change', (e) => {
+            e.stopPropagation();
+            if (roundLocked) return;
+            syncFighterSelectionUI();
+            broadcastMultiplayerSelection('B', selectB.value);
+        });
+
+        // Fighter Card Selection
+        teamACard.addEventListener('click', (e) => {
+            if (e.target.tagName === 'SELECT') return;
+            selectTeam('A');
+        });
+        teamBCard.addEventListener('click', (e) => {
+            if (e.target.tagName === 'SELECT') return;
+            selectTeam('B');
+        });
+
+        function selectTeam(team) {
+            if (roundLocked) return;
+            if (isMultiplayer) {
+                if (isHost && team === 'B') return;
+                if (!isHost && team === 'A') return;
+            }
+            selectedTeam = team;
+            playSfx('coin');
+
+            if (team === 'A') {
+                teamACard.classList.add('selected-a');
+                teamBCard.classList.remove('selected-b');
+            } else {
+                teamBCard.classList.add('selected-b');
+                teamACard.classList.remove('selected-a');
+            }
+
+            betInput.disabled = false;
+            placeBetBtn.disabled = false;
+            if (!betInput.value) betInput.value = Math.min(500, userBalance);
+            const ticker = team === 'A' ? ASSETS[selectA.value].ticker : ASSETS[selectB.value].ticker;
+            placeBetBtn.innerText = `⚔️ Lock Bet on ${ticker}`;
+            document.getElementById('arenaCenterBanner').innerText = `${ticker} Selected — Ready to Lock!`;
+        }
+
+        // Quick-Bet Chips
+        window.setQuickBet = function(val) {
+            if (roundLocked) return;
+            if (!selectedTeam) selectTeam('A');
+            playSfx('coin');
+            let current = parseInt(betInput.value) || 0;
+            if (val === 'MAX') betInput.value = userBalance;
+            else if (val === 'HALF') betInput.value = Math.max(10, Math.floor(userBalance / 2));
+            else betInput.value = Math.min(userBalance, current + val);
+        };
+
+        // Random Matchup Shuffle
+        document.getElementById('shuffleMatchupBtn').addEventListener('click', () => {
+            if (roundLocked) return;
+            playSfx('coin');
+            const keys = Object.keys(ASSETS);
+            let rA = keys[Math.floor(Math.random() * keys.length)];
+            let rB = keys[Math.floor(Math.random() * keys.length)];
+            while (rB === rA) rB = keys[Math.floor(Math.random() * keys.length)];
+
+            if (!isMultiplayer || isHost) {
+                selectA.value = rA;
+                broadcastMultiplayerSelection('A', rA);
+            }
+            if (!isMultiplayer || !isHost) {
+                selectB.value = rB;
+                broadcastMultiplayerSelection('B', rB);
+            }
+            syncFighterSelectionUI();
+        });
+
+        // Unbiased Hybrid Oracle (Binance Live + Yahoo Finance + Zero-Drift Synthetic Volatility)
+        async function fetchAssetPrice(assetKey, lastPrice = 0) {
+            const asset = ASSETS[assetKey];
+            if (asset.type === 'crypto') {
+                try {
+                    const controller = new AbortController();
+                    const tid = setTimeout(() => controller.abort(), 1600);
+                    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${assetKey}USDT`, { signal: controller.signal });
+                    clearTimeout(tid);
+                    const data = await res.json();
+                    const liveP = parseFloat(data.price);
+                    if (!isNaN(liveP) && liveP > 0) {
+                        // Add tiny micro-jitter if orderbook hasn't moved in 1.5s so 3D mechas always exchange blows
+                        if (lastPrice && Math.abs(liveP - lastPrice) < 1e-8) {
+                            return liveP * (1 + (Math.random() - 0.5) * 0.004);
+                        }
+                        return liveP;
+                    }
+                } catch (e) {}
+            } else if (asset.type === 'stock' && !lastPrice) {
+                try {
+                    const targetUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${assetKey}`);
+                    const controller = new AbortController();
+                    const tid = setTimeout(() => controller.abort(), 1800);
+                    const res = await fetch(`https://api.allorigins.win/get?url=${targetUrl}`, { signal: controller.signal });
+                    clearTimeout(tid);
+                    const json = await res.json();
+                    const yahooData = JSON.parse(json.contents);
+                    const p = yahooData.chart.result[0].meta.regularMarketPrice;
+                    if (!isNaN(p) && p > 0) return p;
+                } catch (e) {}
+            }
+
+            // Unbiased 0.50 centered random walk for stocks/synthetic titans mid-duel
+            const base = lastPrice || asset.base;
+            return base * (1 + (Math.random() - 0.50) * 0.014);
+        }
+
+        async function fetchPairPrices() {
+            const [a, b] = await Promise.all([
+                fetchAssetPrice(selectA.value, currentPriceA),
+                fetchAssetPrice(selectB.value, currentPriceB)
+            ]);
+            return { a, b };
+        }
+
+        // Spawn Floating 2D/3D Text inside Arena Overlay
+        function spawnArenaFloatText(side, text, colorHex = '#FFD700') {
+            const layer = document.getElementById('combatOverlayLayer');
+            if (!layer) return;
+            const el = document.createElement('div');
+            el.className = 'combat-float-text';
+            el.style.left = side === 'A' ? '28%' : (side === 'B' ? '72%' : '50%');
+            el.style.top = '38%';
+            el.style.color = colorHex;
+            el.innerText = text;
+            layer.appendChild(el);
+            setTimeout(() => el.remove(), 1150);
+        }
+
+        // Active Overdrive Skills (Shield Wall & 2x Leverage Strike)
+        function updateRageUI() {
+            document.getElementById('ragePctText').innerText = `${Math.round(playerRage)}%`;
+            document.getElementById('rageBarFill').style.width = `${playerRage}%`;
+            document.getElementById('skillShieldBtn').disabled = !roundLocked || playerRage < 50;
+            document.getElementById('skillLeverageBtn').disabled = !roundLocked || playerRage < 75;
+        }
+
+        document.getElementById('skillShieldBtn').addEventListener('click', () => {
+            if (!roundLocked || playerRage < 50 || !selectedTeam) return;
+            playerRage = Math.max(0, playerRage - 50);
+            if (selectedTeam === 'A') shieldTicksA = 3;
+            else shieldTicksB = 3;
+            playSfx('shield');
+            spawnArenaFloatText(selectedTeam, '🛡️ HEX SHIELD ACTIVE (3 TICKS)!', '#00F0FF');
+            updateRageUI();
+            broadcastMultiplayerSkill('SHIELD', selectedTeam);
+        });
+
+        document.getElementById('skillLeverageBtn').addEventListener('click', () => {
+            if (!roundLocked || playerRage < 75 || !selectedTeam) return;
+            playerRage = Math.max(0, playerRage - 75);
+            if (selectedTeam === 'A') leverageTicksA = 4;
+            else leverageTicksB = 4;
+            playSfx('crit');
+            spawnArenaFloatText(selectedTeam, '⚡ 2X LEVERAGE OVERDRIVE!', '#FFD700');
+            updateRageUI();
+            broadcastMultiplayerSkill('LEVERAGE', selectedTeam);
+        });
+
+        window.triggerArenaEmote = function(emoteText, fromRemoteSide = null) {
+            playSfx('coin');
+            const side = fromRemoteSide || selectedTeam || 'A';
+            spawnArenaFloatText(side, emoteText, '#00FF88');
+            if (!fromRemoteSide) {
+                broadcastMultiplayerSkill('EMOTE', side, emoteText);
+            }
+        };
+
+        // Start Duel Button Handler
+        placeBetBtn.addEventListener('click', async () => {
+            if (roundLocked) return;
+            if (!selectedTeam) {
+                spawnArenaFloatText('CENTER', '⚠️ Select Fighter A or B First!', '#FFD700');
+                return;
+            }
+            if (selectA.value === selectB.value) {
+                spawnArenaFloatText('CENTER', '❌ Pick 2 Different Assets!', '#FF3366');
+                return;
+            }
+
+            const amount = parseInt(betInput.value);
+            if (!amount || amount <= 0) {
+                spawnArenaFloatText('CENTER', '⚠️ Enter a valid $VCT wager!', '#FFD700');
+                return;
+            }
+            if (amount > userBalance) {
+                spawnArenaFloatText('CENTER', '❌ Insufficient $VCT Balance!', '#FF3366');
+                return;
+            }
+
+            playSfx('coin');
+
+            // Multiplayer Intercept
+            if (isMultiplayer) {
+                lockMultiplayerBet(amount);
+                return;
+            }
+
+            await startSingleOrHostMatch(amount);
+        });
+
+        async function startSingleOrHostMatch(wagerAmount) {
+            placeBetBtn.disabled = true;
+            betInput.disabled = true;
+            selectA.disabled = true;
+            selectB.disabled = true;
+            placeBetBtn.innerText = "📡 SYNCING ORACLE...";
+
+            currentPriceA = 0;
+            currentPriceB = 0;
+            const initialPrices = await fetchPairPrices();
+
+            if (isMultiplayer && isHost) {
+                broadcastMultiplayerStart(initialPrices);
+            }
+
+            beginArenaCombatSession(wagerAmount, initialPrices);
+
+            // Unified 1000ms Countdown Timer
+            unifiedClockInterval = setInterval(() => {
+                if (!roundLocked || timer <= 0) return;
+                timer--;
+                countdownEl.innerText = timer;
+                if (timer <= 0) {
+                    finishAndResolveDuel();
+                }
+            }, 1000);
+
+            // 1500ms Market Oracle & 3D Combat Tick Loop
+            oracleTickInterval = setInterval(async () => {
+                if (!roundLocked) return;
+                prevPriceA = currentPriceA;
+                prevPriceB = currentPriceB;
+
+                const live = await fetchPairPrices();
+                currentPriceA = live.a;
+                currentPriceB = live.b;
+                tickCount++;
+
+                const cumChangeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
+                const cumChangeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
+
+                // Momentum tick delta determines who strikes on this 1.5s beat
+                const stepA = ((currentPriceA - prevPriceA) / prevPriceA) * 100;
+                const stepB = ((currentPriceB - prevPriceB) / prevPriceB) * 100;
+
+                processCombatTickData({
+                    tickCount,
+                    timer,
+                    priceA: currentPriceA,
+                    priceB: currentPriceB,
+                    cumChangeA,
+                    cumChangeB,
+                    stepA,
+                    stepB
+                });
+
+                if (isMultiplayer && isHost) {
+                    broadcastMultiplayerTick({
+                        tickCount,
+                        timer,
+                        priceA: currentPriceA,
+                        priceB: currentPriceB,
+                        cumChangeA,
+                        cumChangeB,
+                        stepA,
+                        stepB,
+                        hpA,
+                        hpB
+                    });
+                }
+            }, 1500);
+        }
+
+        function beginArenaCombatSession(wagerAmount, initialPrices) {
+            userBalance -= wagerAmount;
+            currentBet = wagerAmount;
+            roundLocked = true;
+            savePlayerState();
+
+            startPriceA = currentPriceA = prevPriceA = initialPrices.a;
+            startPriceB = currentPriceB = prevPriceB = initialPrices.b;
+            historyA = [0];
+            historyB = [0];
+            hpA = 100;
+            hpB = 100;
+            playerRage = 25; // Start with 25% Rage so player can engage quickly
+            shieldTicksA = 0; shieldTicksB = 0;
+            leverageTicksA = 0; leverageTicksB = 0;
+            timer = 60;
+            tickCount = 0;
+
+            countdownEl.innerText = timer;
+            document.getElementById('pool' + selectedTeam).innerText = wagerAmount;
+            placeBetBtn.innerText = "⚔️ DUEL IN PROGRESS!";
+            placeBetBtn.style.background = "var(--alert-red)";
+            document.getElementById('arenaCenterBanner').innerText = `🔥 ${ASSETS[selectA.value].ticker} vs ${ASSETS[selectB.value].ticker} — FIGHT!`;
+
+            teamACard.classList.remove('winner-glow', 'loser-dim');
+            teamBCard.classList.remove('winner-glow', 'loser-dim');
+            spawnFightersIn3D(selectA.value, selectB.value);
+            updateRageUI();
+            updateFighterLiveHUD(0, 0);
+            drawTelemetryChart();
+        }
+
+        function processCombatTickData(tick) {
+            currentPriceA = tick.priceA;
+            currentPriceB = tick.priceB;
+            historyA.push(tick.cumChangeA);
+            historyB.push(tick.cumChangeB);
+
+            // Charge player's Overdrive Rage bar every tick
+            playerRage = Math.min(100, playerRage + 14);
+
+            // Calculate Tick Strike & HP Damage
+            const stepDiff = Math.abs(tick.stepA - tick.stepB);
+            const cumDiff = Math.abs(tick.cumChangeA - tick.cumChangeB);
+            let rawDamage = Math.min(4.8, Math.max(1.2, stepDiff * 4.2 + cumDiff * 1.1));
+            const isCrit = stepDiff >= 0.55 || cumDiff >= 1.4;
+
+            let attackerSide = tick.stepA >= tick.stepB ? 'A' : 'B';
+
+            if (attackerSide === 'A') {
+                if (leverageTicksA > 0) rawDamage *= 2.0;
+                const blocked = shieldTicksB > 0;
+                const finalDmg = blocked ? 0 : rawDamage;
+                if (typeof tick.hpB === 'number') hpB = tick.hpB;
+                else hpB = Math.max(0, hpB - finalDmg);
+
+                trigger3DCombatClash('A', isCrit, finalDmg, blocked);
+                if (blocked) {
+                    playSfx('shield');
+                    spawnArenaFloatText('B', '🛡️ BLOCKED!', '#00F0FF');
+                } else if (isCrit) {
+                    playSfx('crit');
+                    spawnArenaFloatText('B', `💥 CRIT -${finalDmg.toFixed(1)} HP!`, '#FFD700');
+                } else {
+                    playSfx('hit');
+                    spawnArenaFloatText('B', `-${finalDmg.toFixed(1)} HP`, '#FF3366');
+                }
+            } else {
+                if (leverageTicksB > 0) rawDamage *= 2.0;
+                const blocked = shieldTicksA > 0;
+                const finalDmg = blocked ? 0 : rawDamage;
+                if (typeof tick.hpA === 'number') hpA = tick.hpA;
+                else hpA = Math.max(0, hpA - finalDmg);
+
+                trigger3DCombatClash('B', isCrit, finalDmg, blocked);
+                if (blocked) {
+                    playSfx('shield');
+                    spawnArenaFloatText('A', '🛡️ BLOCKED!', '#00F0FF');
+                } else if (isCrit) {
+                    playSfx('crit');
+                    spawnArenaFloatText('A', `💥 CRIT -${finalDmg.toFixed(1)} HP!`, '#FFD700');
+                } else {
+                    playSfx('hit');
+                    spawnArenaFloatText('A', `-${finalDmg.toFixed(1)} HP`, '#FF3366');
+                }
+            }
+
+            // Decrement active skill durations
+            if (shieldTicksA > 0) shieldTicksA--;
+            if (shieldTicksB > 0) shieldTicksB--;
+            if (leverageTicksA > 0) leverageTicksA--;
+            if (leverageTicksB > 0) leverageTicksB--;
+
+            updateRageUI();
+            updateFighterLiveHUD(tick.cumChangeA, tick.cumChangeB);
+            drawTelemetryChart();
+
+            // Check for Early 0 HP Voxel Shatter KO
+            if (hpA <= 0 || hpB <= 0) {
+                finishAndResolveDuel();
+            }
+        }
+
+        function updateFighterLiveHUD(changeA, changeB) {
+            document.getElementById('hpA').style.width = `${hpA}%`;
+            document.getElementById('hpB').style.width = `${hpB}%`;
+            document.getElementById('hpTextA').innerText = `${Math.ceil(hpA)} / 100 HP`;
+            document.getElementById('hpTextB').innerText = `${Math.ceil(hpB)} / 100 HP`;
+
+            document.getElementById('livePriceA').innerText = `$${currentPriceA.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('livePriceB').innerText = `$${currentPriceB.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const strA = `${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}%`;
+            const strB = `${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}%`;
+
+            const badgeA = document.getElementById('deltaBadgeA');
+            const badgeB = document.getElementById('deltaBadgeB');
+            badgeA.innerText = strA;
+            badgeB.innerText = strB;
+            badgeA.style.background = changeA >= 0 ? '#065f46' : '#881337';
+            badgeB.style.background = changeB >= 0 ? '#065f46' : '#881337';
+
+            document.getElementById('labelDeltaA').innerText = strA;
+            document.getElementById('labelDeltaA').className = `font-mono-num text-[11px] ${changeA >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.getElementById('labelDeltaB').innerText = strB;
+            document.getElementById('labelDeltaB').className = `font-mono-num text-[11px] ${changeB >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('statusBuffA').innerText = shieldTicksA > 0 ? `🛡️ Shield (${shieldTicksA}t)` : (leverageTicksA > 0 ? `⚡ 2x Overdrive (${leverageTicksA}t)` : 'Engaged in Arena');
+            document.getElementById('statusBuffB').innerText = shieldTicksB > 0 ? `🛡️ Shield (${shieldTicksB}t)` : (leverageTicksB > 0 ? `⚡ 2x Overdrive (${leverageTicksB}t)` : 'Engaged in Arena');
+            document.getElementById('tickCounterText').innerText = `Tick ${Math.min(historyA.length - 1, TOTAL_TICKS)} / ${TOTAL_TICKS}`;
+        }
+
+        // Calibrated 40-Tick Live Performance Canvas Chart
+        function drawTelemetryChart() {
+            const w = chartCanvas.width;
+            const h = chartCanvas.height;
+            chartCtx.clearRect(0, 0, w, h);
+
+            // Subtle Grid & Center Zero Line
+            chartCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+            chartCtx.lineWidth = 1;
+            chartCtx.setLineDash([4, 4]);
+            chartCtx.beginPath();
+            chartCtx.moveTo(0, h / 2);
+            chartCtx.lineTo(w, h / 2);
+            chartCtx.stroke();
+            chartCtx.setLineDash([]);
+
+            const maxAbs = Math.max(
+                ...historyA.map(Math.abs),
+                ...historyB.map(Math.abs),
+                0.35
+            );
+
+            const plotSeries = (arr, color) => {
+                if (arr.length < 1) return;
+                chartCtx.beginPath();
+                chartCtx.strokeStyle = color;
+                chartCtx.lineWidth = 3;
+                chartCtx.lineJoin = 'round';
+
+                const xStep = w / TOTAL_TICKS;
+                for (let i = 0; i < arr.length; i++) {
+                    const x = Math.min(w, i * xStep);
+                    const y = (h / 2) - (arr[i] / maxAbs) * (h * 0.4);
+                    if (i === 0) chartCtx.moveTo(x, y);
+                    else chartCtx.lineTo(x, y);
+                }
+                chartCtx.stroke();
+            };
+
+            const cfgA = ASSETS[selectA.value];
+            const cfgB = ASSETS[selectB.value];
+            plotSeries(historyB, cfgB.color);
+            plotSeries(historyA, cfgA.color);
+
+            // Legend Overlay
+            chartCtx.font = 'bold 12px "Space Grotesk", sans-serif';
+            chartCtx.fillStyle = cfgA.color;
+            chartCtx.textAlign = 'left';
+            chartCtx.fillText(`■ ${cfgA.ticker}`, 10, 18);
+
+            chartCtx.fillStyle = cfgB.color;
+            chartCtx.textAlign = 'right';
+            chartCtx.fillText(`■ ${cfgB.ticker}`, w - 10, 18);
+        }
+
+        // Resolve Round, Trigger 3D KO Explosion & Show On-Chain Receipt
+        function finishAndResolveDuel(forcedFinalA = null, forcedFinalB = null) {
+            if (!roundLocked) return;
+            roundLocked = false;
+            clearInterval(unifiedClockInterval);
+            clearInterval(oracleTickInterval);
+
+            if (forcedFinalA !== null) currentPriceA = forcedFinalA;
+            if (forcedFinalB !== null) currentPriceB = forcedFinalB;
+
+            const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
+            const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
+
+            let winner = 'A';
+            if (hpA <= 0 && hpB > 0) winner = 'B';
+            else if (hpB <= 0 && hpA > 0) winner = 'A';
+            else winner = changeA >= changeB ? 'A' : 'B';
+
+            // Trigger 3D Voxel Shatter Explosion on Loser & Victory Spin on Winner
+            if (fighterMeshA && fighterMeshB) {
+                const winMesh = winner === 'A' ? fighterMeshA : fighterMeshB;
+                const loseMesh = winner === 'A' ? fighterMeshB : fighterMeshA;
+                winMesh.userData.victorySpin = true;
+                loseMesh.userData.isKO = true;
+                spawn3DVoxelBurst(loseMesh.position.clone(), 0xFF3366, 36, true);
+            }
+
+            if (winner === 'A') {
+                teamACard.classList.add('winner-glow');
+                teamBCard.classList.add('loser-dim');
+            } else {
+                teamBCard.classList.add('winner-glow');
+                teamACard.classList.add('loser-dim');
+            }
+
+            const cfgA = ASSETS[selectA.value];
+            const cfgB = ASSETS[selectB.value];
+            const playerWon = selectedTeam === winner;
+
+            let payout = 0;
+            if (playerWon) {
+                winStreak++;
+                const streakBonus = Math.min(0.35, (winStreak - 1) * 0.05);
+                payout = Math.floor(currentBet * (1.95 + streakBonus));
+                userBalance += payout;
+                playSfx('win');
+            } else {
+                winStreak = 0;
+                playSfx('crit');
+            }
+            savePlayerState();
+
+            // Record Match to Live Creator Analytics & Global Feed
+            recordMatchTelemetry({
+                player: playerNickname || 'Raider',
+                assetA: selectA.value,
+                assetB: selectB.value,
+                winnerAsset: winner === 'A' ? selectA.value : selectB.value,
+                loserAsset: winner === 'A' ? selectB.value : selectA.value,
+                wager: currentBet,
+                payout: playerWon ? payout : 0,
+                playerWon
+            });
+
+            const receiptHTML = `
+                <div class="bg-[#111] text-[#00F0FF] p-3.5 rounded-xl font-mono-num text-left my-3 text-xs border-2 border-black shadow-[3px_3px_0_#000]">
+                    <div class="font-extrabold text-white border-b border-white/15 pb-1 mb-2 flex justify-between">
+                        <span>ON-CHAIN ORACLE RECEIPT</span>
+                        <span class="text-[#FFD700]">STREAK: 🔥 ${winStreak}x</span>
+                    </div>
+                    <div class="mb-1.5" style="color:${cfgA.color}">
+                        <strong>${cfgA.ticker} (${cfgA.mechaTitle}):</strong><br>
+                        $${startPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ➔ $${currentPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}%)
+                    </div>
+                    <div class="mb-2" style="color:${cfgB.color}">
+                        <strong>${cfgB.ticker} (${cfgB.mechaTitle}):</strong><br>
+                        $${startPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ➔ $${currentPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}%)
+                    </div>
+                    <div class="text-[#FFD700] font-extrabold pt-1 border-t border-white/15">
+                        🏆 CHAMPION: ${winner === 'A' ? cfgA.ticker : cfgB.ticker} ${hpA <= 0 || hpB <= 0 ? '(BY 3D VOXEL KO!)' : '(BY ORACLE DELTA)'}
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const resTitle = document.getElementById('resultTitle');
+                const resIcon = document.getElementById('resultIcon');
+                const resMsg = document.getElementById('resultMessage');
+                resTitle.innerText = playerWon ? '🎉 VICTORY IN THE ARENA!' : '💀 MECHA SHATTERED!';
+                resTitle.style.color = playerWon ? '#059669' : '#e11d48';
+                resIcon.innerText = playerWon ? `+${payout.toLocaleString()} $VCT` : `-${currentBet.toLocaleString()} $VCT`;
+                resIcon.style.color = playerWon ? '#00FF88' : '#FF3366';
+                resMsg.innerText = playerWon
+                    ? `Your 3D Viber outperformed and claimed the prize pool!`
+                    : `Your rival's asset dominated this round.`;
+                document.getElementById('oracleReceipt').innerHTML = receiptHTML;
+                document.getElementById('resultModal').classList.remove('hidden');
+            }, 900);
+        }
+
+        function resetArenaForNextRound() {
+            clearInterval(unifiedClockInterval);
+            clearInterval(oracleTickInterval);
+            roundLocked = false;
+            currentBet = 0;
+            timer = 60;
+            tickCount = 0;
+            hpA = 100;
+            hpB = 100;
+            playerRage = 0;
+            shieldTicksA = 0; shieldTicksB = 0;
+            leverageTicksA = 0; leverageTicksB = 0;
+            historyA = [0];
+            historyB = [0];
+            myLock = false;
+            oppLock = false;
+
+            countdownEl.innerText = '60';
+            document.getElementById('poolA').innerText = '0';
+            document.getElementById('poolB').innerText = '0';
+            placeBetBtn.style.background = "var(--vibe-purple)";
+            betInput.disabled = false;
+            placeBetBtn.disabled = !selectedTeam;
+
+            if (isMultiplayer) {
+                selectA.disabled = !isHost;
+                selectB.disabled = isHost;
+                selectTeam(isHost ? 'A' : 'B');
+            } else {
+                selectA.disabled = false;
+                selectB.disabled = false;
+                if (selectedTeam) selectTeam(selectedTeam);
+                else placeBetBtn.innerText = "Select a Fighter Card First";
+            }
+
+            syncFighterSelectionUI();
+            updateFighterLiveHUD(0, 0);
+            updateRageUI();
+        }
+
+        document.getElementById('closeResultBtn').addEventListener('click', () => {
+            document.getElementById('resultModal').classList.add('hidden');
+            resetArenaForNextRound();
+            if (isMultiplayer) broadcastMultiplayerNextRound();
+        });
+
+        // Copy Brag Receipt for X / WhatsApp
+        document.getElementById('shareResultBtn').addEventListener('click', () => {
+            const text = `⚔️ I just fought in Vibe Stock Duels 3D (${ASSETS[selectA.value].ticker} vs ${ASSETS[selectB.value].ticker})! 🔥 Streak: ${winStreak}x | Balance: ${userBalance} $VCT!`;
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            temp.remove();
+            const btn = document.getElementById('shareResultBtn');
+            btn.innerText = "✅ Receipt Copied!";
+            setTimeout(() => { btn.innerText = "📸 Copy Brag Receipt"; }, 2000);
+        });
+
+        /***********************************************************************
+         * 6. HYBRID CLOUD (FIRESTORE) + WEBRTC (PEERJS) 6-DIGIT OTP MULTIPLAYER
+         * Works 100% reliably even across strict NAT / mobile carrier networks
+         ***********************************************************************/
+        let isMultiplayer = false;
+        let isHost = false;
+        let currentRoomOtp = null;
+        let peer = null;
+        let p2pConn = null;
+        let roomUnsubscribe = null;
+        let myLock = false;
+        let oppLock = false;
+        let oppUsername = "Challenger";
+        let pendingWager = 0;
+
+        function switchMultiplayerTab(mode) {
+            const pHost = document.getElementById('panelHost');
+            const pJoin = document.getElementById('panelJoin');
+            const tHost = document.getElementById('tabHostBtn');
+            const tJoin = document.getElementById('tabJoinBtn');
+            if (mode === 'host') {
+                pHost.classList.remove('hidden');
+                pJoin.classList.add('hidden');
+                tHost.className = "btn-neubrutal flex-1 py-2.5 text-sm bg-[#8A2BE2] text-white";
+                tJoin.className = "btn-neubrutal flex-1 py-2.5 text-sm bg-[#111] text-neutral-300";
+            } else {
+                pJoin.classList.remove('hidden');
+                pHost.classList.add('hidden');
+                tJoin.className = "btn-neubrutal flex-1 py-2.5 text-sm bg-[#FFD700] text-[#111]";
+                tHost.className = "btn-neubrutal flex-1 py-2.5 text-sm bg-[#111] text-neutral-300";
+            }
+        }
+
+        document.getElementById('tabHostBtn').addEventListener('click', () => switchMultiplayerTab('host'));
+        document.getElementById('tabJoinBtn').addEventListener('click', () => switchMultiplayerTab('join'));
+
+        // Host Creates 6-Digit OTP Room (Registered in BOTH Firestore Cloud & PeerJS)
+        document.getElementById('createRoomBtn').addEventListener('click', async () => {
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            currentRoomOtp = otp;
+            isHost = true;
+
+            document.getElementById('hostPreGenerate').classList.add('hidden');
+            document.getElementById('hostCodeDisplay').classList.remove('hidden');
+            document.getElementById('roomOtpBadge').innerText = otp;
+
+            // 1. Create Cloud Room in Firestore for guaranteed NAT-free signaling
+            if (db && currentUser) {
+                try {
+                    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', otp);
+                    await setDoc(roomRef, {
+                        otp,
+                        hostName: playerNickname || 'Host Raider',
+                        guestName: '',
+                        assetA: selectA.value,
+                        assetB: selectB.value,
+                        hostLock: 0,
+                        guestLock: 0,
+                        status: 'WAITING',
+                        updatedAt: Date.now()
+                    });
+                    listenToCloudRoom(otp);
+                } catch (e) {}
+            }
+
+            // 2. Also register PeerJS ID for low-latency direct P2P packets
+            try {
+                if (peer) peer.destroy();
+                peer = new Peer('vibe-duel-' + otp);
+                peer.on('connection', (conn) => {
+                    p2pConn = conn;
+                    setupPeerChannel(conn);
+                });
+            } catch (e) {}
+        });
+
+        // Guest Joins 6-Digit OTP Room
+        document.getElementById('joinWithOtpBtn').addEventListener('click', async () => {
+            const otp = document.getElementById('joinOtpInput').value.trim().replace(/\D/g, '');
+            const statusEl = document.getElementById('joinStatusText');
+            if (otp.length !== 6) {
+                statusEl.innerText = "⚠️ Enter a valid 6-digit OTP code!";
+                statusEl.classList.remove('hidden');
+                return;
+            }
+
+            currentRoomOtp = otp;
+            isHost = false;
+            statusEl.innerText = `📡 Connecting to Room #${otp}...`;
+            statusEl.classList.remove('hidden');
+
+            let joinedViaCloud = false;
+            if (db && currentUser) {
+                try {
+                    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', otp);
+                    const snap = await getDoc(roomRef);
+                    if (snap.exists()) {
+                        joinedViaCloud = true;
+                        await updateDoc(roomRef, {
+                            guestName: playerNickname || 'Guest Raider',
+                            status: 'CONNECTED',
+                            updatedAt: Date.now()
+                        });
+                        listenToCloudRoom(otp);
+                        activatePvPArenaUI(snap.data().hostName || 'Host', playerNickname || 'Guest');
+                    }
+                } catch (e) {}
+            }
+
+            // Also connect via PeerJS
+            try {
+                if (peer) peer.destroy();
+                peer = new Peer('vibe-guest-' + Math.random().toString(36).slice(2, 7));
+                peer.on('open', () => {
+                    const conn = peer.connect('vibe-duel-' + otp, { reliable: true });
+                    p2pConn = conn;
+                    setupPeerChannel(conn);
+                });
+            } catch (e) {}
+        });
+
+        function listenToCloudRoom(otp) {
+            if (!db || !currentUser) return;
+            if (roomUnsubscribe) roomUnsubscribe();
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', otp);
+            roomUnsubscribe = onSnapshot(roomRef, (snap) => {
+                if (!snap.exists()) return;
+                const d = snap.data();
+
+                if (d.status === 'CONNECTED' && !isMultiplayer) {
+                    oppUsername = isHost ? (d.guestName || 'Guest') : (d.hostName || 'Host');
+                    activatePvPArenaUI(d.hostName || 'Host', d.guestName || 'Guest');
+                }
+
+                // Sync Asset Dropdowns
+                if (isHost && d.assetB && selectB.value !== d.assetB && !roundLocked) {
+                    selectB.value = d.assetB;
+                    syncFighterSelectionUI();
+                } else if (!isHost && d.assetA && selectA.value !== d.assetA && !roundLocked) {
+                    selectA.value = d.assetA;
+                    syncFighterSelectionUI();
+                }
+
+                // Sync Locks
+                if (isHost && d.guestLock > 0 && !oppLock) {
+                    oppLock = true;
+                    document.getElementById('poolB').innerText = d.guestLock;
+                    if (myLock && !roundLocked) startSingleOrHostMatch(pendingWager);
+                } else if (!isHost && d.hostLock > 0 && !oppLock) {
+                    oppLock = true;
+                    document.getElementById('poolA').innerText = d.hostLock;
+                }
+
+                // Sync Match Start for Guest
+                if (!isHost && d.status === 'FIGHTING' && d.initialPrices && !roundLocked) {
+                    beginArenaCombatSession(pendingWager || 500, d.initialPrices);
+                }
+
+                // Sync Latest Tick for Guest if P2P isn't handling it
+                if (!isHost && d.lastTick && d.lastTick.tickCount > tickCount && roundLocked) {
+                    timer = d.lastTick.timer;
+                    countdownEl.innerText = timer;
+                    processCombatTickData(d.lastTick);
+                }
+            }, () => {});
+        }
+
+        function setupPeerChannel(conn) {
+            conn.on('open', () => {
+                conn.send({ type: 'HELLO', username: playerNickname || (isHost ? 'Host' : 'Guest') });
+            });
+            conn.on('data', (msg) => {
+                if (msg.type === 'HELLO') {
+                    oppUsername = msg.username;
+                    activatePvPArenaUI(isHost ? (playerNickname || 'Host') : oppUsername, isHost ? oppUsername : (playerNickname || 'Guest'));
+                } else if (msg.type === 'SELECT') {
+                    if (msg.team === 'A' && !isHost) { selectA.value = msg.asset; syncFighterSelectionUI(); }
+                    if (msg.team === 'B' && isHost) { selectB.value = msg.asset; syncFighterSelectionUI(); }
+                } else if (msg.type === 'LOCK') {
+                    oppLock = true;
+                    document.getElementById(isHost ? 'poolB' : 'poolA').innerText = msg.amount;
+                    if (isHost && myLock && !roundLocked) startSingleOrHostMatch(pendingWager);
+                } else if (msg.type === 'START' && !isHost && !roundLocked) {
+                    beginArenaCombatSession(pendingWager || 500, msg.initialPrices);
+                } else if (msg.type === 'TICK' && !isHost && roundLocked) {
+                    timer = msg.tick.timer;
+                    countdownEl.innerText = timer;
+                    processCombatTickData(msg.tick);
+                } else if (msg.type === 'SKILL') {
+                    if (msg.skill === 'SHIELD') {
+                        if (msg.side === 'A') shieldTicksA = 3; else shieldTicksB = 3;
+                        spawnArenaFloatText(msg.side, '🛡️ RIVAL SHIELD!', '#00F0FF');
+                    } else if (msg.skill === 'LEVERAGE') {
+                        if (msg.side === 'A') leverageTicksA = 4; else leverageTicksB = 4;
+                        spawnArenaFloatText(msg.side, '⚡ RIVAL 2X OVERDRIVE!', '#FFD700');
+                    } else if (msg.skill === 'EMOTE') {
+                        window.triggerArenaEmote(msg.emoteText, msg.side);
+                    }
+                } else if (msg.type === 'CHAT') {
+                    appendChatMessage(oppUsername, msg.text, '#FF3366');
+                } else if (msg.type === 'NEXT_ROUND') {
+                    document.getElementById('resultModal').classList.add('hidden');
+                    resetArenaForNextRound();
+                }
+            });
+        }
+
+        function activatePvPArenaUI(hostName, guestName) {
+            isMultiplayer = true;
+            document.getElementById('multiplayerModal').classList.add('hidden');
+            document.getElementById('pvpHeader').classList.remove('hidden');
+            document.getElementById('activeRoomCodeBadge').innerText = currentRoomOtp || 'LIVE';
+            document.getElementById('pvpHostName').innerText = hostName;
+            document.getElementById('pvpGuestName').innerText = guestName;
+            document.getElementById('chatStatusTag').innerText = `Room #${currentRoomOtp}`;
+
+            selectA.disabled = !isHost;
+            selectB.disabled = isHost;
+            selectTeam(isHost ? 'A' : 'B');
+            appendChatMessage("⚔️ ARENA", `Connected to PvP Duel Room #${currentRoomOtp}!`, "#00FF88");
+        }
+
+        async function lockMultiplayerBet(amount) {
+            myLock = true;
+            pendingWager = amount;
+            placeBetBtn.disabled = true;
+            betInput.disabled = true;
+            placeBetBtn.innerText = `⏳ WAITING FOR ${oppUsername.toUpperCase()}...`;
+            document.getElementById(isHost ? 'poolA' : 'poolB').innerText = amount;
+
+            if (p2pConn && p2pConn.open) {
+                p2pConn.send({ type: 'LOCK', amount });
+            }
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, isHost ? { hostLock: amount } : { guestLock: amount }).catch(() => {});
+            }
+
+            if (oppLock && isHost) {
+                await startSingleOrHostMatch(amount);
+            }
+        }
+
+        function broadcastMultiplayerSelection(team, asset) {
+            if (!isMultiplayer) return;
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'SELECT', team, asset });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, team === 'A' ? { assetA: asset } : { assetB: asset }).catch(() => {});
+            }
+        }
+
+        function broadcastMultiplayerStart(initialPrices) {
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'START', initialPrices });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, { status: 'FIGHTING', initialPrices }).catch(() => {});
+            }
+        }
+
+        function broadcastMultiplayerTick(tick) {
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'TICK', tick });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, { lastTick: tick }).catch(() => {});
+            }
+        }
+
+        function broadcastMultiplayerSkill(skill, side, emoteText = '') {
+            if (!isMultiplayer) return;
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'SKILL', skill, side, emoteText });
+        }
+
+        function broadcastMultiplayerNextRound() {
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'NEXT_ROUND' });
+        }
+
+        document.getElementById('leavePvpBtn').addEventListener('click', () => {
+            isMultiplayer = false;
+            if (roomUnsubscribe) roomUnsubscribe();
+            if (peer) peer.destroy();
+            document.getElementById('pvpHeader').classList.add('hidden');
+            resetArenaForNextRound();
+        });
+
+        // Copy OTP & Share Invite Link
+        document.getElementById('copyOtpBtn').addEventListener('click', () => {
+            if (!currentRoomOtp) return;
+            const t = document.createElement('textarea');
+            t.value = currentRoomOtp;
+            document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+            document.getElementById('copyOtpBtn').innerText = `✅ Copied ${currentRoomOtp}!`;
+        });
+
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
+            if (!currentRoomOtp) return;
+            const url = `${window.location.origin}${window.location.pathname}?duel=${currentRoomOtp}`;
+            const t = document.createElement('textarea');
+            t.value = url;
+            document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+            document.getElementById('copyInviteLinkBtn').innerText = `✅ Link Copied!`;
+        });
+
+        /***********************************************************************
+         * 7. UI MODALS, CHAT, WALLET AUTH & INITIALIZATION
+         ***********************************************************************/
+        function appendChatMessage(sender, text, color = '#00F0FF') {
+            const box = document.getElementById('chatMessages');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.innerHTML = `<strong style="color:${color}">${escapeHtml(sender)}:</strong> <span class="text-neutral-200">${escapeHtml(text)}</span>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            appendChatMessage(playerNickname || 'You', text, '#00F0FF');
+            if (isMultiplayer && p2pConn && p2pConn.open) {
+                p2pConn.send({ type: 'CHAT', text });
+            }
+            input.value = '';
+        }
+
+        document.getElementById('sendChatBtn').addEventListener('click', sendChat);
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChat();
+        });
+
+        // Navigation Modal Triggers
+        document.getElementById('analyticsBtn').addEventListener('click', () => {
+            renderAnalyticsDashboard();
+            document.getElementById('analyticsModal').classList.remove('hidden');
+        });
+        document.getElementById('closeAnalyticsBtn').addEventListener('click', () => {
+            document.getElementById('analyticsModal').classList.add('hidden');
+        });
+
+        document.getElementById('leaderboardBtn').addEventListener('click', () => {
+            renderLeaderboardList();
+            document.getElementById('leaderboardModal').classList.remove('hidden');
+        });
+        document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
+            document.getElementById('leaderboardModal').classList.add('hidden');
+        });
+
+        document.getElementById('multiplayerBtn').addEventListener('click', () => {
+            document.getElementById('multiplayerModal').classList.remove('hidden');
+        });
+        document.getElementById('closeMultiplayer').addEventListener('click', () => {
+            document.getElementById('multiplayerModal').classList.add('hidden');
+        });
+
+        document.getElementById('tutorialBtn').addEventListener('click', () => {
+            document.getElementById('tutorialModal').classList.remove('hidden');
+        });
+        document.getElementById('closeTutorialBtn').addEventListener('click', () => {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        });
+
+        document.getElementById('soundToggleBtn').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerText = soundEnabled ? '🔊 SFX' : '🔇 Muted';
+            if (soundEnabled) playSfx('coin');
+        });
+
+        // Onboarding Nickname
+        document.getElementById('nicknamePill').addEventListener('click', () => {
+            document.getElementById('nicknameInput').value = playerNickname;
+            document.getElementById('nicknameModal').classList.remove('hidden');
+        });
+
+        document.getElementById('saveNicknameBtn').addEventListener('click', () => {
+            const val = document.getElementById('nicknameInput').value.trim();
+            if (val.length < 2) return;
+            playerNickname = val;
+            localStorage.setItem('vibe_stock_nickname', val);
+            document.getElementById('playerNameDisplay').innerText = val;
+            document.getElementById('nicknamePill').classList.remove('hidden');
+            document.getElementById('nicknameModal').classList.add('hidden');
+            if (currentUser) registerPlayerPresence(currentUser.uid);
+        });
+
+        // Privy & MetaMask Login Simulation / Ethers v6
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            document.getElementById('privyModal').classList.remove('hidden');
+        });
+        document.getElementById('closePrivy').addEventListener('click', () => {
+            document.getElementById('privyModal').classList.add('hidden');
+        });
+
+        window.simulatePrivyLogin = function(providerName) {
+            playSfx('coin');
+            userWallet = "0x" + Math.random().toString(16).slice(2, 6).toUpperCase() + "..." + Math.random().toString(16).slice(2, 6).toUpperCase();
+            localStorage.setItem('vibe_wallet_addr', userWallet);
+            if (userBalance < 1000) userBalance += 5000;
+            savePlayerState();
+            document.getElementById('loginBtnText').innerText = `🟢 ${userWallet}`;
+            document.getElementById('privyModal').classList.add('hidden');
+            appendChatMessage("🔐 PRIVY", `Connected via ${providerName} (${userWallet})`, "#00F0FF");
+        };
+
+        window.initWeb3Real = async function() {
+            if (!window.ethereum) {
+                window.simulatePrivyLogin('Embedded Wallet');
+                return;
+            }
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = await provider.getSigner();
+                const addr = await signer.getAddress();
+                userWallet = `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+                localStorage.setItem('vibe_wallet_addr', userWallet);
+                document.getElementById('loginBtnText').innerText = `🦊 ${userWallet}`;
+                document.getElementById('privyModal').classList.add('hidden');
+                playSfx('win');
+            } catch (e) {
+                window.simulatePrivyLogin('Fallback Wallet');
+            }
+        };
+
+        // Initialize Everything on Load
+        window.onload = function() {
+            savePlayerState();
+            if (playerNickname) {
+                document.getElementById('playerNameDisplay').innerText = playerNickname;
+                document.getElementById('nicknamePill').classList.remove('hidden');
+            } else {
+                document.getElementById('nicknameModal').classList.remove('hidden');
+            }
+
+            syncFighterSelectionUI();
+            selectTeam('A'); // Default select Corner A so player can bet immediately
+            animate3DArena();
+            initFirebaseBackend();
+
+            // Check for ?duel=OTP URL invite parameter
+            const params = new URLSearchParams(window.location.search);
+            const duelOtp = params.get('duel');
+            if (duelOtp && duelOtp.replace(/\D/g, '').length === 6) {
+                document.getElementById('joinOtpInput').value = duelOtp.replace(/\D/g, '');
+                document.getElementById('multiplayerModal').classList.remove('hidden');
+                switchMultiplayerTab('join');
+            }
+        };
+    </script>
 </body>
 </html>

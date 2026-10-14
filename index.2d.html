@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Stock Duels</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+</head>
+<body class="cyber-skyline-bg">
+    <div class="sky-cyber-gradient"></div>
+    
+    <div class="app-container">
+        <!-- Navigation / Header -->
+        <header class="top-nav tactile-card">
+            <div class="logo">⚔️ Vibe Duels</div>
+            <div class="user-controls" style="display: flex; align-items: center; gap: 15px;">
+                <button id="soundToggleBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px; cursor: pointer;">🔊 SFX</button>
+                <button id="tutorialBtn" class="tactile-icon-btn" style="background: var(--charcoal-ink); color: #fff; padding: 5px 10px; border-radius: 8px;">❓ How to Play</button>
+                <div class="online-counter" style="color: var(--vibe-cyan); font-weight: bold;">🟢 <span id="onlineCount">1,402</span> Online</div>
+                <button id="multiplayerBtn" class="btn-action" style="background: var(--vibe-purple);">👥 Challenge Friend</button>
+                <div class="tactile-card hidden" id="nicknamePill" style="padding: 8px 12px; font-weight: bold; font-size: 0.9rem; background: var(--alert-red); color: white;">👤 <span id="playerNameDisplay">Raider</span></div>
+                <div class="token-balance hidden" id="balancePill">0 $VCT</div>
+                <button id="loginBtn" class="btn-google-pill">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" width="18">
+                    Connect to Play
+                </button>
+            </div>
+        </header>
+
+        <!-- Modals for Onboarding -->
+        <div id="nicknameModal" class="privy-overlay hidden">
+            <div class="danfo-sheet result-card">
+                <h2 style="color: var(--vibe-gold); margin-bottom: 10px;">Enter the Arena</h2>
+                <p style="margin-bottom: 20px;">What should we call you on the leaderboard?</p>
+                <input type="text" id="nicknameInput" placeholder="Enter Nickname (e.g. Satoshi)" style="width: 100%; padding: 12px; background: #111; color: var(--cream-paper); border: 2px solid var(--vibe-cyan); margin-bottom: 15px; font-family: 'Space Grotesk'; text-align: center; font-size: 1.1rem;">
+                <button id="saveNicknameBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000;">Save & Continue ➔</button>
+            </div>
+        </div>
+
+        <div id="tutorialModal" class="privy-overlay hidden">
+            <div class="danfo-sheet result-card" style="text-align: left;">
+                <h2 style="color: var(--vibe-cyan); margin-bottom: 15px; text-align: center;">How to Play ⚔️</h2>
+                <ul style="line-height: 1.6; margin-bottom: 20px; padding-left: 20px; font-size: 0.95rem;">
+                    <li><strong>1. Pick Your Asset:</strong> Select a crypto or stock for both sides (e.g. $BTC vs $TSLA).</li>
+                    <li><strong>2. Place Your Bet:</strong> Enter how many $VCT tokens you want to wager.</li>
+                    <li><strong>3. Lock In:</strong> Click "Place Bet" and confirm the Web3 transaction to lock your tokens in the Smart Vault.</li>
+                    <li><strong>4. 60-Second Duel:</strong> The arena pulls <strong>live</strong> market prices. The asset whose price goes up the most (or down the least) in 60 seconds wins!</li>
+                    <li><strong>5. Payout:</strong> The winner takes the combined prize pool (minus a protocol burn fee).</li>
+                </ul>
+                <button id="closeTutorialBtn" class="btn-action" style="width: 100%; background: var(--vibe-purple);">Let's Duel! 🚀</button>
+            </div>
+        </div>
+
+        <!-- Main Arena -->
+        <main class="duel-arena">
+            <!-- Timer -->
+            <div class="timer-display tactile-card">
+                <div class="timer-label">Round Ends In</div>
+                <div class="countdown-text"><span id="countdown">60</span>s</div>
+            </div>
+
+            <!-- The Duel -->
+            <h2 id="pvpHeader" class="hidden" style="text-align: center; color: var(--vibe-cyan); margin-bottom: 20px; font-weight: 700; text-transform: uppercase;">⚔️ <span id="pvpHostName">Host</span> vs <span id="pvpGuestName">Guest</span> ⚔️</h2>
+            <div class="versus-container">
+                <!-- Team A -->
+                <div class="team-card tactile-card" id="teamA">
+                    <div class="health-bar-wrapper hidden" id="hpBoxA">
+                        <div class="health-fill" id="hpA" style="width: 100%; background: var(--vibe-cyan);"></div>
+                    </div>
+                    <div class="viber-avatar" id="avatarA" style="background-image: url('assets/vibers/viber1.webp'); box-shadow: 0 0 15px var(--vibe-cyan);">
+                        <div class="weapon weapon-a" id="weaponA">🗡️</div>
+                    </div>
+                    <div class="stock-info">
+                        <select id="assetA" class="asset-dropdown">
+                            <optgroup label="Live Crypto (Binance API)">
+                                <option value="BTC" selected>Bitcoin ($BTC)</option>
+                                <option value="ETH">Ethereum ($ETH)</option>
+                                <option value="SOL">Solana ($SOL)</option>
+                            </optgroup>
+                            <optgroup label="Live Stocks (Yahoo Finance API)">
+                                <option value="TSLA">Tesla ($TSLA)</option>
+                                <option value="AAPL">Apple ($AAPL)</option>
+                                <option value="NVDA">NVIDIA ($NVDA)</option>
+                                <option value="MSFT">Microsoft ($MSFT)</option>
+                                <option value="AMZN">Amazon ($AMZN)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="pool-amount">Prize Pool: <span id="poolA">0</span> VCT</div>
+                </div>
+
+                <div class="vs-center">
+                    <div class="vs-badge" id="vsBadge">VS</div>
+                    <button id="shuffleMatchupBtn" class="tactile-icon-btn" style="margin-top: 10px; font-size: 0.8rem; background: #111; color: var(--vibe-gold); border: 2px solid var(--vibe-gold); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: bold; font-family: 'Space Grotesk';">🎲 Random Duel</button>
+                    
+                    <!-- Live Chart container -->
+                    <div class="chart-container hidden" id="chartBox">
+                        <div class="chart-label">🔴 Live Performance Chart 🟢</div>
+                        <canvas id="liveChart" width="300" height="180"></canvas>
+                    </div>
+                </div>
+
+                <!-- Team B -->
+                <div class="team-card tactile-card" id="teamB">
+                    <div class="health-bar-wrapper hidden" id="hpBoxB">
+                        <div class="health-fill" id="hpB" style="width: 100%; background: var(--alert-red);"></div>
+                    </div>
+                    <div class="viber-avatar" id="avatarB" style="background-image: url('assets/vibers/viber4.webp'); box-shadow: 0 0 15px var(--alert-red);">
+                        <div class="weapon weapon-b" id="weaponB">🔨</div>
+                    </div>
+                    <div class="stock-info">
+                        <select id="assetB" class="asset-dropdown">
+                            <optgroup label="Live Crypto (Binance API)">
+                                <option value="BTC">Bitcoin ($BTC)</option>
+                                <option value="ETH">Ethereum ($ETH)</option>
+                                <option value="SOL" selected>Solana ($SOL)</option>
+                            </optgroup>
+                            <optgroup label="Live Stocks (Yahoo Finance API)">
+                                <option value="TSLA">Tesla ($TSLA)</option>
+                                <option value="AAPL">Apple ($AAPL)</option>
+                                <option value="NVDA">NVIDIA ($NVDA)</option>
+                                <option value="MSFT">Microsoft ($MSFT)</option>
+                                <option value="AMZN">Amazon ($AMZN)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="pool-amount">Prize Pool: <span id="poolB">0</span> VCT</div>
+                </div>
+            </div>
+
+            <!-- Betting Controls -->
+            <div class="betting-panel danfo-sheet">
+                <h3>Predict the Winner</h3>
+                <p>Which asset will perform better in the next 60 seconds?</p>
+                <div class="bet-controls">
+                    <input type="number" id="betAmount" placeholder="Amount of $VCT" disabled>
+                    <button id="placeBetBtn" class="btn-action" disabled>Select a Team First</button>
+                </div>
+            </div>
+            
+            <!-- PvP Chat Box (Hidden by default) -->
+            <div id="pvpChatContainer" class="hidden tactile-card" style="margin-top: 20px; padding: 10px; background: var(--charcoal-ink); border: 2px solid var(--vibe-purple);">
+                <div style="color: var(--vibe-cyan); font-weight: bold; margin-bottom: 5px;">💬 Live Match Chat</div>
+                <div id="chatMessages" style="height: 120px; overflow-y: auto; color: var(--cream-paper); font-size: 0.9rem; margin-bottom: 10px; background: #000; border: 1px solid #333; padding: 8px; border-radius: 4px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="color: #666; font-style: italic;">Waiting for opponent to connect...</div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chatInput" placeholder="Trash talk here..." style="flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid var(--vibe-cyan); font-family: 'Space Grotesk';">
+                    <button id="sendChatBtn" class="btn-action" style="padding: 5px 15px; font-size: 0.9rem; background: var(--vibe-gold); color: #000;">Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Result Modal (Replaces Browser Alert) -->
+    <div id="resultModal" class="privy-overlay hidden">
+        <div class="danfo-sheet result-card">
+            <h2 id="resultTitle">Round Over!</h2>
+            <div id="resultIcon" style="font-size: 4rem; margin: 10px 0;">🔔</div>
+            <p id="resultMessage" style="font-size: 1.2rem; margin-bottom: 20px;">The Oracle has spoken.</p>
+            <button class="btn-action" id="closeResultBtn">Next Round</button>
+        </div>
+    </div>
+
+    <!-- Phase 2: Privy Auth Modal Simulation & Real Web3 -->
+    <div id="privyModal" class="privy-overlay hidden">
+        <div class="privy-modal" style="padding: 25px; position: relative;">
+            <div class="privy-header" style="background: none; border-bottom: none; text-align: left; padding: 0;">
+                <h4 style="font-size: 1.4rem; color: #18181b; margin-bottom: 5px;">Log in or sign up</h4>
+                <p style="color: #4b5563; font-size: 0.9rem; font-weight: 600;">Welcome to Vibe Stock Duels</p>
+            </div>
+            <div class="privy-body" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button class="privy-btn" onclick="simulatePrivyLogin('Google')" style="background: #ffffff; color: #18181b; border: 1px solid #ccc; justify-content: center; width: 100%;">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="20" alt="Google"> Continue with Google
+                </button>
+                <button class="privy-btn" onclick="simulatePrivyLogin('Discord')" style="background: #5865F2; color: #ffffff; justify-content: center; width: 100%;">
+                    <img src="https://img.icons8.com/color/48/000000/discord-logo.png" width="20" alt="Discord"> Continue with Discord
+                </button>
+                <div class="privy-divider"><span>OR</span></div>
+                <button class="privy-btn-outline" onclick="initWeb3Real()" style="background: var(--charcoal-ink); color: #fff; justify-content: center; width: 100%;">
+                    🦊 Connect MetaMask
+                </button>
+            </div>
+            <div class="privy-footer" style="margin-top: 20px; text-align: center; color: #a1a1aa; font-size: 0.75rem;">
+                Protected by <strong>Privy</strong>
+            </div>
+            <button id="closePrivy" class="close-btn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #000; box-shadow: none;">&times;</button>
+        </div>
+    </div>
+
+    <!-- Multiplayer Lobby Modal (OTP Room Code System) -->
+    <div id="multiplayerModal" class="privy-overlay hidden">
+        <div class="danfo-sheet result-card" style="max-width: 420px;">
+            <div class="privy-header" style="justify-content: flex-end; margin-bottom: -15px; width: 100%;">
+                <button id="closeMultiplayer" class="close-btn">&times;</button>
+            </div>
+            <h2 style="color: var(--vibe-cyan); margin-bottom: 5px;">PvP Duel Arena</h2>
+            <p style="margin-bottom: 18px; font-size: 0.95rem; color: #ccc;">Fast, instant Web3 duel using a 6-digit OTP.</p>
+
+            <!-- Mode Selector Tabs: Host vs Join -->
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 18px;">
+                <button id="tabHostBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--vibe-purple);">👑 Host Match</button>
+                <button id="tabJoinBtn" class="btn-action" style="flex: 1; padding: 10px; font-size: 0.95rem; background: var(--charcoal-ink); color: #ccc;">⚡ Join with OTP</button>
+            </div>
+
+            <!-- Panel 1: Host Room (Generates 6-Digit OTP) -->
+            <div id="panelHost" style="width: 100%; text-align: center;">
+                <div id="hostPreGenerate">
+                    <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Create an arena room and get a 6-digit OTP code to share with your opponent.</p>
+                    <button id="createRoomBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; font-size: 1.1rem;">🎲 Generate Duel OTP ➔</button>
+                </div>
+                
+                <div id="hostCodeDisplay" class="hidden" style="margin-top: 5px;">
+                    <p style="font-size: 0.85rem; color: #bbb; margin-bottom: 8px;">SHARE THIS 6-DIGIT CODE WITH YOUR FRIEND:</p>
+                    <div id="roomOtpBadge" style="font-family: monospace; font-size: 2.5rem; letter-spacing: 8px; font-weight: 900; color: var(--vibe-gold); background: #000; border: 3px solid var(--vibe-gold); padding: 12px; border-radius: 12px; margin-bottom: 12px; text-shadow: 0 0 15px rgba(255,215,0,0.4);">------</div>
+                    <button id="copyOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-cyan); color: #000; margin-bottom: 12px;">📋 Copy 6-Digit Code</button>
+                    <p style="color: var(--vibe-purple); font-size: 0.9rem;" id="waitingText">⏳ Waiting for opponent to enter code...<br><span style="font-size: 0.78rem; opacity: 0.8; color: #fff;">(Keep this tab open on your screen)</span></p>
+                </div>
+            </div>
+
+            <!-- Panel 2: Join Room (Input 6-Digit OTP) -->
+            <div id="panelJoin" class="hidden" style="width: 100%; text-align: center;">
+                <p style="font-size: 0.9rem; color: #bbb; margin-bottom: 10px;">Enter the 6-digit OTP from your friend:</p>
+                <input type="text" id="joinOtpInput" maxlength="6" placeholder="000000" inputmode="numeric" style="width: 100%; font-family: monospace; font-size: 2.2rem; letter-spacing: 8px; text-align: center; font-weight: 900; padding: 12px; background: #000; color: var(--vibe-cyan); border: 3px solid var(--vibe-cyan); border-radius: 12px; margin-bottom: 15px; outline: none;">
+                <button id="joinWithOtpBtn" class="btn-action" style="width: 100%; background: var(--vibe-gold); color: #000; font-size: 1.1rem;">⚡ Connect & Fight ➔</button>
+                <p id="joinStatusText" style="margin-top: 12px; font-size: 0.85rem; color: var(--vibe-cyan);" class="hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
