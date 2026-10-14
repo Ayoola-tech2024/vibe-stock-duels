@@ -219,6 +219,32 @@
             display: none !important;
         }
 
+        /* AAA Interactive Guided Walkthrough Spotlight & Glow */
+        .tutorial-spotlight-active {
+            position: relative !important;
+            z-index: 55 !important;
+            box-shadow: 0 0 0 5px #00F0FF, 0 0 35px #00F0FF !important;
+            animation: tutBeaconPulse 1.2s ease-in-out infinite alternate !important;
+        }
+        @keyframes tutBeaconPulse {
+            0% {
+                box-shadow: 0 0 0 4px #00F0FF, 0 0 20px #00F0FF, inset 0 0 10px rgba(0, 240, 255, 0.4);
+                transform: scale(1.0);
+            }
+            100% {
+                box-shadow: 0 0 0 6px #FFD700, 0 0 45px #FFD700, inset 0 0 20px rgba(255, 215, 0, 0.5);
+                transform: scale(1.02);
+            }
+        }
+        .tut-overlay-dim {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 8, 20, 0.65);
+            pointer-events: none;
+            z-index: 45;
+            transition: opacity 0.3s ease;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #111; }
@@ -599,7 +625,7 @@
                     <!-- Quick Wager Chips -->
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <button type="button" onclick="setQuickBet(100)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+100</button>
-                        <button type="button" onclick="setQuickBet(500)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+500</button>
+                        <button type="button" id="quickBet500Btn" onclick="setQuickBet(500)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+500</button>
                         <button type="button" onclick="setQuickBet(1000)" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1 text-xs font-mono-num">+1K</button>
                         <button type="button" onclick="setQuickBet('HALF')" class="btn-neubrutal bg-[#111] text-[#00F0FF] px-2.5 py-1 text-xs">1/2</button>
                         <button type="button" onclick="setQuickBet('MAX')" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 py-1 text-xs">MAX</button>
@@ -884,9 +910,38 @@
                 </div>
             </div>
 
-            <button id="closeTutorialBtn" class="btn-neubrutal w-full py-3 bg-[#00FF88] text-[#111] text-sm font-black shadow-[3px_3px_0_#000]">
-                ⚔️ Ready to Fight! Enter Arena ➔
-            </button>
+            <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                <button id="startInteractiveWalkthroughBtn" class="btn-neubrutal flex-1 py-3 bg-[#00F0FF] text-[#111] text-sm font-black shadow-[3px_3px_0_#000] flex items-center justify-center gap-1.5">
+                    <span>🎮 Start Interactive Training ➔</span>
+                </button>
+                <button id="closeTutorialBtn" class="btn-neubrutal flex-1 py-3 bg-[#00FF88] text-[#111] text-sm font-black shadow-[3px_3px_0_#000]">
+                    <span>⚔️ Skip to Arena</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         INTERACTIVE AAA ONBOARDING COACH BANNER & SPOTLIGHT
+         ======================================================================= -->
+    <div id="tutorialOverlayDim" class="tut-overlay-dim hidden"></div>
+
+    <div id="interactiveTutorialBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-xl w-[94%] bg-[#111]/95 backdrop-blur-md text-white border-4 border-[#00F0FF] rounded-2xl p-4 shadow-[0_0_35px_rgba(0,240,255,0.45),5px_5px_0_#000] flex items-center gap-3.5 transition-all duration-300">
+        <div class="w-12 h-12 rounded-xl bg-[#00F0FF] text-[#111] flex items-center justify-center text-2xl font-black shrink-0 animate-bounce shadow-md">
+            🤖
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <span id="tutStepBadge" class="px-2 py-0.5 rounded bg-[#8A2BE2] text-white text-[10px] font-black tracking-wider uppercase">
+                    QUEST • STEP 1 OF 5
+                </span>
+                <button id="skipTutorialBtn" class="text-[11px] font-extrabold text-neutral-400 hover:text-white underline cursor-pointer">
+                    ✕ Exit Guide
+                </button>
+            </div>
+            <div id="tutStepInstruction" class="text-xs sm:text-sm font-black text-white leading-snug">
+                Step 1: Equip your weapon! Tap the weapon selector under Corner A to try out different 3D weapons in the Colosseum.
+            </div>
         </div>
     </div>
 
@@ -1229,7 +1284,7 @@
         }
 
         // Build Procedural 3D Voxel Mecha Fighter matching the user's Viber WebP designs
-        function buildVoxelViberFighter(assetKey, isLeftCorner) {
+        function buildVoxelViberFighter(assetKey, isLeftCorner, chosenWeapon = null) {
             const cfg = ASSETS[assetKey] || ASSETS.BTC;
             const root = new THREE.Group();
 
@@ -2116,6 +2171,9 @@
                 currentWeaponA = weaponASelect.value;
                 syncFighterSelectionUI();
                 broadcastMultiplayerWeapon('A', currentWeaponA);
+                if (typeof tutStep !== 'undefined' && tutStep === 1) {
+                    setTimeout(() => setTutorialStep(2), 400);
+                }
             });
         }
 
@@ -2162,6 +2220,10 @@
             const ticker = team === 'A' ? ASSETS[selectA.value].ticker : ASSETS[selectB.value].ticker;
             placeBetBtn.innerText = `⚔️ Lock Bet on ${ticker}`;
             document.getElementById('arenaCenterBanner').innerText = `${ticker} Selected — Ready to Lock!`;
+
+            if (typeof tutStep !== 'undefined' && tutStep === 2) {
+                setTimeout(() => setTutorialStep(3), 400);
+            }
         }
 
         // Quick-Bet Chips
@@ -2173,7 +2235,17 @@
             if (val === 'MAX') betInput.value = userBalance;
             else if (val === 'HALF') betInput.value = Math.max(10, Math.floor(userBalance / 2));
             else betInput.value = Math.min(userBalance, current + val);
+
+            if (typeof tutStep !== 'undefined' && tutStep === 3) {
+                setTimeout(() => setTutorialStep(4), 400);
+            }
         };
+
+        betInput.addEventListener('input', () => {
+            if (typeof tutStep !== 'undefined' && tutStep === 3 && parseInt(betInput.value) > 0) {
+                setTimeout(() => setTutorialStep(4), 400);
+            }
+        });
 
         // Random Matchup Shuffle
         document.getElementById('shuffleMatchupBtn').addEventListener('click', () => {
@@ -2272,6 +2344,9 @@
             spawnArenaFloatText(selectedTeam, '🛡️ HEX SHIELD ACTIVE (3 TICKS)!', '#00F0FF');
             updateRageUI();
             broadcastMultiplayerSkill('SHIELD', selectedTeam);
+            if (typeof tutStep !== 'undefined' && tutStep === 5) {
+                completeInteractiveTutorial();
+            }
         });
 
         document.getElementById('skillLeverageBtn').addEventListener('click', () => {
@@ -2283,6 +2358,9 @@
             spawnArenaFloatText(selectedTeam, '⚡ 2X LEVERAGE OVERDRIVE!', '#FFD700');
             updateRageUI();
             broadcastMultiplayerSkill('LEVERAGE', selectedTeam);
+            if (typeof tutStep !== 'undefined' && tutStep === 5) {
+                completeInteractiveTutorial();
+            }
         });
 
         window.triggerArenaEmote = function(emoteText, fromRemoteSide = null) {
@@ -2430,6 +2508,10 @@
             updateRageUI();
             updateFighterLiveHUD(0, 0);
             drawTelemetryChart();
+
+            if (typeof tutStep !== 'undefined' && tutStep === 4) {
+                setTimeout(() => setTutorialStep(5), 1000);
+            }
         }
 
         function processCombatTickData(tick) {
@@ -3246,6 +3328,114 @@
             document.getElementById('multiplayerModal').classList.add('hidden');
         });
 
+        // =======================================================================
+        // AAA INTERACTIVE GUIDED WALKTHROUGH ENGINE
+        // =======================================================================
+        let tutStep = 0;
+        let tutHighlightedElements = [];
+
+        function clearTutorialSpotlights() {
+            tutHighlightedElements.forEach(el => {
+                if (el) el.classList.remove('tutorial-spotlight-active');
+            });
+            tutHighlightedElements = [];
+        }
+
+        function addTutorialSpotlight(elementOrSelector) {
+            const el = typeof elementOrSelector === 'string' ? document.querySelector(elementOrSelector) : elementOrSelector;
+            if (el) {
+                el.classList.add('tutorial-spotlight-active');
+                tutHighlightedElements.push(el);
+                try {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } catch(e) {}
+            }
+        }
+
+        window.startInteractiveWalkthrough = function() {
+            const tutModal = document.getElementById('tutorialModal');
+            if (tutModal) tutModal.classList.add('hidden');
+            const overlay = document.getElementById('tutorialOverlayDim');
+            if (overlay) overlay.classList.remove('hidden');
+            const banner = document.getElementById('interactiveTutorialBanner');
+            if (banner) banner.classList.remove('hidden');
+            tutStep = 1;
+            setTutorialStep(1);
+        };
+
+        window.stopInteractiveWalkthrough = function(markCompleted = false) {
+            clearTutorialSpotlights();
+            tutStep = 0;
+            const banner = document.getElementById('interactiveTutorialBanner');
+            if (banner) banner.classList.add('hidden');
+            const overlay = document.getElementById('tutorialOverlayDim');
+            if (overlay) overlay.classList.add('hidden');
+            if (markCompleted) {
+                localStorage.setItem('vibe_interactive_tutorial_completed', 'true');
+                localStorage.setItem('vibe_tutorial_seen', 'true');
+            }
+        };
+
+        window.setTutorialStep = function(step) {
+            clearTutorialSpotlights();
+            tutStep = step;
+            const badge = document.getElementById('tutStepBadge');
+            const instruction = document.getElementById('tutStepInstruction');
+
+            if (step === 1) {
+                if (badge) badge.innerText = "QUEST • STEP 1 OF 5";
+                if (instruction) instruction.innerText = "⚔️ Equip Your Weapon! Tap the weapon selector under Corner A to gear up your 3D fighter for battle.";
+                addTutorialSpotlight('#weaponA');
+                playSfx('coin');
+            } else if (step === 2) {
+                if (badge) badge.innerText = "QUEST • STEP 2 OF 5";
+                if (instruction) instruction.innerText = "🏆 Pick Your Champion! Tap Corner A or Corner B to back your preferred asset in this 60s duel.";
+                addTutorialSpotlight('#teamA');
+                addTutorialSpotlight('#teamB');
+                playSfx('coin');
+            } else if (step === 3) {
+                if (badge) badge.innerText = "QUEST • STEP 3 OF 5";
+                if (instruction) instruction.innerText = "💰 Place Your Stake! Tap the '+500' quick-bet chip or enter your wager.";
+                addTutorialSpotlight('#quickBet500Btn');
+                addTutorialSpotlight('#betAmount');
+                playSfx('coin');
+            } else if (step === 4) {
+                if (badge) badge.innerText = "QUEST • STEP 4 OF 5";
+                if (instruction) instruction.innerText = "⚡ Ready for Battle! Tap '⚔️ LOCK BET' to unleash your 3D Mecha into combat!";
+                addTutorialSpotlight('#placeBetBtn');
+                playSfx('coin');
+            } else if (step === 5) {
+                if (badge) badge.innerText = "QUEST • STEP 5 OF 5";
+                if (instruction) instruction.innerText = "🔥 Combat Overdrive! We've charged your Rage to 100%! Tap '🛡️ Shield' to block hits or '⚡ 2X Strike' for critical damage!";
+                playerRage = 100;
+                updateRageUI();
+                addTutorialSpotlight('#skillShieldBtn');
+                addTutorialSpotlight('#skillLeverageBtn');
+                playSfx('crit');
+            }
+        };
+
+        window.completeInteractiveTutorial = function() {
+            clearTutorialSpotlights();
+            const badge = document.getElementById('tutStepBadge');
+            const instruction = document.getElementById('tutStepInstruction');
+            if (badge) badge.innerText = "🏆 QUEST COMPLETED!";
+            if (instruction) instruction.innerText = "🎉 AWESOME JOB! +1,000 $VCT Training Reward added to your balance! You are ready to dominate the arena!";
+
+            userBalance += 1000;
+            savePlayerState();
+            playSfx('win');
+            spawnArenaFloatText('CENTER', '+1,000 $VCT TRAINING REWARD!', '#FFD700');
+
+            localStorage.setItem('vibe_interactive_tutorial_completed', 'true');
+            localStorage.setItem('vibe_tutorial_seen', 'true');
+            tutStep = 0;
+
+            setTimeout(() => {
+                stopInteractiveWalkthrough(true);
+            }, 3500);
+        };
+
         document.getElementById('tutorialBtn').addEventListener('click', () => {
             document.getElementById('tutorialModal').classList.remove('hidden');
         });
@@ -3258,6 +3448,18 @@
             closeTutX.addEventListener('click', () => {
                 document.getElementById('tutorialModal').classList.add('hidden');
                 localStorage.setItem('vibe_tutorial_seen', 'true');
+            });
+        }
+        const startWalkBtn = document.getElementById('startInteractiveWalkthroughBtn');
+        if (startWalkBtn) {
+            startWalkBtn.addEventListener('click', () => {
+                startInteractiveWalkthrough();
+            });
+        }
+        const skipWalkBtn = document.getElementById('skipTutorialBtn');
+        if (skipWalkBtn) {
+            skipWalkBtn.addEventListener('click', () => {
+                stopInteractiveWalkthrough(true);
             });
         }
 
@@ -3284,10 +3486,10 @@
             document.getElementById('nicknameModal').classList.add('hidden');
             if (currentUser) registerPlayerPresence(currentUser.uid);
 
-            // If player hasn't seen the tutorial yet, show it right after onboarding
-            if (!localStorage.getItem('vibe_tutorial_seen')) {
+            // If player hasn't completed the interactive tutorial yet, trigger guided walkthrough
+            if (!localStorage.getItem('vibe_interactive_tutorial_completed')) {
                 setTimeout(() => {
-                    document.getElementById('tutorialModal').classList.remove('hidden');
+                    startInteractiveWalkthrough();
                 }, 400);
             }
         });
@@ -3346,7 +3548,11 @@
             animate3DArena();
             initFirebaseBackend();
 
-            if (!localStorage.getItem('vibe_tutorial_seen') && playerNickname) {
+            if (!localStorage.getItem('vibe_interactive_tutorial_completed') && playerNickname) {
+                setTimeout(() => {
+                    startInteractiveWalkthrough();
+                }, 800);
+            } else if (!localStorage.getItem('vibe_tutorial_seen') && playerNickname) {
                 setTimeout(() => {
                     document.getElementById('tutorialModal').classList.remove('hidden');
                 }, 800);
