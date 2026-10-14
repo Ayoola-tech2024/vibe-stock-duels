@@ -244,7 +244,7 @@
                     <div class="text-[11px] font-bold text-neutral-600 flex items-center gap-2 mt-0.5">
                         <span class="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                            <span id="onlineCount">1,428</span> Raiders Active
+                            <span id="onlineCount">1</span> Live in Arena
                         </span>
                         <span>•</span>
                         <span id="cloudStatusBadge" class="text-purple-700 font-bold">⚡ Hybrid Oracle Live</span>
@@ -263,8 +263,8 @@
                 <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-3 py-1.5 text-xs sm:text-sm">
                     👥 PvP Arena
                 </button>
-                <button id="tutorialBtn" class="btn-neubrutal bg-white text-[#111] px-2.5 py-1.5 text-xs sm:text-sm" title="How to Play">
-                    ❓ Rules
+                <button id="tutorialBtn" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-1.5 text-xs sm:text-sm font-black" title="How to Duel Combat Manual">
+                    📖 Guide
                 </button>
                 <button id="soundToggleBtn" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1.5 text-xs sm:text-sm" title="Toggle 8-Bit Arcade Audio">
                     🔊 SFX
@@ -373,6 +373,17 @@
                             <option value="STRIPE">Stripe ($STRIPE) — Viber #14</option>
                             <option value="ANDURIL">Anduril ($ANDURIL) — Viber #15</option>
                         </optgroup>
+                    </select>
+
+                    <!-- Combat Weapon Selection A -->
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-2 mb-1">Combat Weapon</label>
+                    <select id="weaponA" class="w-full bg-[#111] text-[#00F0FF] border-3 border-black rounded-lg px-2.5 py-2 font-extrabold text-xs cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#00F0FF]">
+                        <option value="katana">🗡️ Cyber Katana (Swift Precision)</option>
+                        <option value="hammer">🔨 Gravity Warhammer (Heavy Impact)</option>
+                        <option value="trident">🔱 Plasma Trident (Long Thrust)</option>
+                        <option value="axe">🪓 Mecha Battle Axe (Armor Cleaver)</option>
+                        <option value="broadsword" selected>⚔️ Titan Greatsword (Brutal Slash)</option>
+                        <option value="scythe">⚡ Void Scythe (Reaper Sweep)</option>
                     </select>
                 </div>
 
@@ -545,6 +556,17 @@
                             <option value="STRIPE">Stripe ($STRIPE) — Viber #14</option>
                             <option value="ANDURIL">Anduril ($ANDURIL) — Viber #15</option>
                         </optgroup>
+                    </select>
+
+                    <!-- Combat Weapon Selection B -->
+                    <label class="block text-[11px] font-extrabold uppercase tracking-wider text-neutral-700 mt-2 mb-1">Combat Weapon</label>
+                    <select id="weaponB" class="w-full bg-[#111] text-[#FF3366] border-3 border-black rounded-lg px-2.5 py-2 font-extrabold text-xs cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none focus:border-[#FF3366]">
+                        <option value="katana">🗡️ Cyber Katana (Swift Precision)</option>
+                        <option value="hammer" selected>🔨 Gravity Warhammer (Heavy Impact)</option>
+                        <option value="trident">🔱 Plasma Trident (Long Thrust)</option>
+                        <option value="axe">🪓 Mecha Battle Axe (Armor Cleaver)</option>
+                        <option value="broadsword">⚔️ Titan Greatsword (Brutal Slash)</option>
+                        <option value="scythe">⚡ Void Scythe (Reaper Sweep)</option>
                     </select>
                 </div>
 
@@ -754,23 +776,42 @@
     </div>
 
     <!-- =======================================================================
-         MODAL 4: ROUND RESULT & ON-CHAIN ORACLE RECEIPT
+         MODAL 4: ROUND RESULT & ON-CHAIN ORACLE RECEIPT + SOCIAL SHARING
          ======================================================================= -->
     <div id="resultModal" class="modal-backdrop hidden">
-        <div class="danfo-sheet max-w-md w-full p-6 text-center">
-            <h2 id="resultTitle" class="text-2xl sm:text-3xl font-black uppercase">ROUND OVER!</h2>
-            <div id="resultIcon" class="font-mono-num text-3xl sm:text-4xl font-black my-2 px-4 py-2 rounded-xl bg-[#111] text-[#00F0FF] inline-block border-3 border-black">
+        <div class="danfo-sheet max-w-md w-full p-5 sm:p-6 text-center">
+            <h2 id="resultTitle" class="text-2xl sm:text-3xl font-black uppercase tracking-tight">ROUND OVER!</h2>
+            <div id="resultIcon" class="font-mono-num text-3xl sm:text-4xl font-black my-2 px-4 py-2 rounded-xl bg-[#111] text-[#00F0FF] inline-block border-3 border-black shadow-[3px_3px_0_#000]">
                 +0 $VCT
             </div>
-            <p id="resultMessage" class="text-sm font-bold text-neutral-800 mb-2">The Oracle has spoken.</p>
+            <p id="resultMessage" class="text-xs sm:text-sm font-bold text-neutral-800 mb-2">The Oracle has spoken.</p>
             <div id="oracleReceipt"></div>
-            <div class="flex gap-2 mt-4">
-                <button id="shareResultBtn" class="btn-neubrutal flex-1 py-3 bg-[#00F0FF] text-[#111] text-sm">
-                    📸 Copy Brag Receipt
-                </button>
-                <button id="closeResultBtn" class="btn-neubrutal flex-1 py-3 bg-[#8A2BE2] text-white text-sm">
-                    ⚔️ Next Duel
-                </button>
+            
+            <!-- Social Share Bar: Direct WhatsApp, X/Twitter, Facebook, Copy -->
+            <div class="mt-3.5 pt-3 border-t-2 border-black/15 text-left">
+                <div class="text-[11px] font-black uppercase tracking-wider text-neutral-700 mb-2 flex items-center justify-between">
+                    <span>📢 Share Receipt / Challenge Friends:</span>
+                    <span id="shareFeedbackText" class="text-emerald-600 font-extrabold hidden">✅ Link Copied!</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    <button id="shareWhatsAppBtn" class="btn-neubrutal py-2 px-1.5 bg-[#25D366] text-white text-xs font-black flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]" title="Share to WhatsApp">
+                        <span>💬 WhatsApp</span>
+                    </button>
+                    <button id="shareTwitterBtn" class="btn-neubrutal py-2 px-1.5 bg-[#111] text-white text-xs font-black flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]" title="Share to X (Twitter)">
+                        <span>𝕏 Post</span>
+                    </button>
+                    <button id="shareFacebookBtn" class="btn-neubrutal py-2 px-1.5 bg-[#1877F2] text-white text-xs font-black flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]" title="Share to Facebook">
+                        <span>👥 Facebook</span>
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="shareResultBtn" class="btn-neubrutal flex-1 py-2.5 bg-[#00F0FF] text-[#111] text-xs font-black flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]">
+                        📋 Copy Receipt Text
+                    </button>
+                    <button id="closeResultBtn" class="btn-neubrutal flex-1 py-2.5 bg-[#8A2BE2] text-white text-xs font-black flex items-center justify-center gap-1 shadow-[2px_2px_0_#000]">
+                        ⚔️ Next Duel ➔
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -791,17 +832,60 @@
     </div>
 
     <div id="tutorialModal" class="modal-backdrop hidden">
-        <div class="danfo-sheet max-w-md w-full p-6 text-left">
-            <h2 class="text-2xl font-black uppercase text-center mb-3">⚔️ How to Duel in 3D</h2>
-            <ul class="space-y-2 text-xs sm:text-sm font-semibold text-neutral-800 mb-5">
-                <li><strong>1. 15 3D Voxel Mechas:</strong> Pick any Crypto, Wall Street Stock, or Private Titan (`$BTC`, `$NVDA`, `$DANGOTE`, `$SPACEX`) for Corner A & Corner B.</li>
-                <li><strong>2. Wager $VCT:</strong> Use the quick-bet chips (`+100`, `+500`, `MAX`) and lock in your prediction.</li>
-                <li><strong>3. 60-Second Live 3D Brawler:</strong> Every 1.5s, live market ticks drive the 3D Voxel Robots to dash across the arena and clash weapons!</li>
-                <li><strong>4. Active Overdrive Skills:</strong> Spend your **⚡ Rage Bar** mid-fight to trigger a **🛡️ 3D Hex Shield** or **⚡ 2x Leverage Strike**!</li>
-                <li><strong>5. KO or Oracle Decision:</strong> Drain the rival's HP to 0 for an explosive 3D Voxel Shatter KO, or win by highest % gain at 0s.</li>
-            </ul>
-            <button id="closeTutorialBtn" class="btn-neubrutal w-full py-3 bg-[#8A2BE2] text-white text-base">
-                Let's Fight! 🚀
+        <div class="danfo-sheet max-w-lg w-full p-5 sm:p-6 text-left relative">
+            <button id="closeTutorialBtnX" class="btn-neubrutal bg-[#111] text-white px-2.5 py-0.5 text-xs absolute top-4 right-4">✕</button>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-2xl">📖</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black uppercase text-[#111] leading-tight">Colosseum Combat Manual</h2>
+                    <p class="text-xs font-bold text-neutral-600">Master 3D Market Duels in 5 Simple Steps</p>
+                </div>
+            </div>
+
+            <div class="space-y-2.5 text-xs font-semibold text-neutral-900 mb-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div class="p-3 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0_#000]">
+                    <div class="flex items-center gap-2 font-black text-xs text-[#8A2BE2] mb-1">
+                        <span>1️⃣</span>
+                        <span>PICK FIGHTERS & CHOOSE WEAPONS</span>
+                    </div>
+                    <p class="text-neutral-700">Choose from 15 articulated Voxel Mechas across Crypto ($BTC, $SOL), Stocks ($NVDA, $TSLA), and African/Global Titans ($DANGOTE, $SPACEX). Equip them with <strong>🗡️ Katana</strong>, <strong>🔨 Warhammer</strong>, <strong>🔱 Trident</strong>, <strong>🪓 Battle Axe</strong>, <strong>⚔️ Greatsword</strong>, or <strong>⚡ Void Scythe</strong> with customized 3D attack physics!</p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0_#000]">
+                    <div class="flex items-center gap-2 font-black text-xs text-[#059669] mb-1">
+                        <span>2️⃣</span>
+                        <span>PREDICT & WAGER $VCT CHIPS</span>
+                    </div>
+                    <p class="text-neutral-700">Click Corner A or Corner B to back your chosen champion. Use the quick wager chips (+100, +500, MAX) to set your bet and hit <strong>⚔️ Lock Bet</strong>.</p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0_#000]">
+                    <div class="flex items-center gap-2 font-black text-xs text-[#d97706] mb-1">
+                        <span>3️⃣</span>
+                        <span>60-SECOND REAL-TIME 3D COMBAT</span>
+                    </div>
+                    <p class="text-neutral-700">Every 1.5s, real market oracle price deltas drive the robots. The fighter with superior upward delta dashes across the arena, swings their custom weapon, and knocks back the opponent, chipping away at their 100 HP bar!</p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0_#000]">
+                    <div class="flex items-center gap-2 font-black text-xs text-[#0284c7] mb-1">
+                        <span>4️⃣</span>
+                        <span>TRIGGER ACTIVE OVERDRIVE SKILLS</span>
+                    </div>
+                    <p class="text-neutral-700">During combat, your <strong>⚡ Rage Bar</strong> charges up. Spend it to activate a <strong>🛡️ 3D Hex Shield</strong> (blocks incoming damage) or unleash <strong>⚡ 2x Leverage</strong> (doubles strike damage)!</p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0_#000]">
+                    <div class="flex items-center gap-2 font-black text-xs text-[#e11d48] mb-1">
+                        <span>5️⃣</span>
+                        <span>3D VOXEL KO & SOCIAL FLEX</span>
+                    </div>
+                    <p class="text-neutral-700">Deplete the rival's HP to 0 for a dramatic 3D Voxel Shatter explosion, or win by % delta at 0s. Claim your $VCT payout + win streak multiplier, and share your brag receipt directly to WhatsApp, X, and Facebook!</p>
+                </div>
+            </div>
+
+            <button id="closeTutorialBtn" class="btn-neubrutal w-full py-3 bg-[#00FF88] text-[#111] text-sm font-black shadow-[3px_3px_0_#000]">
+                ⚔️ Ready to Fight! Enter Arena ➔
             </button>
         </div>
     </div>
@@ -1240,33 +1324,9 @@
             rightArm.position.y = -0.32;
             rightArmPivot.add(rightArm);
 
-            // Build 3D Weapon attached to the front-facing hand
-            const weaponGroup = new THREE.Group();
-            weaponGroup.position.set(0, -0.62, 0.25);
-
-            const hilt = createVoxelBox(0.12, 0.12, 0.65, 0x27272a);
-            weaponGroup.add(hilt);
-
-            if (cfg.weaponType === 'hammer') {
-                const shaft = createVoxelBox(0.12, 1.25, 0.12, 0x52525b);
-                shaft.position.set(0, 0.55, 0.2);
-                const mallet = createVoxelBox(0.55, 0.42, 0.82, cfg.accentHex, cfg.accentHex);
-                mallet.position.set(0, 1.18, 0.2);
-                weaponGroup.add(shaft, mallet);
-            } else if (cfg.weaponType === 'spear') {
-                const pole = createVoxelBox(0.1, 1.65, 0.1, 0x71717a);
-                pole.position.set(0, 0.7, 0.2);
-                const tip = createVoxelBox(0.24, 0.52, 0.14, cfg.accentHex, cfg.accentHex);
-                tip.position.set(0, 1.6, 0.2);
-                weaponGroup.add(pole, tip);
-            } else {
-                // Cyber Broadsword / Katana
-                const guard = createVoxelBox(0.42, 0.12, 0.22, 0xFFD700);
-                guard.position.set(0, 0.15, 0.2);
-                const blade = createVoxelBox(0.1, 1.38, 0.24, cfg.accentHex, cfg.accentHex);
-                blade.position.set(0, 0.88, 0.2);
-                weaponGroup.add(guard, blade);
-            }
+            // Build Procedural 3D Custom Weapon attached to the front-facing hand
+            const activeWeapon = chosenWeapon || (isLeftCorner ? (currentWeaponA || 'broadsword') : (currentWeaponB || 'hammer'));
+            const weaponGroup = buildVoxelWeapon(activeWeapon, cfg.accentHex);
 
             rightArmPivot.add(weaponGroup);
             root.add(leftArmPivot, rightArmPivot);
@@ -1303,6 +1363,7 @@
             root.userData = {
                 assetKey,
                 isLeftCorner,
+                weaponType: activeWeapon,
                 homeX,
                 headGroup,
                 torso,
@@ -1321,16 +1382,106 @@
             return root;
         }
 
+        // Dedicated Procedural Weapon Generator for the 6 Combat Arsenals
+        function buildVoxelWeapon(weaponKey, accentHex) {
+            const group = new THREE.Group();
+            group.position.set(0, -0.62, 0.25);
+
+            if (weaponKey === 'hammer') {
+                // Hydraulic Gravity Warhammer
+                const shaft = createVoxelBox(0.12, 1.35, 0.12, 0x3f3f46);
+                shaft.position.set(0, 0.6, 0.2);
+                const grip = createVoxelBox(0.16, 0.25, 0.16, 0x18181b);
+                grip.position.set(0, 0.15, 0.2);
+                const head = createVoxelBox(0.66, 0.46, 0.92, 0x27272a);
+                head.position.set(0, 1.25, 0.2);
+                const faceF = createVoxelBox(0.7, 0.5, 0.14, accentHex, accentHex);
+                faceF.position.set(0, 1.25, 0.68);
+                const faceB = createVoxelBox(0.7, 0.5, 0.14, accentHex, accentHex);
+                faceB.position.set(0, 1.25, -0.28);
+                const jetL = createVoxelBox(0.14, 0.14, 0.22, 0x00F0FF, 0x00F0FF);
+                jetL.position.set(-0.22, 1.25, -0.42);
+                const jetR = createVoxelBox(0.14, 0.14, 0.22, 0x00F0FF, 0x00F0FF);
+                jetR.position.set(0.22, 1.25, -0.42);
+                group.add(shaft, grip, head, faceF, faceB, jetL, jetR);
+            } else if (weaponKey === 'trident') {
+                // Plasma Trident
+                const pole = createVoxelBox(0.1, 1.75, 0.1, 0x52525b);
+                pole.position.set(0, 0.75, 0.2);
+                const crossBar = createVoxelBox(0.72, 0.12, 0.14, 0xFFD700, 0x886600);
+                crossBar.position.set(0, 1.5, 0.2);
+                const prongCenter = createVoxelBox(0.12, 0.75, 0.14, accentHex, accentHex);
+                prongCenter.position.set(0, 1.9, 0.2);
+                const prongL = createVoxelBox(0.08, 0.58, 0.1, accentHex, accentHex);
+                prongL.position.set(-0.28, 1.82, 0.2);
+                const prongR = createVoxelBox(0.08, 0.58, 0.1, accentHex, accentHex);
+                prongR.position.set(0.28, 1.82, 0.2);
+                group.add(pole, crossBar, prongCenter, prongL, prongR);
+            } else if (weaponKey === 'axe') {
+                // Mecha Battle Axe
+                const haft = createVoxelBox(0.12, 1.45, 0.12, 0x3f3f46);
+                haft.position.set(0, 0.65, 0.2);
+                const core = createVoxelBox(0.24, 0.35, 0.28, 0x18181b);
+                core.position.set(0, 1.25, 0.2);
+                const bladeF = createVoxelBox(0.1, 0.62, 0.55, accentHex, accentHex);
+                bladeF.position.set(0, 1.25, 0.55);
+                const bladeB = createVoxelBox(0.1, 0.45, 0.35, 0x71717a);
+                bladeB.position.set(0, 1.25, -0.15);
+                const spike = createVoxelBox(0.12, 0.38, 0.12, 0xFFD700, 0xFFD700);
+                spike.position.set(0, 1.58, 0.2);
+                group.add(haft, core, bladeF, bladeB, spike);
+            } else if (weaponKey === 'scythe') {
+                // Void Scythe
+                const staff = createVoxelBox(0.12, 1.85, 0.12, 0x18181b);
+                staff.position.set(0, 0.8, 0.2);
+                const neck = createVoxelBox(0.16, 0.22, 0.38, 0x27272a);
+                neck.position.set(0, 1.68, 0.32);
+                const curvedBlade = createVoxelBox(0.08, 0.32, 1.25, accentHex, accentHex);
+                curvedBlade.position.set(0, 1.75, 0.95);
+                curvedBlade.rotation.x = -0.22;
+                group.add(staff, neck, curvedBlade);
+            } else if (weaponKey === 'broadsword') {
+                // Titan Greatsword / Buster Blade
+                const hilt = createVoxelBox(0.12, 0.52, 0.12, 0x27272a);
+                hilt.position.set(0, 0.1, 0.2);
+                const guard = createVoxelBox(0.68, 0.14, 0.24, 0xFFD700, 0x886600);
+                guard.position.set(0, 0.38, 0.2);
+                const gem = createVoxelBox(0.2, 0.2, 0.26, accentHex, accentHex);
+                gem.position.set(0, 0.38, 0.2);
+                const blade = createVoxelBox(0.12, 1.48, 0.42, 0xe4e4e7);
+                blade.position.set(0, 1.15, 0.2);
+                const fuller = createVoxelBox(0.14, 1.15, 0.14, accentHex, accentHex);
+                fuller.position.set(0, 1.15, 0.2);
+                group.add(hilt, guard, gem, blade, fuller);
+            } else {
+                // Cyber Katana (Swift Precision)
+                const tsuka = createVoxelBox(0.1, 0.48, 0.1, 0x111111);
+                tsuka.position.set(0, 0.08, 0.2);
+                const tsuba = createVoxelBox(0.34, 0.08, 0.28, 0xFFD700, 0x886600);
+                tsuba.position.set(0, 0.34, 0.2);
+                const blade = createVoxelBox(0.08, 1.52, 0.18, 0xFFFFFF, accentHex);
+                blade.position.set(0, 1.08, 0.2);
+                group.add(tsuka, tsuba, blade);
+            }
+            return group;
+        }
+
+        let currentWeaponA = 'broadsword';
+        let currentWeaponB = 'hammer';
         let fighterMeshA = null;
         let fighterMeshB = null;
         const voxelParticles = []; // 3D Hit Sparks & KO Voxel Shatter Blocks
         let active3DStrike = null; // Current dash-and-slash animation state
 
-        function spawnFightersIn3D(keyA, keyB) {
+        function spawnFightersIn3D(keyA, keyB, weaponKeyA = null, weaponKeyB = null) {
             if (fighterMeshA) scene.remove(fighterMeshA);
             if (fighterMeshB) scene.remove(fighterMeshB);
-            fighterMeshA = buildVoxelViberFighter(keyA, true);
-            fighterMeshB = buildVoxelViberFighter(keyB, false);
+            const wA = weaponKeyA || (document.getElementById('weaponA') ? document.getElementById('weaponA').value : currentWeaponA);
+            const wB = weaponKeyB || (document.getElementById('weaponB') ? document.getElementById('weaponB').value : currentWeaponB);
+            currentWeaponA = wA;
+            currentWeaponB = wB;
+            fighterMeshA = buildVoxelViberFighter(keyA, true, wA);
+            fighterMeshB = buildVoxelViberFighter(keyB, false, wB);
             scene.add(fighterMeshA, fighterMeshB);
         }
 
@@ -1455,45 +1606,91 @@
                 active3DStrike.elapsed += dt;
                 const p = Math.min(1, active3DStrike.elapsed / active3DStrike.duration);
                 const { attacker, defender, startX, targetX, isCrit, blockedByShield, attackerSide } = active3DStrike;
+                const weapon = attacker.userData.weaponType || 'broadsword';
 
                 if (p < 0.45) {
-                    // Dash forward & wind up weapon
+                    // Dash forward & wind up weapon according to weapon weight
                     const dashT = p / 0.45;
                     attacker.position.x = THREE.MathUtils.lerp(startX, targetX, dashT);
-                    attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.85 : 0.35);
-                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.1, dashT);
+                    
+                    if (weapon === 'hammer') {
+                        // High vertical leap with hydraulic rocket
+                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 1.4 : 0.95);
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.6, dashT);
+                    } else if (weapon === 'katana') {
+                        // Low swift forward razor slide
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.18;
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.6, dashT);
+                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0, 0.8, dashT);
+                    } else if (weapon === 'trident') {
+                        // Straight lunging spear stance
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.25;
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.8, dashT);
+                    } else if (weapon === 'scythe') {
+                        // Spinning windup
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.45;
+                        attacker.rotation.y = (attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2) + dashT * Math.PI;
+                    } else {
+                        // Greatsword & Battle Axe: heavy overhead arc
+                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.9 : 0.45);
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.3, dashT);
+                    }
                 } else if (p < 0.65) {
-                    // Violent downward weapon cleave!
+                    // Weapon impact & physics strike
                     const strikeT = (p - 0.45) / 0.2;
-                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.1, 0.65, strikeT);
+
+                    if (weapon === 'hammer') {
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.6, 0.85, strikeT);
+                        attacker.position.y = THREE.MathUtils.lerp(attacker.position.y, 0, strikeT * 2);
+                    } else if (weapon === 'katana') {
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.6, 0.45, strikeT);
+                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0.8, -0.6, strikeT);
+                    } else if (weapon === 'trident') {
+                        // Rapid piercing triple-jab
+                        const jab = Math.sin(strikeT * Math.PI * 3) * 0.35;
+                        attacker.position.x = targetX + (attackerSide === 'A' ? jab : -jab);
+                        attacker.userData.rightArmPivot.rotation.x = -1.5 + jab;
+                    } else if (weapon === 'scythe') {
+                        attacker.rotation.y = (attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2) + (1 + strikeT) * Math.PI;
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.2, 0.5, strikeT);
+                    } else {
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.3, 0.75, strikeT);
+                    }
 
                     if (!active3DStrike.impactTriggered) {
                         active3DStrike.impactTriggered = true;
                         const defPos = defender.position.clone();
                         const sparkHex = blockedByShield ? 0x00F0FF : (isCrit ? 0xFFD700 : 0xFF3366);
-                        spawn3DVoxelBurst(defPos, sparkHex, isCrit ? 28 : 14, false);
+                        const sparkCount = weapon === 'hammer' ? 36 : (isCrit ? 28 : 16);
+                        spawn3DVoxelBurst(defPos, sparkHex, sparkCount, false);
 
-                        if (isCrit && !blockedByShield) {
+                        if (weapon === 'hammer' || (isCrit && !blockedByShield)) {
                             const wrap = document.getElementById('arena-3d-wrapper');
                             wrap.classList.remove('shake-crit');
                             void wrap.offsetWidth;
                             wrap.classList.add('shake-crit');
                         }
                     }
-                    // Defender recoil knockback
-                    defender.position.x = defender.userData.homeX + (attackerSide === 'A' ? 0.42 : -0.42);
+                    // Defender recoil knockback based on weapon impact
+                    const knockDist = weapon === 'hammer' ? 0.65 : (weapon === 'axe' ? 0.52 : 0.42);
+                    defender.position.x = defender.userData.homeX + (attackerSide === 'A' ? knockDist : -knockDist);
+                    defender.position.y = weapon === 'hammer' ? 0.25 : 0;
                 } else {
                     // Return back to home stance
                     const backT = (p - 0.65) / 0.35;
                     attacker.position.x = THREE.MathUtils.lerp(targetX, startX, backT);
                     attacker.position.y = 0;
                     defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX, backT);
+                    defender.position.y = THREE.MathUtils.lerp(defender.position.y, 0, backT);
+                    attacker.rotation.y = attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2;
                     attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(0.65, -0.35, backT);
+                    attacker.userData.rightArmPivot.rotation.z = 0;
                 }
 
                 if (p >= 1) {
                     attacker.position.x = startX;
                     defender.position.x = defender.userData.homeX;
+                    defender.position.y = 0;
                     active3DStrike = null;
                 }
             }
@@ -1547,18 +1744,14 @@
         let currentUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-stock-duels-3d';
 
-        // Local + Cloud Aggregated Analytics State
+        // Local + Cloud Aggregated Analytics State (100% Authentic Telemetry)
         let telemetryState = {
             activePlayers: 1,
-            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '18'),
-            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '42500'),
-            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '2125'),
-            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || '{"BTC":14,"SOL":11,"NVDA":9,"TSLA":7,"DANGOTE":6,"ETH":6,"SPACEX":5}'),
-            recentMatches: [
-                { winner: "Satoshi_NG", assetWin: "$BTC", assetLose: "$SOL", payout: 975, time: "Just now" },
-                { winner: "LagosWhale", assetWin: "$DANGOTE", assetLose: "$TSLA", payout: 1950, time: "1m ago" },
-                { winner: "CyberRaider", assetWin: "$NVDA", assetLose: "$AAPL", payout: 487, time: "3m ago" }
-            ]
+            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '0'),
+            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '0'),
+            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '0'),
+            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || '{}'),
+            recentMatches: JSON.parse(localStorage.getItem('vibe_recent_matches') || '[]')
         };
 
         async function initFirebaseBackend() {
@@ -1620,7 +1813,7 @@
         function subscribeToGlobalAnalytics() {
             if (!db || !currentUser) return;
 
-            // 1. Listen to Active Players & Leaderboard
+            // 1. Listen to Real Active Players & Leaderboard
             const presCol = collection(db, 'artifacts', appId, 'public', 'data', 'presence');
             onSnapshot(presCol, (snap) => {
                 const now = Date.now();
@@ -1631,7 +1824,7 @@
                 });
                 const recentActive = players.filter(p => (now - (p.lastSeen || 0)) < 120000).length;
                 telemetryState.activePlayers = Math.max(1, recentActive);
-                document.getElementById('onlineCount').innerText = (1420 + telemetryState.activePlayers).toLocaleString();
+                document.getElementById('onlineCount').innerText = telemetryState.activePlayers.toLocaleString();
                 renderLeaderboardList(players);
                 renderAnalyticsDashboard();
             }, (err) => console.warn("Presence listener warning:", err));
@@ -1640,9 +1833,9 @@
             const matchesCol = collection(db, 'artifacts', appId, 'public', 'data', 'match_logs');
             onSnapshot(matchesCol, (snap) => {
                 const logs = [];
-                let vol = 42500;
-                let burned = 2125;
-                const picks = { BTC: 14, SOL: 11, NVDA: 9, TSLA: 7, DANGOTE: 6, ETH: 6, SPACEX: 5 };
+                let vol = 0;
+                let burned = 0;
+                const picks = {};
 
                 snap.forEach(d => {
                     const m = d.data();
@@ -1655,7 +1848,7 @@
 
                 logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 if (logs.length > 0) {
-                    telemetryState.totalMatches = 18 + logs.length;
+                    telemetryState.totalMatches = logs.length;
                     telemetryState.totalVolume = vol;
                     telemetryState.totalBurned = burned;
                     telemetryState.assetPicks = picks;
@@ -1693,6 +1886,7 @@
                 won: matchData.playerWon,
                 time: "Just now"
             });
+            localStorage.setItem('vibe_recent_matches', JSON.stringify(telemetryState.recentMatches.slice(0, 15)));
             renderAnalyticsDashboard();
 
             // Broadcast to Global Arena Feed
@@ -1726,52 +1920,54 @@
             const entries = Object.entries(telemetryState.assetPicks).sort((a, b) => b[1] - a[1]).slice(0, 7);
             const maxPick = Math.max(1, ...entries.map(e => e[1]));
 
-            barsEl.innerHTML = entries.map(([key, count]) => {
-                const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
-                const pct = Math.round((count / maxPick) * 100);
-                return `
-                    <div>
-                        <div class="flex justify-between font-bold mb-0.5">
-                            <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
-                            <span class="font-mono-num text-neutral-300">${count} picks</span>
+            if (entries.length === 0) {
+                barsEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No asset picks logged yet. Duel in the Colosseum to build meta rankings!</div>';
+            } else {
+                barsEl.innerHTML = entries.map(([key, count]) => {
+                    const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
+                    const pct = Math.round((count / maxPick) * 100);
+                    return `
+                        <div>
+                            <div class="flex justify-between font-bold mb-0.5">
+                                <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
+                                <span class="font-mono-num text-neutral-300">${count} picks</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-black rounded-full overflow-hidden border border-white/10">
+                                <div class="h-full rounded-full" style="width:${pct}%; background:${cfg.color}"></div>
+                            </div>
                         </div>
-                        <div class="w-full h-2.5 bg-black rounded-full overflow-hidden border border-white/10">
-                            <div class="h-full rounded-full" style="width:${pct}%; background:${cfg.color}"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            }
 
             // Live Match Feed
             const feedEl = document.getElementById('analyticsLiveFeed');
-            feedEl.innerHTML = telemetryState.recentMatches.map(m => `
-                <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
-                    <div>
-                        <span class="font-bold text-[#00F0FF]">${escapeHtml(m.winner)}</span>
-                        <span class="text-neutral-300"> duelled </span>
-                        <span class="font-bold text-[#FFD700]">${escapeHtml(m.assetWin)}</span>
-                        <span class="text-neutral-400"> vs ${escapeHtml(m.assetLose)}</span>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <div class="font-bold ${m.payout > 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
-                            ${m.payout > 0 ? '+' + m.payout + ' $VCT' : 'KO Loss'}
+            if (telemetryState.recentMatches.length === 0) {
+                feedEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No duels recorded yet. Enter the arena to write match history!</div>';
+            } else {
+                feedEl.innerHTML = telemetryState.recentMatches.map(m => `
+                    <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
+                        <div>
+                            <span class="font-bold text-[#00F0FF]">${escapeHtml(m.winner)}</span>
+                            <span class="text-neutral-300"> duelled </span>
+                            <span class="font-bold text-[#FFD700]">${escapeHtml(m.assetWin)}</span>
+                            <span class="text-neutral-400"> vs ${escapeHtml(m.assetLose)}</span>
                         </div>
-                        <div class="text-[10px] text-neutral-500">${escapeHtml(m.time)}</div>
+                        <div class="text-right shrink-0">
+                            <div class="font-bold ${m.payout > 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
+                                ${m.payout > 0 ? '+' + m.payout + ' $VCT' : 'KO Loss'}
+                            </div>
+                            <div class="text-[10px] text-neutral-500">${escapeHtml(m.time)}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         function renderLeaderboardList(cloudPlayers = []) {
             const listEl = document.getElementById('leaderboardList');
-            const defaultRaiders = [
-                { nickname: "Satoshi_Prime", balance: 18450, streak: 5 },
-                { nickname: "Lagos_Whale", balance: 14200, streak: 3 },
-                { nickname: "Vibe_Archmage", balance: 9800, streak: 2 },
-                { nickname: playerNickname || "You (Raider)", balance: userBalance, streak: winStreak }
-            ];
-
-            const merged = [...cloudPlayers, ...defaultRaiders];
+            const localPlayer = { nickname: playerNickname || "You (Raider)", balance: userBalance, streak: winStreak };
+            const merged = [localPlayer, ...cloudPlayers];
             const uniqueMap = new Map();
             merged.forEach(p => {
                 if (!p.nickname) return;
@@ -1810,6 +2006,8 @@
          ***********************************************************************/
         const selectA = document.getElementById('assetA');
         const selectB = document.getElementById('assetB');
+        const weaponASelect = document.getElementById('weaponA');
+        const weaponBSelect = document.getElementById('weaponB');
         const teamACard = document.getElementById('teamA');
         const teamBCard = document.getElementById('teamB');
         const betInput = document.getElementById('betAmount');
@@ -1818,12 +2016,22 @@
         const chartCanvas = document.getElementById('liveChart');
         const chartCtx = chartCanvas.getContext('2d');
 
+        const WEAPON_REGISTRY = {
+            katana: { name: "🗡️ Cyber Katana", type: "katana" },
+            hammer: { name: "🔨 Gravity Warhammer", type: "hammer" },
+            trident: { name: "🔱 Plasma Trident", type: "trident" },
+            axe: { name: "🪓 Mecha Battle Axe", type: "axe" },
+            broadsword: { name: "⚔️ Titan Greatsword", type: "broadsword" },
+            scythe: { name: "⚡ Void Scythe", type: "scythe" }
+        };
+
         let playerNickname = localStorage.getItem('vibe_stock_nickname') || '';
         let userWallet = localStorage.getItem('vibe_wallet_addr') || '0xVibe...3D99';
         let userBalance = parseInt(localStorage.getItem('vibe_vct_balance') || '5000');
         let winStreak = parseInt(localStorage.getItem('vibe_win_streak') || '0');
         let isSimulated = true;
         let vctContract = null;
+        let lastDuelShareText = "";
 
         let selectedTeam = null;
         let roundLocked = false;
@@ -1859,21 +2067,26 @@
             const cfgA = ASSETS[selectA.value];
             const cfgB = ASSETS[selectB.value];
 
+            const wA = weaponASelect ? weaponASelect.value : currentWeaponA;
+            const wB = weaponBSelect ? weaponBSelect.value : currentWeaponB;
+            currentWeaponA = wA;
+            currentWeaponB = wB;
+
             document.getElementById('mechaNameA').innerText = cfgA.mechaTitle;
-            document.getElementById('weaponNameA').innerText = cfgA.weaponName;
+            document.getElementById('weaponNameA').innerText = WEAPON_REGISTRY[wA]?.name || cfgA.weaponName;
             document.getElementById('miniSwatchA').style.background = cfgA.color;
             document.getElementById('oracleBadgeA').innerText = cfgA.type === 'crypto' ? 'BINANCE LIVE' : (cfgA.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
             document.getElementById('livePriceA').innerText = `$${cfgA.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('labelTickerA').innerText = cfgA.ticker;
 
             document.getElementById('mechaNameB').innerText = cfgB.mechaTitle;
-            document.getElementById('weaponNameB').innerText = cfgB.weaponName;
+            document.getElementById('weaponNameB').innerText = WEAPON_REGISTRY[wB]?.name || cfgB.weaponName;
             document.getElementById('miniSwatchB').style.background = cfgB.color;
             document.getElementById('oracleBadgeB').innerText = cfgB.type === 'crypto' ? 'BINANCE LIVE' : (cfgB.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
             document.getElementById('livePriceB').innerText = `$${cfgB.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('labelTickerB').innerText = cfgB.ticker;
 
-            spawnFightersIn3D(selectA.value, selectB.value);
+            spawnFightersIn3D(selectA.value, selectB.value, wA, wB);
             drawTelemetryChart();
 
             if (selectedTeam) {
@@ -1895,6 +2108,26 @@
             syncFighterSelectionUI();
             broadcastMultiplayerSelection('B', selectB.value);
         });
+
+        if (weaponASelect) {
+            weaponASelect.addEventListener('change', (e) => {
+                e.stopPropagation();
+                if (roundLocked) return;
+                currentWeaponA = weaponASelect.value;
+                syncFighterSelectionUI();
+                broadcastMultiplayerWeapon('A', currentWeaponA);
+            });
+        }
+
+        if (weaponBSelect) {
+            weaponBSelect.addEventListener('change', (e) => {
+                e.stopPropagation();
+                if (roundLocked) return;
+                currentWeaponB = weaponBSelect.value;
+                syncFighterSelectionUI();
+                broadcastMultiplayerWeapon('B', currentWeaponB);
+            });
+        }
 
         // Fighter Card Selection
         teamACard.addEventListener('click', (e) => {
@@ -2354,8 +2587,8 @@
             chartCtx.fillText(`■ ${cfgB.ticker}`, w - 10, 18);
         }
 
-        // Resolve Round, Trigger 3D KO Explosion & Show On-Chain Receipt
-        function finishAndResolveDuel(forcedFinalA = null, forcedFinalB = null) {
+        // Resolve Round, Trigger 3D KO Explosion, Broadcast to Guest & Show On-Chain Receipt
+        function finishAndResolveDuel(forcedFinalA = null, forcedFinalB = null, forcedWinner = null, forcedHpA = null, forcedHpB = null) {
             if (!roundLocked) return;
             roundLocked = false;
             clearInterval(unifiedClockInterval);
@@ -2363,14 +2596,33 @@
 
             if (forcedFinalA !== null) currentPriceA = forcedFinalA;
             if (forcedFinalB !== null) currentPriceB = forcedFinalB;
+            if (forcedHpA !== null) hpA = forcedHpA;
+            if (forcedHpB !== null) hpB = forcedHpB;
 
             const changeA = ((currentPriceA - startPriceA) / startPriceA) * 100;
             const changeB = ((currentPriceB - startPriceB) / startPriceB) * 100;
 
             let winner = 'A';
-            if (hpA <= 0 && hpB > 0) winner = 'B';
-            else if (hpB <= 0 && hpA > 0) winner = 'A';
-            else winner = changeA >= changeB ? 'A' : 'B';
+            if (forcedWinner !== null) {
+                winner = forcedWinner;
+            } else if (hpA <= 0 && hpB > 0) {
+                winner = 'B';
+            } else if (hpB <= 0 && hpA > 0) {
+                winner = 'A';
+            } else {
+                winner = changeA >= changeB ? 'A' : 'B';
+            }
+
+            // Sync Resolution Packet with PvP Guest / Cloud Room
+            if (isMultiplayer && isHost) {
+                broadcastMultiplayerResolve({
+                    priceA: currentPriceA,
+                    priceB: currentPriceB,
+                    winner: winner,
+                    hpA: hpA,
+                    hpB: hpB
+                });
+            }
 
             // Trigger 3D Voxel Shatter Explosion on Loser & Victory Spin on Winner
             if (fighterMeshA && fighterMeshB) {
@@ -2391,6 +2643,8 @@
 
             const cfgA = ASSETS[selectA.value];
             const cfgB = ASSETS[selectB.value];
+            const weapNameA = WEAPON_REGISTRY[currentWeaponA]?.name || cfgA.weaponName;
+            const weapNameB = WEAPON_REGISTRY[currentWeaponB]?.name || cfgB.weaponName;
             const playerWon = selectedTeam === winner;
 
             let payout = 0;
@@ -2418,22 +2672,45 @@
                 playerWon
             });
 
+            const winReason = (hpA <= 0 || hpB <= 0) ? '3D Voxel KO' : 'Oracle Delta';
+            const wonCfg = winner === 'A' ? cfgA : cfgB;
+            const lostCfg = winner === 'A' ? cfgB : cfgA;
+            const wonWeap = winner === 'A' ? weapNameA : weapNameB;
+            const lostWeap = winner === 'A' ? weapNameB : weapNameA;
+            const roomInvite = isMultiplayer && currentRoomOtp ? ` Room #${currentRoomOtp}` : '';
+            const gameUrl = window.location.origin + window.location.pathname;
+
+            lastDuelShareText = playerWon
+                ? `🏆 VICTORY in Vibe Stock Duels 3D!\n🤖 My ${wonCfg.ticker} (${wonWeap}) defeated ${lostCfg.ticker} (${lostWeap}) via ${winReason}!\n💰 Won +${payout.toLocaleString()} $VCT (Streak: 🔥 ${winStreak}x)!\n⚔️ Challenge me in the Cyber-Colosseum${roomInvite}:\n${gameUrl}`
+                : `⚔️ Epic match in Vibe Stock Duels 3D!\n🤖 ${wonCfg.ticker} (${wonWeap}) defeated ${lostCfg.ticker} (${lostWeap}) via ${winReason}!\n🎮 Step into the Colosseum and test your financial reflexes:\n${gameUrl}`;
+
             const receiptHTML = `
-                <div class="bg-[#111] text-[#00F0FF] p-3.5 rounded-xl font-mono-num text-left my-3 text-xs border-2 border-black shadow-[3px_3px_0_#000]">
-                    <div class="font-extrabold text-white border-b border-white/15 pb-1 mb-2 flex justify-between">
-                        <span>ON-CHAIN ORACLE RECEIPT</span>
-                        <span class="text-[#FFD700]">STREAK: 🔥 ${winStreak}x</span>
+                <div class="bg-[#111] text-[#00F0FF] p-4 rounded-xl font-mono-num text-left my-2.5 text-xs border-3 border-black shadow-[3px_3px_0_#000]">
+                    <div class="font-extrabold text-white border-b border-white/15 pb-1.5 mb-2.5 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><span class="text-amber-400">📜</span> ON-CHAIN ORACLE RECEIPT</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-[#FFD700] border border-amber-500/40 text-[11px] font-black">🔥 STREAK: ${winStreak}x</span>
                     </div>
-                    <div class="mb-1.5" style="color:${cfgA.color}">
-                        <strong>${cfgA.ticker} (${cfgA.mechaTitle}):</strong><br>
-                        $${startPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ➔ $${currentPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}%)
+                    <div class="grid grid-cols-2 gap-2 mb-2.5 p-2 rounded-lg bg-black/50 border border-white/10">
+                        <div style="color:${cfgA.color}">
+                            <div class="text-[10px] text-neutral-400 font-bold">CORNER A</div>
+                            <div class="font-black text-sm">${cfgA.ticker}</div>
+                            <div class="text-[10px] text-neutral-300 truncate">${weapNameA}</div>
+                            <div class="text-[11px] font-bold mt-1">$${currentPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                            <div class="text-[11px] font-extrabold ${changeA >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}%</div>
+                        </div>
+                        <div style="color:${cfgB.color}" class="text-right">
+                            <div class="text-[10px] text-neutral-400 font-bold">CORNER B</div>
+                            <div class="font-black text-sm">${cfgB.ticker}</div>
+                            <div class="text-[10px] text-neutral-300 truncate">${weapNameB}</div>
+                            <div class="text-[11px] font-bold mt-1">$${currentPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                            <div class="text-[11px] font-extrabold ${changeB >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}%</div>
+                        </div>
                     </div>
-                    <div class="mb-2" style="color:${cfgB.color}">
-                        <strong>${cfgB.ticker} (${cfgB.mechaTitle}):</strong><br>
-                        $${startPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ➔ $${currentPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} (${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}%)
-                    </div>
-                    <div class="text-[#FFD700] font-extrabold pt-1 border-t border-white/15">
-                        🏆 CHAMPION: ${winner === 'A' ? cfgA.ticker : cfgB.ticker} ${hpA <= 0 || hpB <= 0 ? '(BY 3D VOXEL KO!)' : '(BY ORACLE DELTA)'}
+                    <div class="p-2 rounded-lg bg-[#18181b] border border-amber-400/30 flex items-center justify-between">
+                        <div class="text-neutral-300 font-bold">CHAMPION:</div>
+                        <div class="text-[#FFD700] font-black text-sm">
+                            🏆 ${winner === 'A' ? cfgA.ticker : cfgB.ticker} <span class="text-xs text-neutral-300">(${winReason})</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2481,10 +2758,14 @@
             if (isMultiplayer) {
                 selectA.disabled = !isHost;
                 selectB.disabled = isHost;
+                if (weaponASelect) weaponASelect.disabled = !isHost;
+                if (weaponBSelect) weaponBSelect.disabled = isHost;
                 selectTeam(isHost ? 'A' : 'B');
             } else {
                 selectA.disabled = false;
                 selectB.disabled = false;
+                if (weaponASelect) weaponASelect.disabled = false;
+                if (weaponBSelect) weaponBSelect.disabled = false;
                 if (selectedTeam) selectTeam(selectedTeam);
                 else placeBetBtn.innerText = "Select a Fighter Card First";
             }
@@ -2500,18 +2781,42 @@
             if (isMultiplayer) broadcastMultiplayerNextRound();
         });
 
-        // Copy Brag Receipt for X / WhatsApp
+        // 1-Click Direct Social Sharing Handlers
+        document.getElementById('shareWhatsAppBtn').addEventListener('click', () => {
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(lastDuelShareText)}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('shareTwitterBtn').addEventListener('click', () => {
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(lastDuelShareText)}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('shareFacebookBtn').addEventListener('click', () => {
+            const gameUrl = window.location.origin + window.location.pathname;
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}&quote=${encodeURIComponent(lastDuelShareText)}`;
+            window.open(url, '_blank');
+        });
+
         document.getElementById('shareResultBtn').addEventListener('click', () => {
-            const text = `⚔️ I just fought in Vibe Stock Duels 3D (${ASSETS[selectA.value].ticker} vs ${ASSETS[selectB.value].ticker})! 🔥 Streak: ${winStreak}x | Balance: ${userBalance} $VCT!`;
-            const temp = document.createElement('textarea');
-            temp.value = text;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            temp.remove();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(lastDuelShareText).catch(() => {});
+            } else {
+                const temp = document.createElement('textarea');
+                temp.value = lastDuelShareText;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                temp.remove();
+            }
+            const fb = document.getElementById('shareFeedbackText');
+            if (fb) {
+                fb.classList.remove('hidden');
+                setTimeout(() => fb.classList.add('hidden'), 2500);
+            }
             const btn = document.getElementById('shareResultBtn');
-            btn.innerText = "✅ Receipt Copied!";
-            setTimeout(() => { btn.innerText = "📸 Copy Brag Receipt"; }, 2000);
+            btn.innerText = "✅ Copied to Clipboard!";
+            setTimeout(() => { btn.innerText = "📋 Copy Receipt Text"; }, 2000);
         });
 
         /***********************************************************************
@@ -2657,6 +2962,17 @@
                     syncFighterSelectionUI();
                 }
 
+                // Sync Weapon Dropdowns
+                if (isHost && d.weaponB && currentWeaponB !== d.weaponB && !roundLocked) {
+                    currentWeaponB = d.weaponB;
+                    if (weaponBSelect) weaponBSelect.value = d.weaponB;
+                    syncFighterSelectionUI();
+                } else if (!isHost && d.weaponA && currentWeaponA !== d.weaponA && !roundLocked) {
+                    currentWeaponA = d.weaponA;
+                    if (weaponASelect) weaponASelect.value = d.weaponA;
+                    syncFighterSelectionUI();
+                }
+
                 // Sync Locks
                 if (isHost && d.guestLock > 0 && !oppLock) {
                     oppLock = true;
@@ -2678,6 +2994,17 @@
                     countdownEl.innerText = timer;
                     processCombatTickData(d.lastTick);
                 }
+
+                // Sync Match Resolution for Guest from Host
+                if (!isHost && d.status === 'RESOLVED' && roundLocked) {
+                    finishAndResolveDuel(d.finalPriceA, d.finalPriceB, d.winner, d.hpA, d.hpB);
+                }
+
+                // Sync Next Round Reset for Guest
+                if (!isHost && d.status === 'READY_NEXT' && !roundLocked) {
+                    document.getElementById('resultModal').classList.add('hidden');
+                    resetArenaForNextRound();
+                }
             }, () => {});
         }
 
@@ -2692,6 +3019,17 @@
                 } else if (msg.type === 'SELECT') {
                     if (msg.team === 'A' && !isHost) { selectA.value = msg.asset; syncFighterSelectionUI(); }
                     if (msg.team === 'B' && isHost) { selectB.value = msg.asset; syncFighterSelectionUI(); }
+                } else if (msg.type === 'SELECT_WEAPON') {
+                    if (msg.team === 'A' && !isHost) {
+                        currentWeaponA = msg.weapon;
+                        if (weaponASelect) weaponASelect.value = msg.weapon;
+                        syncFighterSelectionUI();
+                    }
+                    if (msg.team === 'B' && isHost) {
+                        currentWeaponB = msg.weapon;
+                        if (weaponBSelect) weaponBSelect.value = msg.weapon;
+                        syncFighterSelectionUI();
+                    }
                 } else if (msg.type === 'LOCK') {
                     oppLock = true;
                     document.getElementById(isHost ? 'poolB' : 'poolA').innerText = msg.amount;
@@ -2702,6 +3040,14 @@
                     timer = msg.tick.timer;
                     countdownEl.innerText = timer;
                     processCombatTickData(msg.tick);
+                    // Guest fallback timeout if clock ends or KO hits 0
+                    if (timer <= 0 || msg.tick.hpA <= 0 || msg.tick.hpB <= 0) {
+                        setTimeout(() => {
+                            if (roundLocked) finishAndResolveDuel(msg.tick.priceA, msg.tick.priceB, null, msg.tick.hpA, msg.tick.hpB);
+                        }, 800);
+                    }
+                } else if (msg.type === 'RESOLVE' && !isHost && roundLocked) {
+                    finishAndResolveDuel(msg.priceA, msg.priceB, msg.winner, msg.hpA, msg.hpB);
                 } else if (msg.type === 'SKILL') {
                     if (msg.skill === 'SHIELD') {
                         if (msg.side === 'A') shieldTicksA = 3; else shieldTicksB = 3;
@@ -2732,6 +3078,8 @@
 
             selectA.disabled = !isHost;
             selectB.disabled = isHost;
+            if (weaponASelect) weaponASelect.disabled = !isHost;
+            if (weaponBSelect) weaponBSelect.disabled = isHost;
             selectTeam(isHost ? 'A' : 'B');
             appendChatMessage("⚔️ ARENA", `Connected to PvP Duel Room #${currentRoomOtp}!`, "#00FF88");
         }
@@ -2766,6 +3114,15 @@
             }
         }
 
+        function broadcastMultiplayerWeapon(team, weapon) {
+            if (!isMultiplayer) return;
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'SELECT_WEAPON', team, weapon });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, team === 'A' ? { weaponA: weapon } : { weaponB: weapon }).catch(() => {});
+            }
+        }
+
         function broadcastMultiplayerStart(initialPrices) {
             if (p2pConn && p2pConn.open) p2pConn.send({ type: 'START', initialPrices });
             if (db && currentUser && currentRoomOtp) {
@@ -2782,6 +3139,22 @@
             }
         }
 
+        function broadcastMultiplayerResolve(resData) {
+            if (!isMultiplayer) return;
+            if (p2pConn && p2pConn.open) p2pConn.send({ type: 'RESOLVE', ...resData });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, {
+                    status: 'RESOLVED',
+                    finalPriceA: resData.priceA,
+                    finalPriceB: resData.priceB,
+                    winner: resData.winner,
+                    hpA: resData.hpA,
+                    hpB: resData.hpB
+                }).catch(() => {});
+            }
+        }
+
         function broadcastMultiplayerSkill(skill, side, emoteText = '') {
             if (!isMultiplayer) return;
             if (p2pConn && p2pConn.open) p2pConn.send({ type: 'SKILL', skill, side, emoteText });
@@ -2789,6 +3162,10 @@
 
         function broadcastMultiplayerNextRound() {
             if (p2pConn && p2pConn.open) p2pConn.send({ type: 'NEXT_ROUND' });
+            if (db && currentUser && currentRoomOtp) {
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'duel_rooms', currentRoomOtp);
+                updateDoc(roomRef, { status: 'READY_NEXT', hostLock: 0, guestLock: 0 }).catch(() => {});
+            }
         }
 
         document.getElementById('leavePvpBtn').addEventListener('click', () => {
@@ -2874,7 +3251,15 @@
         });
         document.getElementById('closeTutorialBtn').addEventListener('click', () => {
             document.getElementById('tutorialModal').classList.add('hidden');
+            localStorage.setItem('vibe_tutorial_seen', 'true');
         });
+        const closeTutX = document.getElementById('closeTutorialBtnX');
+        if (closeTutX) {
+            closeTutX.addEventListener('click', () => {
+                document.getElementById('tutorialModal').classList.add('hidden');
+                localStorage.setItem('vibe_tutorial_seen', 'true');
+            });
+        }
 
         document.getElementById('soundToggleBtn').addEventListener('click', () => {
             soundEnabled = !soundEnabled;
@@ -2898,6 +3283,13 @@
             document.getElementById('nicknamePill').classList.remove('hidden');
             document.getElementById('nicknameModal').classList.add('hidden');
             if (currentUser) registerPlayerPresence(currentUser.uid);
+
+            // If player hasn't seen the tutorial yet, show it right after onboarding
+            if (!localStorage.getItem('vibe_tutorial_seen')) {
+                setTimeout(() => {
+                    document.getElementById('tutorialModal').classList.remove('hidden');
+                }, 400);
+            }
         });
 
         // Privy & MetaMask Login Simulation / Ethers v6
@@ -2953,6 +3345,12 @@
             selectTeam('A'); // Default select Corner A so player can bet immediately
             animate3DArena();
             initFirebaseBackend();
+
+            if (!localStorage.getItem('vibe_tutorial_seen') && playerNickname) {
+                setTimeout(() => {
+                    document.getElementById('tutorialModal').classList.remove('hidden');
+                }, 800);
+            }
 
             // Check for ?duel=OTP URL invite parameter
             const params = new URLSearchParams(window.location.search);
