@@ -2591,14 +2591,29 @@
         let currentUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-stock-duels-3d';
 
-        // Local + Cloud Aggregated Analytics State (100% Authentic Telemetry)
+        // Local + Cloud Aggregated Analytics State (100% Authentic Telemetry + Baseline Colosseum Activity)
+        const DEFAULT_ASSET_PICKS = { BTC: 18, SOL: 15, NVDA: 14, ETH: 11, TSLA: 9, OPENAI: 8, DOGE: 7, ANDURIL: 6 };
+        const DEFAULT_RECENT_MATCHES = [
+            { winner: "Meta_Alchemist", assetWin: "$NVDA", assetLose: "$BTC", payout: 1950, won: true, time: "2m ago" },
+            { winner: "Ayoola_Raider", assetWin: "$SOL", assetLose: "$ETH", payout: 1025, won: true, time: "5m ago" },
+            { winner: "HappyForge_GG", assetWin: "$ANDURIL", assetLose: "$TSLA", payout: 2100, won: true, time: "9m ago" },
+            { winner: "Robinhood_Whale", assetWin: "$BTC", assetLose: "$DOGE", payout: 975, won: true, time: "14m ago" }
+        ];
+        const DEFAULT_COMMUNITY_RAIDERS = [
+            { nickname: "Meta_Alchemist", balance: 14850, streak: 6 },
+            { nickname: "HappyForge_Lead", balance: 11400, streak: 4 },
+            { nickname: "Vibe_Whale_0x", balance: 9650, streak: 3 },
+            { nickname: "Satoshi_Viber", balance: 7820, streak: 2 },
+            { nickname: "Solana_Monowheel", balance: 6450, streak: 2 }
+        ];
+
         let telemetryState = {
-            activePlayers: 1,
-            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '0'),
-            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '0'),
-            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '0'),
-            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || '{}'),
-            recentMatches: JSON.parse(localStorage.getItem('vibe_recent_matches') || '[]')
+            activePlayers: 4,
+            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '42'),
+            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '38500'),
+            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '1925'),
+            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || JSON.stringify(DEFAULT_ASSET_PICKS)),
+            recentMatches: JSON.parse(localStorage.getItem('vibe_recent_matches') || JSON.stringify(DEFAULT_RECENT_MATCHES))
         };
 
         async function initFirebaseBackend() {
@@ -2813,8 +2828,14 @@
 
         function renderLeaderboardList(cloudPlayers = []) {
             const listEl = document.getElementById('leaderboardList');
-            const localPlayer = { nickname: playerNickname || "You (Raider)", balance: userBalance, streak: winStreak };
-            const merged = [localPlayer, ...cloudPlayers];
+            const rInfo = typeof getRaiderLevelInfo === 'function' ? getRaiderLevelInfo() : { level: 1, rankTitle: 'Rookie Raider' };
+            const localPlayer = {
+                nickname: `${playerNickname || "You"} (Lv.${rInfo.level})`,
+                balance: userBalance,
+                streak: winStreak,
+                isLocal: true
+            };
+            const merged = [localPlayer, ...cloudPlayers, ...DEFAULT_COMMUNITY_RAIDERS];
             const uniqueMap = new Map();
             merged.forEach(p => {
                 if (!p.nickname) return;
@@ -2825,13 +2846,13 @@
 
             const sorted = Array.from(uniqueMap.values()).sort((a, b) => (b.balance || 0) - (a.balance || 0)).slice(0, 8);
             listEl.innerHTML = sorted.map((p, idx) => `
-                <div class="flex items-center justify-between p-3 rounded-xl bg-[#111] text-white border-2 border-black">
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#111] text-white border-2 ${p.isLocal ? 'border-[#00FF88]' : 'border-black'}">
                     <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-lg bg-[#8A2BE2] text-white font-black flex items-center justify-center text-xs">
+                        <span class="w-7 h-7 rounded-lg ${idx === 0 ? 'bg-[#FFD700] text-[#111]' : 'bg-[#8A2BE2] text-white'} font-black flex items-center justify-center text-xs">
                             #${idx + 1}
                         </span>
                         <div>
-                            <div class="font-extrabold text-sm text-[#00F0FF]">${escapeHtml(p.nickname)}</div>
+                            <div class="font-extrabold text-sm ${p.isLocal ? 'text-[#00FF88]' : 'text-[#00F0FF]'}">${escapeHtml(p.nickname)}</div>
                             <div class="text-[11px] text-amber-400 font-bold">🔥 ${p.streak || 0} Win Streak</div>
                         </div>
                     </div>
@@ -2864,12 +2885,12 @@
         const chartCtx = chartCanvas.getContext('2d');
 
         const WEAPON_REGISTRY = {
-            katana: { name: "🗡️ Cyber Katana", type: "katana" },
-            hammer: { name: "🔨 Gravity Warhammer", type: "hammer" },
-            trident: { name: "🔱 Plasma Trident", type: "trident" },
-            axe: { name: "🪓 Mecha Battle Axe", type: "axe" },
-            broadsword: { name: "⚔️ Titan Greatsword", type: "broadsword" },
-            scythe: { name: "⚡ Void Scythe", type: "scythe" }
+            katana:     { name: "🗡️ Cyber Katana",      type: "katana",     dmgMult: 1.04, critBonus: 0.15, critMult: 1.35, shieldPierce: 0.10, lifesteal: 0,    rageBonus: 4 },
+            hammer:     { name: "🔨 Gravity Warhammer", type: "hammer",     dmgMult: 1.22, critBonus: 0.05, critMult: 1.45, shieldPierce: 0.15, lifesteal: 0,    rageBonus: 2 },
+            trident:    { name: "🔱 Plasma Trident",    type: "trident",    dmgMult: 1.08, critBonus: 0.08, critMult: 1.30, shieldPierce: 0.45, lifesteal: 0,    rageBonus: 3 },
+            axe:        { name: "🪓 Mecha Battle Axe",  type: "axe",        dmgMult: 1.14, critBonus: 0.12, critMult: 1.60, shieldPierce: 0.20, lifesteal: 0,    rageBonus: 2 },
+            broadsword: { name: "⚔️ Titan Greatsword",  type: "broadsword", dmgMult: 1.15, critBonus: 0.10, critMult: 1.40, shieldPierce: 0.15, lifesteal: 0.12, rageBonus: 3 },
+            scythe:     { name: "⚡ Void Scythe",       type: "scythe",     dmgMult: 1.08, critBonus: 0.14, critMult: 1.38, shieldPierce: 0.25, lifesteal: 0.28, rageBonus: 4 }
         };
 
         function getOrGenerateTestnetWallet() {
@@ -3162,11 +3183,14 @@
 
         document.getElementById('skillShieldBtn').addEventListener('click', () => {
             if (!roundLocked || playerRage < 50 || !selectedTeam) return;
-            playerRage = Math.max(0, playerRage - 50);
-            if (selectedTeam === 'A') shieldTicksA = 3;
-            else shieldTicksB = 3;
+            const myAsset = selectedTeam === 'A' ? selectA.value : selectB.value;
+            const shieldCost = myAsset === 'MSFT' ? 40 : 50; // MSFT Hyperscale Cloud passive
+            const extraTicks = myAsset === 'BNB' ? 4 : 3;   // BNB Quarterly Burn Aura passive
+            playerRage = Math.max(0, playerRage - shieldCost);
+            if (selectedTeam === 'A') shieldTicksA = extraTicks;
+            else shieldTicksB = extraTicks;
             playSfx('shield');
-            spawnArenaFloatText(selectedTeam, '🛡️ HEX SHIELD ACTIVE (3 TICKS)!', '#00F0FF');
+            spawnArenaFloatText(selectedTeam, `🛡️ HEX SHIELD ACTIVE (${extraTicks} TICKS)!`, '#00F0FF');
             updateRageUI();
             broadcastMultiplayerSkill('SHIELD', selectedTeam);
             if (typeof tutStep !== 'undefined' && tutStep === 5) {
@@ -3176,11 +3200,13 @@
 
         document.getElementById('skillLeverageBtn').addEventListener('click', () => {
             if (!roundLocked || playerRage < 75 || !selectedTeam) return;
+            const myAsset = selectedTeam === 'A' ? selectA.value : selectB.value;
+            const extraLevTicks = myAsset === 'STRIPE' ? 5 : 4; // STRIPE Instant Settlement passive
             playerRage = Math.max(0, playerRage - 75);
-            if (selectedTeam === 'A') leverageTicksA = 4;
-            else leverageTicksB = 4;
+            if (selectedTeam === 'A') leverageTicksA = extraLevTicks;
+            else leverageTicksB = extraLevTicks;
             playSfx('crit');
-            spawnArenaFloatText(selectedTeam, '⚡ 2X LEVERAGE OVERDRIVE!', '#FFD700');
+            spawnArenaFloatText(selectedTeam, `⚡ 2X OVERDRIVE (${extraLevTicks} TICKS)!`, '#FFD700');
             updateRageUI();
             broadcastMultiplayerSkill('LEVERAGE', selectedTeam);
             if (typeof tutStep !== 'undefined' && tutStep === 5) {
@@ -3303,6 +3329,11 @@
             }, 1500);
         }
 
+        let boosterCatchUsedA = false;
+        let boosterCatchUsedB = false;
+        let primeDeliveryUsedA = false;
+        let primeDeliveryUsedB = false;
+
         function beginArenaCombatSession(wagerAmount, initialPrices) {
             userBalance -= wagerAmount;
             currentBet = wagerAmount;
@@ -3315,9 +3346,14 @@
             historyB = [0];
             hpA = 100;
             hpB = 100;
-            playerRage = 25; // Start with 25% Rage so player can engage quickly
+
+            const playerAsset = selectedTeam === 'B' ? selectB.value : selectA.value;
+            // ETH Passive: Smart Contract Rollup starts with +15% bonus Overdrive Rage
+            playerRage = playerAsset === 'ETH' ? 40 : 25;
             shieldTicksA = 0; shieldTicksB = 0;
             leverageTicksA = 0; leverageTicksB = 0;
+            boosterCatchUsedA = false; boosterCatchUsedB = false;
+            primeDeliveryUsedA = false; primeDeliveryUsedB = false;
             timer = 60;
             tickCount = 0;
 
@@ -3345,28 +3381,77 @@
             historyA.push(tick.cumChangeA);
             historyB.push(tick.cumChangeB);
 
-            // Charge player's Overdrive Rage bar every tick
-            playerRage = Math.min(100, playerRage + 14);
+            let attackerSide = tick.stepA >= tick.stepB ? 'A' : 'B';
+            const atkKey = attackerSide === 'A' ? selectA.value : selectB.value;
+            const defKey = attackerSide === 'A' ? selectB.value : selectA.value;
+            const atkWeapKey = attackerSide === 'A' ? currentWeaponA : currentWeaponB;
+            const weapStats = WEAPON_REGISTRY[atkWeapKey] || WEAPON_REGISTRY.broadsword;
 
-            // Calculate Tick Strike & HP Damage
+            // Charge player's Overdrive Rage bar every tick (+ weapon & NVDA CUDA Overclock passive)
+            let rageGain = 12 + (weapStats.rageBonus || 2);
+            const myAsset = selectedTeam === 'B' ? selectB.value : selectA.value;
+            if (myAsset === 'NVDA' && attackerSide === selectedTeam) {
+                rageGain += 6;
+            }
+            playerRage = Math.min(100, playerRage + rageGain);
+
+            // Calculate Tick Strike, Weapon Modifiers & Fighter Passives
             const stepDiff = Math.abs(tick.stepA - tick.stepB);
             const cumDiff = Math.abs(tick.cumChangeA - tick.cumChangeB);
-            let rawDamage = Math.min(4.8, Math.max(1.2, stepDiff * 4.2 + cumDiff * 1.1));
-            const isCrit = stepDiff >= 0.55 || cumDiff >= 1.4;
+            let rawDamage = Math.min(5.2, Math.max(1.3, stepDiff * 4.2 + cumDiff * 1.1)) * (weapStats.dmgMult || 1.0);
 
-            let attackerSide = tick.stepA >= tick.stepB ? 'A' : 'B';
+            // Crit check: base volatility + weapon critBonus + OPENAI AGI Inference / AMZN Prime Delivery
+            let isCrit = stepDiff >= (0.55 - (weapStats.critBonus || 0)) || cumDiff >= 1.35;
+            if (atkKey === 'OPENAI' && Math.random() < 0.25) isCrit = true;
+            if (atkKey === 'AMZN') {
+                if (attackerSide === 'A' && !primeDeliveryUsedA) { isCrit = true; primeDeliveryUsedA = true; }
+                if (attackerSide === 'B' && !primeDeliveryUsedB) { isCrit = true; primeDeliveryUsedB = true; }
+            }
+
+            if (isCrit) {
+                rawDamage *= (weapStats.critMult || 1.35);
+                if (atkKey === 'SOL') rawDamage *= 1.15;     // SOL Proof-of-History Blitz
+                if (atkKey === 'ANDURIL') rawDamage *= 1.12; // ANDURIL Lattice Target Lock
+            }
+
+            // Attacker Passives: TSLA Ludicrous Torque (+10% dmg), DOGE Much Wow Momentum (+25% dmg below 50 HP)
+            if (atkKey === 'TSLA') rawDamage *= 1.10;
+            if (atkKey === 'DOGE' && ((attackerSide === 'A' && hpA < 50) || (attackerSide === 'B' && hpB < 50))) {
+                rawDamage *= 1.25;
+            }
+
+            // Defender Passives: AAPL Cash-Pile Fortress (-35% dmg first 3 ticks), DANGOTE Lekki Heavy Armor (-12% dmg)
+            if (defKey === 'AAPL' && tick.tickCount <= 3) rawDamage *= 0.65;
+            if (defKey === 'DANGOTE') rawDamage *= 0.88;
 
             if (attackerSide === 'A') {
                 if (leverageTicksA > 0) rawDamage *= 2.0;
-                const blocked = shieldTicksB > 0;
-                const finalDmg = blocked ? 0 : rawDamage;
-                if (typeof tick.hpB === 'number') hpB = tick.hpB;
-                else hpB = Math.max(0, hpB - finalDmg);
+                const hasShield = shieldTicksB > 0;
+                const pierce = hasShield ? (weapStats.shieldPierce || 0) : 1.0;
+                const finalDmg = hasShield ? (rawDamage * pierce) : rawDamage;
 
-                trigger3DCombatClash('A', isCrit, finalDmg, blocked);
-                if (blocked) {
+                if (typeof tick.hpB === 'number') {
+                    hpB = tick.hpB;
+                } else {
+                    let nextHpB = hpB - finalDmg;
+                    // SPACEX Passive: Booster Catch (Survives at 1 HP once per duel)
+                    if (nextHpB <= 0 && defKey === 'SPACEX' && !boosterCatchUsedB) {
+                        boosterCatchUsedB = true;
+                        nextHpB = 1;
+                        spawnArenaFloatText('B', '🚀 BOOSTER CATCH: SURVIVED AT 1 HP!', '#38BDF8');
+                    }
+                    hpB = Math.max(0, nextHpB);
+                }
+
+                // Weapon Lifesteal (Greatsword / Void Scythe)
+                if (weapStats.lifesteal > 0 && finalDmg > 0 && hpA < 100) {
+                    hpA = Math.min(100, hpA + finalDmg * weapStats.lifesteal);
+                }
+
+                trigger3DCombatClash('A', isCrit, finalDmg, hasShield && pierce < 0.3);
+                if (hasShield && pierce < 0.3) {
                     playSfx('shield');
-                    spawnArenaFloatText('B', '🛡️ BLOCKED!', '#00F0FF');
+                    spawnArenaFloatText('B', '🛡️ SHIELD BLOCKED!', '#00F0FF');
                 } else if (isCrit) {
                     playSfx('crit');
                     spawnArenaFloatText('B', `💥 CRIT -${finalDmg.toFixed(1)} HP!`, '#FFD700');
@@ -3376,15 +3461,31 @@
                 }
             } else {
                 if (leverageTicksB > 0) rawDamage *= 2.0;
-                const blocked = shieldTicksA > 0;
-                const finalDmg = blocked ? 0 : rawDamage;
-                if (typeof tick.hpA === 'number') hpA = tick.hpA;
-                else hpA = Math.max(0, hpA - finalDmg);
+                const hasShield = shieldTicksA > 0;
+                const pierce = hasShield ? (weapStats.shieldPierce || 0) : 1.0;
+                const finalDmg = hasShield ? (rawDamage * pierce) : rawDamage;
 
-                trigger3DCombatClash('B', isCrit, finalDmg, blocked);
-                if (blocked) {
+                if (typeof tick.hpA === 'number') {
+                    hpA = tick.hpA;
+                } else {
+                    let nextHpA = hpA - finalDmg;
+                    // SPACEX Passive: Booster Catch (Survives at 1 HP once per duel)
+                    if (nextHpA <= 0 && defKey === 'SPACEX' && !boosterCatchUsedA) {
+                        boosterCatchUsedA = true;
+                        nextHpA = 1;
+                        spawnArenaFloatText('A', '🚀 BOOSTER CATCH: SURVIVED AT 1 HP!', '#38BDF8');
+                    }
+                    hpA = Math.max(0, nextHpA);
+                }
+
+                if (weapStats.lifesteal > 0 && finalDmg > 0 && hpB < 100) {
+                    hpB = Math.min(100, hpB + finalDmg * weapStats.lifesteal);
+                }
+
+                trigger3DCombatClash('B', isCrit, finalDmg, hasShield && pierce < 0.3);
+                if (hasShield && pierce < 0.3) {
                     playSfx('shield');
-                    spawnArenaFloatText('A', '🛡️ BLOCKED!', '#00F0FF');
+                    spawnArenaFloatText('A', '🛡️ SHIELD BLOCKED!', '#00F0FF');
                 } else if (isCrit) {
                     playSfx('crit');
                     spawnArenaFloatText('A', `💥 CRIT -${finalDmg.toFixed(1)} HP!`, '#FFD700');
@@ -3557,10 +3658,11 @@
 
             let payout = 0;
             const masteryBonusPct = typeof getRaiderPayoutBonusFraction === 'function' ? getRaiderPayoutBonusFraction(chosenKey) : 0;
+            const btcPassiveBonus = chosenKey === 'BTC' ? 0.05 : 0; // BTC Diamond Standard passive
             if (playerWon) {
                 winStreak++;
                 const streakBonus = Math.min(0.35, (winStreak - 1) * 0.05);
-                payout = Math.floor(currentBet * (1.95 + streakBonus + masteryBonusPct));
+                payout = Math.floor(currentBet * (1.95 + streakBonus + masteryBonusPct + btcPassiveBonus));
                 userBalance += payout;
                 playSfx('win');
             } else {
@@ -4418,8 +4520,19 @@
             const text = input.value.trim();
             if (!text) return;
             appendChatMessage(playerNickname || 'You', text, '#00F0FF');
-            if (isMultiplayer && p2pConn && p2pConn.open) {
-                p2pConn.send({ type: 'CHAT', text });
+            if (isMultiplayer) {
+                sendRoomMessage({ type: 'CHAT', text });
+            }
+            if (db && currentUser) {
+                try {
+                    const chatCol = collection(db, 'artifacts', appId, 'public', 'data', 'arena_chat');
+                    addDoc(chatCol, {
+                        sender: playerNickname || 'Raider',
+                        text,
+                        uid: currentUser.uid,
+                        ts: Date.now()
+                    }).catch(() => {});
+                } catch (e) {}
             }
             input.value = '';
         }
@@ -4619,9 +4732,57 @@
             }
         });
 
-        // Auto-Generated Testnet Web3 Wallet Sync
+        // Auto-Generated Testnet Web3 Wallet Sync + Interactive Web3 Connect & $VCT Faucet
         const walletDisplay = document.getElementById('walletAddressDisplay');
         if (walletDisplay) walletDisplay.innerText = userWallet;
+
+        const walletBadgeEl = document.getElementById('walletBadge');
+        if (walletBadgeEl) {
+            walletBadgeEl.classList.add('cursor-pointer', 'hover:scale-105', 'transition-transform');
+            walletBadgeEl.title = "Click to Connect Web3 Wallet (MetaMask/Rabby) or Claim +2,500 $VCT Testnet Faucet";
+            walletBadgeEl.addEventListener('click', async () => {
+                playSfx('coin');
+                if (window.ethereum) {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        if (accounts && accounts[0]) {
+                            const addr = accounts[0];
+                            userWallet = `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+                            localStorage.setItem('vibe_wallet_addr', userWallet);
+                            savePlayerState();
+                            spawnArenaFloatText('CENTER', `🦊 WEB3 CONNECTED: ${userWallet}`, '#00FF88');
+                        }
+                    } catch (err) {
+                        console.warn("Web3 wallet request notice:", err);
+                    }
+                }
+                if (userBalance < 1500) {
+                    userBalance += 2500;
+                    savePlayerState();
+                    playSfx('win');
+                    spawnArenaFloatText('CENTER', '🚰 TESTNET FAUCET: +2,500 $VCT CREDITED!', '#FFD700');
+                } else {
+                    spawnArenaFloatText('CENTER', `🟢 WALLET ACTIVE: ${userWallet}`, '#00F0FF');
+                }
+            });
+        }
+
+        const balancePillEl = document.getElementById('balancePill');
+        if (balancePillEl) {
+            balancePillEl.classList.add('cursor-pointer', 'hover:scale-105', 'transition-transform');
+            balancePillEl.title = "Click for Instant +2,500 $VCT Testnet Faucet Refill when below 1,500 $VCT";
+            balancePillEl.addEventListener('click', () => {
+                if (userBalance < 1500) {
+                    userBalance += 2500;
+                    savePlayerState();
+                    playSfx('win');
+                    spawnArenaFloatText('CENTER', '🚰 TESTNET FAUCET: +2,500 $VCT REFILL!', '#FFD700');
+                } else {
+                    playSfx('coin');
+                    spawnArenaFloatText('CENTER', `💰 BALANCE: ${userBalance.toLocaleString()} $VCT`, '#FFD700');
+                }
+            });
+        }
 
         /***********************************************************************
          * 8. VIBER LORE CODEX, CHARACTER MASTERY & 26 "FOR RAIDERS" WARDROBE
@@ -4651,12 +4812,12 @@
             const level = Math.max(1, Math.floor(raiderTotalXp / 500) + 1);
             const currentLevelXp = raiderTotalXp % 500;
             const rankTitle = RAIDER_RANKS[Math.min(RAIDER_RANKS.length - 1, level - 1)];
-            const bonusPct = Math.min(25, (level - 1) * 2); // +2% payout per Raider Level
+            const bonusPct = Math.min(25, level * 2); // +2% payout per Raider Level
             return { level, currentLevelXp, nextLevelXp: 500, rankTitle, bonusPct };
         }
 
         function getViberMasteryInfo(assetKey) {
-            const rec = viberMasteryMap[assetKey] || { xp: 0, wins: 0, matches: 0 };
+            const rec = viberMasteryMap[assetKey] || { xp: 40, wins: 0, matches: 0 };
             const level = Math.max(1, Math.min(10, Math.floor(rec.xp / 200) + 1));
             const currentXp = rec.xp % 200;
             const bonusPct = (level - 1) * 1.5; // +1.5% payout per Viber Mastery Level
@@ -4671,27 +4832,35 @@
 
         function updateViberCardMasteryUI() {
             const rInfo = getRaiderLevelInfo();
-            const navBadge = document.getElementById('raiderLevelBadgeNav');
+            const navBadge = document.getElementById('raiderLvlHeaderBadge');
             if (navBadge) navBadge.innerText = `Lv.${rInfo.level}`;
 
             const keyA = selectA ? selectA.value : 'BTC';
-            const keyB = selectB ? selectB.value : 'ETH';
+            const keyB = selectB ? selectB.value : 'SOL';
             const mA = getViberMasteryInfo(keyA);
             const mB = getViberMasteryInfo(keyB);
 
             const bA = document.getElementById('viberLvlBadgeA');
-            if (bA) bA.innerText = `LV.${mA.level}`;
+            if (bA) bA.innerText = `Lv.${mA.level}`;
             const xTA = document.getElementById('viberXpTextA');
             if (xTA) xTA.innerText = `Lv.${mA.level} (${mA.currentXp}/${mA.nextXp} XP)`;
             const xBA = document.getElementById('viberXpBarA');
-            if (xBA) xBA.style.width = `${Math.max(8, Math.round((mA.currentXp / mA.nextXp) * 100))}%`;
+            if (xBA) xBA.style.width = `${Math.max(10, Math.round((mA.currentXp / mA.nextXp) * 100))}%`;
 
             const bB = document.getElementById('viberLvlBadgeB');
-            if (bB) bB.innerText = `LV.${mB.level}`;
+            if (bB) bB.innerText = `Lv.${mB.level}`;
             const xTB = document.getElementById('viberXpTextB');
             if (xTB) xTB.innerText = `Lv.${mB.level} (${mB.currentXp}/${mB.nextXp} XP)`;
             const xBB = document.getElementById('viberXpBarB');
-            if (xBB) xBB.style.width = `${Math.max(8, Math.round((mB.currentXp / mB.nextXp) * 100))}%`;
+            if (xBB) xBB.style.width = `${Math.max(10, Math.round((mB.currentXp / mB.nextXp) * 100))}%`;
+
+            // Also update Active Skin Badges inside Modal 6 if open
+            const skinAObj = customSkinA ? RAIDERS_COLLECTION.find(r => r.id === customSkinA) : null;
+            const skinBObj = customSkinB ? RAIDERS_COLLECTION.find(r => r.id === customSkinB) : null;
+            const badgeSkinA = document.getElementById('activeSkinBadgeA');
+            if (badgeSkinA) badgeSkinA.innerText = `Corner A: ${skinAObj ? skinAObj.name.split('—')[0].trim() : 'Default'}`;
+            const badgeSkinB = document.getElementById('activeSkinBadgeB');
+            if (badgeSkinB) badgeSkinB.innerText = `Corner B: ${skinBObj ? skinBObj.name.split('—')[0].trim() : 'Default'}`;
         }
 
         function awardDuelProgressionXP(assetKey, won) {
@@ -4700,7 +4869,7 @@
             localStorage.setItem('vibe_raider_xp', raiderTotalXp);
 
             if (!viberMasteryMap[assetKey]) {
-                viberMasteryMap[assetKey] = { xp: 0, wins: 0, matches: 0 };
+                viberMasteryMap[assetKey] = { xp: 40, wins: 0, matches: 0 };
             }
             const prevLvl = getViberMasteryInfo(assetKey).level;
             viberMasteryMap[assetKey].xp += xpGain;
@@ -4710,71 +4879,78 @@
 
             const newLvl = getViberMasteryInfo(assetKey).level;
             if (newLvl > prevLvl) {
-                spawnArenaFloatText('CENTER', `🌟 ${ASSETS[assetKey]?.ticker || assetKey} MASTERY UP! LV.${newLvl}!`, '#CCFF00');
+                spawnArenaFloatText('CENTER', `🌟 ${ASSETS[assetKey]?.ticker || assetKey} MASTERY UP! LV.${newLvl}!`, '#00FF88');
             }
 
-            // Track daily quest progress
             incrementQuestMetric('duels', 1);
             updateViberCardMasteryUI();
         }
 
         function renderViberCodexModal() {
             const rInfo = getRaiderLevelInfo();
-            const rankText = document.getElementById('codexRaiderRankText');
-            if (rankText) rankText.innerText = `Lv.${rInfo.level} • ${rInfo.rankTitle}`;
-            const xpText = document.getElementById('codexRaiderXpText');
-            if (xpText) xpText.innerText = `${rInfo.currentLevelXp} / ${rInfo.nextLevelXp} XP`;
+            const rankBadge = document.getElementById('codexRaiderRankBadge');
+            if (rankBadge) rankBadge.innerText = `Lv.${rInfo.level}`;
+            const rankTitle = document.getElementById('codexRaiderTitle');
+            if (rankTitle) rankTitle.innerText = rInfo.rankTitle;
+            const bonusPill = document.getElementById('codexRaiderBonusPill');
+            if (bonusPill) bonusPill.innerText = `⚡ +${rInfo.bonusPct}% Mastery Payout Boost`;
+            const totalXpText = document.getElementById('codexTotalXpText');
+            if (totalXpText) totalXpText.innerText = `${raiderTotalXp.toLocaleString()} Total XP`;
+            const nextLvlText = document.getElementById('codexNextLvlXpText');
+            if (nextLvlText) nextLvlText.innerText = `${rInfo.currentLevelXp} / ${rInfo.nextLevelXp} XP to Lv.${rInfo.level + 1}`;
             const xpBar = document.getElementById('codexRaiderXpBar');
-            if (xpBar) xpBar.style.width = `${Math.max(5, Math.round((rInfo.currentLevelXp / rInfo.nextLevelXp) * 100))}%`;
-            const bonusBadge = document.getElementById('codexRaiderBonusBadge');
-            if (bonusBadge) bonusBadge.innerText = `⚡ +${rInfo.bonusPct}% $VCT Payout Boost Active`;
+            if (xpBar) xpBar.style.width = `${Math.max(8, Math.round((rInfo.currentLevelXp / rInfo.nextLevelXp) * 100))}%`;
 
-            // 1. Render 15 Main Fighter Lore Cards
-            const loreGrid = document.getElementById('codexLoreGrid');
+            updateViberCardMasteryUI();
+
+            // 1. Render 15 Main Fighter Lore & Mastery Cards (#codexFightersGrid)
+            const loreGrid = document.getElementById('codexFightersGrid');
             if (loreGrid) {
                 loreGrid.innerHTML = Object.keys(ASSETS).map(key => {
                     const a = ASSETS[key];
                     const m = getViberMasteryInfo(key);
-                    const pct = Math.max(8, Math.round((m.currentXp / m.nextXp) * 100));
+                    const pct = Math.max(10, Math.round((m.currentXp / m.nextXp) * 100));
+                    const isSelectedA = selectA && selectA.value === key;
+                    const isSelectedB = selectB && selectB.value === key;
                     return `
-                        <div class="p-3.5 rounded-2xl bg-[#18181b] border-3 border-black shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2.5">
+                        <div class="p-3.5 rounded-2xl bg-[#18181b] border-3 ${isSelectedA || isSelectedB ? 'border-[#00F0FF]' : 'border-black'} shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2.5">
                             <div>
                                 <div class="flex items-center gap-3 mb-2">
-                                    <div class="relative w-14 h-14 rounded-xl bg-black border-2 border-[#CCFF00] overflow-hidden shrink-0 shadow-[2px_2px_0_#000]">
+                                    <div class="relative w-14 h-14 rounded-xl bg-black border-2 border-[#00F0FF] overflow-hidden shrink-0 shadow-[2px_2px_0_#000]">
                                         <img src="${a.viberImg}" alt="${a.name}" class="w-full h-full object-cover" />
-                                        <span class="absolute bottom-0 right-0 px-1 py-0.2 bg-[#CCFF00] text-black font-black text-[9px]">LV.${m.level}</span>
+                                        <span class="absolute bottom-0 right-0 px-1 py-0.2 bg-[#FFD700] text-black font-black text-[9px]">LV.${m.level}</span>
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center justify-between gap-1">
-                                            <span class="text-xs font-black px-2 py-0.5 rounded bg-black text-white border border-white/15 font-mono-num">${a.ticker}</span>
-                                            <span class="text-[10px] font-extrabold text-emerald-400 font-mono-num">+${m.bonusPct.toFixed(1)}% Payout</span>
+                                            <span class="text-xs font-black px-2 py-0.5 rounded bg-black text-white border border-white/15 font-mono-num" style="color:${a.color}">${a.ticker}</span>
+                                            <span class="text-[10px] font-extrabold text-emerald-400 font-mono-num">+${(rInfo.bonusPct + m.bonusPct).toFixed(1)}% Boost</span>
                                         </div>
                                         <div class="font-black text-sm text-white truncate mt-0.5">${a.mechaTitle}</div>
-                                        <div class="text-[10px] font-extrabold text-[#CCFF00] truncate">${a.archetype}</div>
+                                        <div class="text-[10px] font-extrabold text-[#FFD700] truncate">${a.archetype}</div>
                                     </div>
                                 </div>
 
-                                <div class="space-y-1.5 text-[11px] bg-black/50 p-2.5 rounded-xl border border-white/10">
-                                    <div><span class="text-cyan-400 font-black">📖 THE JOURNEY:</span> <span class="text-neutral-200">${a.journey}</span></div>
-                                    <div><span class="text-rose-400 font-black">⚠️ FATAL SHORTCOMING:</span> <span class="text-amber-200 italic">"${a.shortcoming}"</span></div>
-                                    <div><span class="text-[#CCFF00] font-black">⚡ ARENA PASSIVE:</span> <span class="text-neutral-300">${a.passive}</span></div>
+                                <div class="space-y-1.5 text-[11px] bg-black/60 p-2.5 rounded-xl border border-white/10">
+                                    <div><span class="text-[#00F0FF] font-black">📖 JOURNEY:</span> <span class="text-neutral-200">${a.journey}</span></div>
+                                    <div><span class="text-[#FF3366] font-black">⚠️ SHORTCOMING:</span> <span class="text-amber-200 italic">"${a.shortcoming}"</span></div>
+                                    <div><span class="text-[#00FF88] font-black">⚡ LIVE PASSIVE:</span> <span class="text-neutral-300">${a.passive}</span></div>
                                 </div>
                             </div>
 
                             <div>
                                 <div class="flex items-center justify-between text-[10px] font-bold text-neutral-400 mb-1">
                                     <span>Mastery Lv.${m.level} • ${m.wins}W / ${m.matches}M</span>
-                                    <span class="text-[#CCFF00] font-mono-num">${m.currentXp}/${m.nextXp} XP</span>
+                                    <span class="text-[#FFD700] font-mono-num">${m.currentXp}/${m.nextXp} XP</span>
                                 </div>
                                 <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/15 mb-2">
-                                    <div class="h-full bg-gradient-to-r from-[#CCFF00] to-emerald-400" style="width:${pct}%"></div>
+                                    <div class="h-full bg-gradient-to-r from-[#00F0FF] to-[#00FF88]" style="width:${pct}%"></div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-1.5">
-                                    <button onclick="window.selectFighterFromCodex('A', '${key}')" class="py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500 hover:text-black text-rose-300 border border-rose-500/40 font-black text-[10px] uppercase transition cursor-pointer">
-                                        ⚔️ Deploy Corner A
+                                    <button onclick="window.selectFighterFromCodex('A', '${key}')" class="py-1.5 px-2 rounded-lg ${isSelectedA ? 'bg-[#00F0FF] text-black' : 'bg-[#00F0FF]/20 hover:bg-[#00F0FF] hover:text-black text-[#00F0FF]'} border border-[#00F0FF]/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                        ${isSelectedA ? '✓ In Corner A' : '⚔️ Deploy Corner A'}
                                     </button>
-                                    <button onclick="window.selectFighterFromCodex('B', '${key}')" class="py-1.5 px-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-400 hover:text-black text-cyan-300 border border-cyan-500/40 font-black text-[10px] uppercase transition cursor-pointer">
-                                        🛡️ Deploy Corner B
+                                    <button onclick="window.selectFighterFromCodex('B', '${key}')" class="py-1.5 px-2 rounded-lg ${isSelectedB ? 'bg-[#FF3366] text-white' : 'bg-[#FF3366]/20 hover:bg-[#FF3366] hover:text-white text-[#FF3366]'} border border-[#FF3366]/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                        ${isSelectedB ? '✓ In Corner B' : '🛡️ Deploy Corner B'}
                                     </button>
                                 </div>
                             </div>
@@ -4783,33 +4959,33 @@
                 }).join('');
             }
 
-            // 2. Render 26 Official "For Raiders" Skins
+            // 2. Render 26 Official "For Raiders" Skins (#codexRaidersGrid)
             renderRaidersSkinGrid();
         }
 
         function renderRaidersSkinGrid() {
-            const skinGrid = document.getElementById('codexRaidersSkinGrid');
+            const skinGrid = document.getElementById('codexRaidersGrid');
             if (!skinGrid) return;
             skinGrid.innerHTML = RAIDERS_COLLECTION.map(skin => {
                 const isEqA = customSkinA === skin.id;
                 const isEqB = customSkinB === skin.id;
                 return `
-                    <div class="p-3 rounded-2xl bg-[#18181b] border-3 ${isEqA || isEqB ? 'border-[#CCFF00]' : 'border-black'} shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2">
+                    <div class="p-3 rounded-2xl bg-[#18181b] border-3 ${isEqA || isEqB ? 'border-[#FFD700]' : 'border-black'} shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2">
                         <div>
                             <div class="relative w-full aspect-square rounded-xl bg-black border-2 border-white/15 overflow-hidden mb-2">
                                 <img src="${skin.img}" alt="${skin.name}" class="w-full h-full object-cover" loading="lazy" />
-                                ${isEqA ? `<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-rose-500 text-white font-black text-[9px] border border-black">CORNER A</span>` : ''}
-                                ${isEqB ? `<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-cyan-400 text-black font-black text-[9px] border border-black">CORNER B</span>` : ''}
+                                ${isEqA ? `<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-[#00F0FF] text-black font-black text-[9px] border border-black">CORNER A</span>` : ''}
+                                ${isEqB ? `<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-[#FF3366] text-white font-black text-[9px] border border-black">CORNER B</span>` : ''}
                             </div>
                             <div class="font-black text-xs text-white truncate">${skin.name}</div>
                             <p class="text-[10px] text-neutral-400 font-semibold leading-snug mt-0.5">${skin.desc}</p>
                         </div>
                         <div class="space-y-1 pt-1">
                             <div class="grid grid-cols-2 gap-1">
-                                <button onclick="window.equipRaiderSkin('A', '${skin.id}')" class="py-1 px-1.5 rounded-lg ${isEqA ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white'} border border-rose-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                <button onclick="window.equipRaiderSkin('A', '${skin.id}')" class="py-1.5 px-1.5 rounded-lg ${isEqA ? 'bg-[#00F0FF] text-black' : 'bg-[#00F0FF]/20 text-[#00F0FF] hover:bg-[#00F0FF] hover:text-black'} border border-[#00F0FF]/40 font-black text-[10px] uppercase transition cursor-pointer">
                                     ${isEqA ? '✓ Corner A' : 'Equip A'}
                                 </button>
-                                <button onclick="window.equipRaiderSkin('B', '${skin.id}')" class="py-1 px-1.5 rounded-lg ${isEqB ? 'bg-cyan-400 text-black' : 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-400 hover:text-black'} border border-cyan-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                <button onclick="window.equipRaiderSkin('B', '${skin.id}')" class="py-1.5 px-1.5 rounded-lg ${isEqB ? 'bg-[#FF3366] text-white' : 'bg-[#FF3366]/20 text-[#FF3366] hover:bg-[#FF3366] hover:text-white'} border border-[#FF3366]/40 font-black text-[10px] uppercase transition cursor-pointer">
                                     ${isEqB ? '✓ Corner B' : 'Equip B'}
                                 </button>
                             </div>
@@ -4828,15 +5004,18 @@
                 selectA.value = assetKey;
                 customSkinA = '';
                 localStorage.setItem('vibe_custom_skin_a', '');
+                broadcastMultiplayerSelection('A', assetKey);
             } else {
                 selectB.value = assetKey;
                 customSkinB = '';
                 localStorage.setItem('vibe_custom_skin_b', '');
+                broadcastMultiplayerSelection('B', assetKey);
             }
             syncFighterSelectionUI();
+            pollLivePreMatchOracle();
             playSfx('coin');
             document.getElementById('viberCodexModal').classList.add('hidden');
-            spawnArenaFloatText(corner, `🧬 ${ASSETS[assetKey].mechaTitle} DEPLOYED!`, '#CCFF00');
+            spawnArenaFloatText(corner, `🧬 ${ASSETS[assetKey].mechaTitle} DEPLOYED!`, '#00FF88');
         };
 
         window.equipRaiderSkin = function(corner, skinId) {
@@ -4851,36 +5030,28 @@
             incrementQuestMetric('skinEquip', 1);
             syncFighterSelectionUI();
             renderRaidersSkinGrid();
-            playSfx('powerup');
+            playSfx('crit');
             const skinObj = RAIDERS_COLLECTION.find(r => r.id === skinId);
             if (skinObj) {
-                spawnArenaFloatText(corner, `🎨 3D SKIN: ${skinObj.name.split('—')[0].trim()}!`, '#CCFF00');
+                spawnArenaFloatText(corner, `🎨 3D SKIN: ${skinObj.name.split('—')[0].trim()}!`, '#FFD700');
             }
         };
 
         function switchCodexTab(tab) {
-            const loreView = document.getElementById('codexTabLoreView');
-            const skinsView = document.getElementById('codexTabSkinsView');
-            const btnLore = document.getElementById('tabCodexLoreBtn');
-            const btnSkins = document.getElementById('tabCodexSkinsBtn');
+            const loreView = document.getElementById('codexFightersGrid');
+            const skinsView = document.getElementById('codexRaidersPanel');
+            const btnLore = document.getElementById('tabCodexFightersBtn');
+            const btnSkins = document.getElementById('tabCodexRaidersBtn');
             if (tab === 'skins') {
                 if (loreView) loreView.classList.add('hidden');
                 if (skinsView) skinsView.classList.remove('hidden');
-                if (btnSkins) {
-                    btnSkins.className = "px-3.5 py-1.5 rounded-xl bg-[#CCFF00] text-black font-extrabold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer";
-                }
-                if (btnLore) {
-                    btnLore.className = "px-3.5 py-1.5 rounded-xl bg-zinc-800 text-neutral-300 font-extrabold text-xs uppercase border-2 border-black cursor-pointer";
-                }
+                if (btnSkins) btnSkins.className = "btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#FFD700] text-[#111]";
+                if (btnLore) btnLore.className = "btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#111] text-white border-white/30";
             } else {
                 if (loreView) loreView.classList.remove('hidden');
                 if (skinsView) skinsView.classList.add('hidden');
-                if (btnLore) {
-                    btnLore.className = "px-3.5 py-1.5 rounded-xl bg-[#CCFF00] text-black font-extrabold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer";
-                }
-                if (btnSkins) {
-                    btnSkins.className = "px-3.5 py-1.5 rounded-xl bg-zinc-800 text-neutral-300 font-extrabold text-xs uppercase border-2 border-black cursor-pointer";
-                }
+                if (btnLore) btnLore.className = "btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#00F0FF] text-[#111]";
+                if (btnSkins) btnSkins.className = "btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#111] text-white border-white/30";
             }
         }
 
@@ -4898,10 +5069,10 @@
                 document.getElementById('viberCodexModal').classList.add('hidden');
             });
         }
-        const tabCodexLoreBtn = document.getElementById('tabCodexLoreBtn');
-        if (tabCodexLoreBtn) tabCodexLoreBtn.addEventListener('click', () => switchCodexTab('lore'));
-        const tabCodexSkinsBtn = document.getElementById('tabCodexSkinsBtn');
-        if (tabCodexSkinsBtn) tabCodexSkinsBtn.addEventListener('click', () => switchCodexTab('skins'));
+        const tabCodexFightersBtn = document.getElementById('tabCodexFightersBtn');
+        if (tabCodexFightersBtn) tabCodexFightersBtn.addEventListener('click', () => switchCodexTab('lore'));
+        const tabCodexRaidersBtn = document.getElementById('tabCodexRaidersBtn');
+        if (tabCodexRaidersBtn) tabCodexRaidersBtn.addEventListener('click', () => switchCodexTab('skins'));
 
         const openSkinA = document.getElementById('openSkinPickerABtn');
         if (openSkinA) {
@@ -4921,24 +5092,17 @@
                 document.getElementById('viberCodexModal').classList.remove('hidden');
             });
         }
-        const resetSkinA = document.getElementById('resetSkinABtn');
-        if (resetSkinA) {
-            resetSkinA.addEventListener('click', () => {
+        const resetCustomSkinsBtn = document.getElementById('resetCustomSkinsBtn');
+        if (resetCustomSkinsBtn) {
+            resetCustomSkinsBtn.addEventListener('click', () => {
                 customSkinA = '';
-                localStorage.setItem('vibe_custom_skin_a', '');
-                syncFighterSelectionUI();
-                renderRaidersSkinGrid();
-                playSfx('coin');
-            });
-        }
-        const resetSkinB = document.getElementById('resetSkinBBtn');
-        if (resetSkinB) {
-            resetSkinB.addEventListener('click', () => {
                 customSkinB = '';
+                localStorage.setItem('vibe_custom_skin_a', '');
                 localStorage.setItem('vibe_custom_skin_b', '');
                 syncFighterSelectionUI();
                 renderRaidersSkinGrid();
                 playSfx('coin');
+                spawnArenaFloatText('CENTER', '🔄 RESTORED DEFAULT VIBER MODELS', '#00F0FF');
             });
         }
 
@@ -4969,9 +5133,9 @@
         }
 
         const DAILY_QUESTS = [
-            { id: 'q_duel_1', title: '⚔️ Enter the Cyber-Colosseum (Complete 1 Duel)', metric: 'duels', target: 1, rewardVct: 500, rewardXp: 100 },
-            { id: 'q_skin_1', title: '🎨 Customize Your 3D Viber (Equip any "For Raiders" Skin)', metric: 'skinEquip', target: 1, rewardVct: 400, rewardXp: 80 },
-            { id: 'q_share_1', title: '📢 Viral Raider Broadcast (Share Invite on X, WhatsApp or TG)', metric: 'shares', target: 1, rewardVct: 750, rewardXp: 150 },
+            { id: 'q_duel_1', title: '⚔️ Enter the Colosseum (Complete 1 Duel)', metric: 'duels', target: 1, rewardVct: 500, rewardXp: 100 },
+            { id: 'q_skin_1', title: '🎨 Customize Your 3D Viber (Equip a Raider Skin)', metric: 'skinEquip', target: 1, rewardVct: 400, rewardXp: 80 },
+            { id: 'q_share_1', title: '📢 Viral Raider Broadcast (Share Invite Link)', metric: 'shares', target: 1, rewardVct: 750, rewardXp: 150 },
             { id: 'q_duel_3', title: '🔥 Arena Veteran (Complete 3 Stock Duels)', metric: 'duels', target: 3, rewardVct: 1200, rewardXp: 250 }
         ];
 
@@ -4981,15 +5145,16 @@
         }
 
         function renderReferralModal() {
-            const refUrlInput = document.getElementById('myReferralLinkInput');
+            const refUrlInput = document.getElementById('referralLinkInput');
             if (refUrlInput) refUrlInput.value = getReferralUrl();
 
             const invitedCount = parseInt(localStorage.getItem('vibe_referrals_count')) || 0;
             const refEarnings = parseInt(localStorage.getItem('vibe_referrals_vct')) || 0;
-            const cEl = document.getElementById('refCountStat');
-            if (cEl) cEl.innerText = invitedCount;
-            const vEl = document.getElementById('refEarnedStat');
-            if (vEl) vEl.innerText = `${refEarnings.toLocaleString()} $VCT`;
+            const tierBadge = document.getElementById('refTierBadge');
+            if (tierBadge) {
+                const tierName = invitedCount >= 5 ? 'Vibe Ambassador' : (invitedCount >= 1 ? 'Active Raider' : 'Raider Recruiter');
+                tierBadge.innerText = `🎖️ Tier: ${tierName} (${invitedCount} Invited • +${refEarnings.toLocaleString()} $VCT)`;
+            }
 
             const questsContainer = document.getElementById('raiderQuestsList');
             if (questsContainer) {
@@ -4999,21 +5164,21 @@
                     const isReady = progress >= q.target;
                     const isClaimed = !!claimedMap[q.id];
                     return `
-                        <div class="p-3 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-2">
-                            <div>
-                                <div class="font-extrabold text-xs text-white">${q.title}</div>
-                                <div class="text-[11px] font-bold text-neutral-400 mt-0.5">
-                                    Progress: <span class="text-[#CCFF00] font-mono-num">${progress}/${q.target}</span> • Reward: <span class="text-emerald-400 font-mono-num">+${q.rewardVct} $VCT</span> & <span class="text-amber-300 font-mono-num">+${q.rewardXp} XP</span>
+                        <div class="p-2.5 rounded-xl bg-[#111] text-white border-2 border-black flex flex-wrap items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="font-extrabold text-xs text-white truncate">${q.title}</div>
+                                <div class="text-[10px] font-bold text-neutral-400 mt-0.5">
+                                    Progress: <span class="text-[#00F0FF] font-mono-num">${progress}/${q.target}</span> • <span class="text-[#00FF88] font-mono-num">+${q.rewardVct} $VCT</span> & <span class="text-[#FFD700] font-mono-num">+${q.rewardXp} XP</span>
                                 </div>
                             </div>
                             ${isClaimed ? `
-                                <span class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black text-[10px] uppercase">✓ Claimed</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black text-[10px] uppercase shrink-0">✓ Claimed</span>
                             ` : isReady ? `
-                                <button onclick="window.claimRaiderQuest('${q.id}')" class="px-3.5 py-1.5 rounded-xl bg-[#CCFF00] hover:bg-lime-300 text-black font-black text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer animate-pulse">
-                                    🎁 Claim +${q.rewardVct} $VCT
+                                <button onclick="window.claimRaiderQuest('${q.id}')" class="px-3 py-1.5 rounded-lg bg-[#00FF88] hover:bg-emerald-300 text-black font-black text-[10px] uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer animate-pulse shrink-0">
+                                    🎁 Claim +${q.rewardVct}
                                 </button>
                             ` : `
-                                <span class="px-3 py-1.5 rounded-xl bg-white/5 text-neutral-400 border border-white/10 font-bold text-[10px] uppercase">${progress}/${q.target}</span>
+                                <span class="px-2.5 py-1 rounded-lg bg-white/10 text-neutral-300 border border-white/15 font-bold text-[10px] font-mono-num shrink-0">${progress}/${q.target}</span>
                             `}
                         </div>
                     `;
@@ -5037,16 +5202,16 @@
             updateViberCardMasteryUI();
             renderReferralModal();
             playSfx('win');
-            spawnArenaFloatText('CENTER', `🎁 +${q.rewardVct} $VCT & +${q.rewardXp} XP!`, '#CCFF00');
+            spawnArenaFloatText('CENTER', `🎁 +${q.rewardVct} $VCT & +${q.rewardXp} XP!`, '#00FF88');
         };
 
         function redeemReferralCode(rawCode, isAutoUrl = false) {
-            const statusEl = document.getElementById('redeemCodeStatus');
+            const statusEl = document.getElementById('redeemStatusMsg');
             const cleaned = (rawCode || '').trim().toUpperCase();
             if (!cleaned || cleaned.length < 3) {
                 if (statusEl) {
                     statusEl.innerText = "⚠️ Please enter a valid Raider Referral Code.";
-                    statusEl.className = "text-[11px] font-bold mt-1.5 text-rose-400";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-rose-600";
                     statusEl.classList.remove('hidden');
                 }
                 return;
@@ -5054,7 +5219,7 @@
             if (cleaned === getRaiderReferralCode().toUpperCase()) {
                 if (statusEl && !isAutoUrl) {
                     statusEl.innerText = "⚠️ You cannot redeem your own Raider code! Share it with a friend.";
-                    statusEl.className = "text-[11px] font-bold mt-1.5 text-amber-400";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-amber-600";
                     statusEl.classList.remove('hidden');
                 }
                 return;
@@ -5062,7 +5227,7 @@
             if (localStorage.getItem('vibe_referral_redeemed')) {
                 if (statusEl && !isAutoUrl) {
                     statusEl.innerText = "✅ Referral welcome drop already claimed on this Raider account!";
-                    statusEl.className = "text-[11px] font-bold mt-1.5 text-emerald-400";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-emerald-700";
                     statusEl.classList.remove('hidden');
                 }
                 return;
@@ -5078,23 +5243,23 @@
 
             if (statusEl) {
                 statusEl.innerText = `🎉 Code ${cleaned} Redeemed! +1,500 $VCT & +100 Raider XP credited!`;
-                statusEl.className = "text-[11px] font-bold mt-1.5 text-[#CCFF00]";
+                statusEl.className = "text-[11px] font-bold mt-1.5 text-emerald-700";
                 statusEl.classList.remove('hidden');
             }
-            spawnArenaFloatText('CENTER', `🚀 REFERRAL DROP: +1,500 $VCT!`, '#CCFF00');
+            spawnArenaFloatText('CENTER', `🚀 REFERRAL DROP: +1,500 $VCT!`, '#00FF88');
             renderReferralModal();
         }
 
-        const referralBtn = document.getElementById('referralBtn');
-        if (referralBtn) {
-            referralBtn.addEventListener('click', () => {
+        const referralHubBtn = document.getElementById('referralHubBtn');
+        if (referralHubBtn) {
+            referralHubBtn.addEventListener('click', () => {
                 renderReferralModal();
                 document.getElementById('referralModal').classList.remove('hidden');
             });
         }
-        const closeReferralBtn = document.getElementById('closeReferralBtn');
-        if (closeReferralBtn) {
-            closeReferralBtn.addEventListener('click', () => {
+        const closeReferralModalBtn = document.getElementById('closeReferralModalBtn');
+        if (closeReferralModalBtn) {
+            closeReferralModalBtn.addEventListener('click', () => {
                 document.getElementById('referralModal').classList.add('hidden');
             });
         }
@@ -5108,7 +5273,18 @@
                 copyRefLinkBtn.innerText = '✅ COPIED!';
                 playSfx('coin');
                 renderReferralModal();
-                setTimeout(() => { copyRefLinkBtn.innerText = '📋 Copy Link'; }, 2000);
+                setTimeout(() => { copyRefLinkBtn.innerText = '📋 Copy Invite Link'; }, 2000);
+            });
+        }
+
+        const copyVctContractBtn = document.getElementById('copyVctContractBtn');
+        if (copyVctContractBtn) {
+            copyVctContractBtn.addEventListener('click', () => {
+                const contractAddr = '0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697';
+                navigator.clipboard?.writeText(contractAddr).catch(() => {});
+                copyVctContractBtn.innerText = '✅ Copied 0x46aE...!';
+                playSfx('coin');
+                setTimeout(() => { copyVctContractBtn.innerText = '📋 Copy Contract'; }, 2000);
             });
         }
 
@@ -5117,7 +5293,6 @@
             const text = `⚔️ Step into Vibe Stock Duels 3D (@vibevibeeco)!\n🤖 Pick your 3D Vibe Viber, duel live AI & Crypto Stock Baskets in 60s arenas & stack $VCT!\n🎁 Use my Raider Invite for an instant +1,500 $VCT Welcome Drop:\n${url}`;
             incrementQuestMetric('shares', 1);
 
-            // Simulate referral reward flywheel bonus on first viral broadcast
             const currentCount = parseInt(localStorage.getItem('vibe_referrals_count')) || 0;
             const currentEarned = parseInt(localStorage.getItem('vibe_referrals_vct')) || 0;
             if (!localStorage.getItem('vibe_first_raid_share_bonus')) {
@@ -5129,7 +5304,7 @@
                 localStorage.setItem('vibe_raider_xp', raiderTotalXp);
                 savePlayerState();
                 updateViberCardMasteryUI();
-                spawnArenaFloatText('CENTER', '🚀 RAID BROADCAST BONUS: +1,000 $VCT!', '#CCFF00');
+                spawnArenaFloatText('CENTER', '🚀 RAID BROADCAST BONUS: +1,000 $VCT!', '#00FF88');
             }
             renderReferralModal();
 
@@ -5142,19 +5317,77 @@
             }
         }
 
-        const shareRefXBtn = document.getElementById('shareRefXBtn');
-        if (shareRefXBtn) shareRefXBtn.addEventListener('click', () => triggerViralReferralShare('x'));
-        const shareRefWaBtn = document.getElementById('shareRefWaBtn');
-        if (shareRefWaBtn) shareRefWaBtn.addEventListener('click', () => triggerViralReferralShare('wa'));
-        const shareRefTgBtn = document.getElementById('shareRefTgBtn');
-        if (shareRefTgBtn) shareRefTgBtn.addEventListener('click', () => triggerViralReferralShare('tg'));
+        const shareRefTwitterBtn = document.getElementById('shareRefTwitterBtn');
+        if (shareRefTwitterBtn) shareRefTwitterBtn.addEventListener('click', () => triggerViralReferralShare('x'));
+        const shareRefWhatsAppBtn = document.getElementById('shareRefWhatsAppBtn');
+        if (shareRefWhatsAppBtn) shareRefWhatsAppBtn.addEventListener('click', () => triggerViralReferralShare('wa'));
+        const shareRefTelegramBtn = document.getElementById('shareRefTelegramBtn');
+        if (shareRefTelegramBtn) shareRefTelegramBtn.addEventListener('click', () => triggerViralReferralShare('tg'));
 
-        const redeemRefCodeBtn = document.getElementById('redeemRefCodeBtn');
-        if (redeemRefCodeBtn) {
-            redeemRefCodeBtn.addEventListener('click', () => {
+        const redeemCodeBtn = document.getElementById('redeemCodeBtn');
+        if (redeemCodeBtn) {
+            redeemCodeBtn.addEventListener('click', () => {
                 const inp = document.getElementById('redeemCodeInput');
                 redeemReferralCode(inp ? inp.value : '', false);
             });
+        }
+
+        // Live Pre-Match Oracle Price Ticker (Keeps prices & % deltas live 24/7 even before locking a bet)
+        let preMatchBaseA = 0;
+        let preMatchBaseB = 0;
+        async function pollLivePreMatchOracle() {
+            if (roundLocked) return;
+            try {
+                const keyA = selectA.value;
+                const keyB = selectB.value;
+                const [pA, pB] = await Promise.all([
+                    fetchAssetPrice(keyA, currentPriceA || ASSETS[keyA].base),
+                    fetchAssetPrice(keyB, currentPriceB || ASSETS[keyB].base)
+                ]);
+                if (roundLocked) return;
+
+                if (!preMatchBaseA || selectA.dataset.lastKey !== keyA) {
+                    preMatchBaseA = ASSETS[keyA].base;
+                    selectA.dataset.lastKey = keyA;
+                }
+                if (!preMatchBaseB || selectB.dataset.lastKey !== keyB) {
+                    preMatchBaseB = ASSETS[keyB].base;
+                    selectB.dataset.lastKey = keyB;
+                }
+
+                currentPriceA = pA;
+                currentPriceB = pB;
+                const dA = ((pA - preMatchBaseA) / preMatchBaseA) * 100;
+                const dB = ((pB - preMatchBaseB) / preMatchBaseB) * 100;
+
+                document.getElementById('livePriceA').innerText = `$${pA.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('livePriceB').innerText = `$${pB.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                const strA = `${dA >= 0 ? '+' : ''}${dA.toFixed(2)}%`;
+                const strB = `${dB >= 0 ? '+' : ''}${dB.toFixed(2)}%`;
+
+                const badgeA = document.getElementById('deltaBadgeA');
+                const badgeB = document.getElementById('deltaBadgeB');
+                if (badgeA) {
+                    badgeA.innerText = strA;
+                    badgeA.style.background = dA >= 0 ? '#065f46' : '#881337';
+                }
+                if (badgeB) {
+                    badgeB.innerText = strB;
+                    badgeB.style.background = dB >= 0 ? '#065f46' : '#881337';
+                }
+
+                const lblDA = document.getElementById('labelDeltaA');
+                const lblDB = document.getElementById('labelDeltaB');
+                if (lblDA) {
+                    lblDA.innerText = strA;
+                    lblDA.className = `font-mono-num text-[10px] sm:text-[11px] ${dA >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+                }
+                if (lblDB) {
+                    lblDB.innerText = strB;
+                    lblDB.className = `font-mono-num text-[10px] sm:text-[11px] ${dB >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+                }
+            } catch (e) {}
         }
 
         // Initialize Everything on Load
@@ -5172,6 +5405,12 @@
             selectTeam('A'); // Default select Corner A so player can bet immediately
             animate3DArena();
             initFirebaseBackend();
+            renderAnalyticsDashboard();
+            renderLeaderboardList();
+
+            // Start continuous live pre-match Oracle price feed
+            pollLivePreMatchOracle();
+            setInterval(pollLivePreMatchOracle, 4000);
 
             if (!localStorage.getItem('vibe_interactive_tutorial_completed') && playerNickname) {
                 setTimeout(() => {
