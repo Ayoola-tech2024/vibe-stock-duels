@@ -488,19 +488,27 @@
                 <div id="arena-3d-wrapper">
                     <!-- Top Floating Timer & Camera Controls inside 3D Viewport -->
                     <div class="absolute top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 z-20 flex items-center justify-between pointer-events-none gap-1 sm:gap-2">
-                        <!-- Round Countdown Pill -->
-                        <div class="pointer-events-auto bg-[#111]/90 border-2 border-[#00F0FF] rounded-lg sm:rounded-xl px-2 sm:px-3.5 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2.5 shadow-[2px_3px_0_#00F0FF] sm:shadow-[3px_4px_0_#00F0FF]">
+                        <!-- Round Countdown Pill + Duration Toggle -->
+                        <div class="pointer-events-auto bg-[#111]/90 border-2 border-[#00F0FF] rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2 shadow-[2px_3px_0_#00F0FF]">
                             <div class="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-neutral-300 leading-tight">
                                 ROUND<br class="hidden sm:inline"> CLOCK
                             </div>
                             <div class="font-mono-num text-xl sm:text-3xl font-black text-[#00F0FF] leading-none">
                                 <span id="countdown">60</span>s
                             </div>
+                            <button id="durationToggleBtn" type="button" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-[#00F0FF] hover:text-black text-[9px] font-black text-cyan-300 border border-cyan-400/40 cursor-pointer transition" title="Switch Match Duration (30s Blitz / 60s Standard / 90s Marathon)">
+                                60s ⏱️
+                            </button>
                         </div>
 
-                        <!-- Match Status Banner -->
-                        <div id="arenaCenterBanner" class="px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-[10px] sm:text-sm uppercase tracking-wider shadow-[2px_2px_0_#000] truncate max-w-[135px] sm:max-w-none">
-                            ⚔️ Ready to Lock
+                        <!-- Match Status Banner + Combo Counter -->
+                        <div class="flex flex-col items-center gap-1 max-w-[155px] sm:max-w-none">
+                            <div id="arenaCenterBanner" class="px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-[10px] sm:text-sm uppercase tracking-wider shadow-[2px_2px_0_#000] truncate">
+                                ⚔️ Sparring Live • Lock Bet!
+                            </div>
+                            <div id="comboMeterBadge" class="hidden px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#FF3366] to-[#FFD700] text-black font-black text-[10px] sm:text-xs uppercase tracking-wider border border-black shadow-md animate-bounce">
+                                🔥 2x HYPE COMBO!
+                            </div>
                         </div>
 
                         <!-- 3D Camera Angle & Random Matchup Controls -->
@@ -533,31 +541,37 @@
                     <!-- Floating Combat Damage / Crit Container -->
                     <div id="combatOverlayLayer" class="absolute inset-0 pointer-events-none overflow-hidden z-30"></div>
 
-                    <!-- Three.js WebGL Mount -->
-                    <div id="threeCanvasMount" class="w-full h-full"></div>
+                    <!-- Three.js WebGL Mount (Click/Tap to Jab & Boost!) -->
+                    <div id="threeCanvasMount" class="w-full h-full cursor-pointer" title="Tap/Click Arena or Press SPACE to Jab & Charge Overdrive Rage!"></div>
 
                     <!-- Bottom Overlay inside 3D Arena: Active Mid-Fight Overdrive Skills & Emotes -->
                     <div class="absolute bottom-2 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-1 sm:gap-2 bg-[#111]/95 backdrop-blur-md border-2 border-white/15 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2">
                         <!-- Overdrive / Rage Meter -->
-                        <div class="flex items-center gap-1.5 flex-1 min-w-[120px] sm:min-w-[160px]">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[105px] sm:min-w-[140px]">
                             <span class="text-[10px] sm:text-xs font-black uppercase text-[#FFD700] whitespace-nowrap">⚡ <span class="hidden sm:inline">RAGE:</span> <span id="ragePctText" class="font-mono-num">0%</span></span>
                             <div class="flex-1 h-2.5 sm:h-3 bg-black border border-white/25 rounded-full overflow-hidden p-0.5">
                                 <div id="rageBarFill" class="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-full transition-all duration-200" style="width: 0%;"></div>
                             </div>
                         </div>
 
-                        <!-- Active Mid-Fight Skills -->
-                        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
-                            <button id="skillShieldBtn" disabled class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 50% Rage: Blocks incoming HP damage for 3 ticks!">
+                        <!-- Active Mid-Fight Skills (Always-Active Jab + Shield + 2x Overdrive + Meteor Ultimate) -->
+                        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap">
+                            <button id="skillJabBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold animate-pulse" title="Instant 3D Jab & Combo Boost! (+8% Rage & Chip Damage — Or press SPACEBAR!)">
+                                👊 Jab/Boost
+                            </button>
+                            <button id="skillShieldBtn" disabled class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 40% Rage: Blocks incoming HP damage & repairs +4 HP!">
                                 🛡️ Shield
                             </button>
-                            <button id="skillLeverageBtn" disabled class="btn-neubrutal bg-[#FFD700] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 75% Rage: 2x Attack Damage for 4 ticks!">
+                            <button id="skillLeverageBtn" disabled class="btn-neubrutal bg-[#FFD700] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 65% Rage: 2x Attack Damage for 4 ticks!">
                                 ⚡ 2x Strike
+                            </button>
+                            <button id="skillUltimateBtn" disabled class="btn-neubrutal bg-[#FF3366] text-white px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-extrabold" title="Costs 95% Rage: 360° Sky-Drop Meteor Finisher (-14 HP Armor Shatter!)">
+                                ☄️ Ultimate
                             </button>
                         </div>
 
                         <!-- Quick Hype Emotes -->
-                        <div class="flex items-center gap-0.5 sm:gap-1 border-l border-white/15 pl-1 sm:pl-2 shrink-0">
+                        <div class="hidden sm:flex items-center gap-0.5 sm:gap-1 border-l border-white/15 pl-1 sm:pl-2 shrink-0">
                             <button onclick="triggerArenaEmote('🚀 PUMP IT!')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Pump Emote">🚀</button>
                             <button onclick="triggerArenaEmote('📉 DUMPING!')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Dump Emote">📉</button>
                             <button onclick="triggerArenaEmote('💎🙌 DIAMOND')" class="hover:scale-125 transition-transform text-sm sm:text-base px-0.5 sm:px-1" title="Diamond Hands">💎</button>
@@ -2300,7 +2314,9 @@
         let fighterMeshA = null;
         let fighterMeshB = null;
         const voxelParticles = []; // 3D Hit Sparks & KO Voxel Shatter Blocks
+        const shockwaveRings = []; // Expanding 3D Arena Floor Shockwaves
         let active3DStrike = null; // Current dash-and-slash animation state
+        let lastAutoSparTime = 0;  // Pre-match & mid-duel continuous skirmish timer
 
         function spawnFightersIn3D(keyA, keyB, weaponKeyA = null, weaponKeyB = null) {
             if (fighterMeshA) scene.remove(fighterMeshA);
@@ -2314,6 +2330,27 @@
             scene.add(fighterMeshA, fighterMeshB);
         }
 
+        // Spawn Expanding 3D Neon Shockwave Ring on Colosseum Floor
+        function spawn3DShockwaveRing(worldPos, hexColor = 0x00F0FF, maxScale = 4.2) {
+            const ringGeo = new THREE.RingGeometry(0.35, 0.58, 28);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: hexColor,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.9
+            });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.rotation.x = -Math.PI / 2;
+            ringMesh.position.set(worldPos.x, 0.08, worldPos.z);
+            scene.add(ringMesh);
+            shockwaveRings.push({
+                mesh: ringMesh,
+                age: 0,
+                maxAge: 0.55,
+                maxScale
+            });
+        }
+
         // Spawn 3D Voxel Sparks on Weapon Impact or Full KO Explosion
         function spawn3DVoxelBurst(worldPos, hexColor, count = 18, isKOExplosion = false) {
             for (let i = 0; i < count; i++) {
@@ -2324,11 +2361,11 @@
                     worldPos.y + 0.8 + Math.random() * 1.2,
                     worldPos.z + (Math.random() - 0.5) * 0.8
                 );
-                const speed = isKOExplosion ? (3.5 + Math.random() * 5.5) : (2.0 + Math.random() * 3.8);
+                const speed = isKOExplosion ? (3.5 + Math.random() * 5.5) : (2.2 + Math.random() * 4.2);
                 const angle = Math.random() * Math.PI * 2;
                 const vel = new THREE.Vector3(
                     Math.cos(angle) * speed,
-                    2.5 + Math.random() * (isKOExplosion ? 5.5 : 3.2),
+                    2.5 + Math.random() * (isKOExplosion ? 5.5 : 3.5),
                     Math.sin(angle) * speed
                 );
                 scene.add(cube);
@@ -2341,25 +2378,30 @@
             }
         }
 
-        // Trigger 3D Dash, Weapon Slash & Knockback Animation
-        function trigger3DCombatClash(attackerSide, isCrit, damageDealt, blockedByShield) {
+        // Trigger 3D Dash, Weapon Slash, Knockback & Ultimate Meteor Animation
+        function trigger3DCombatClash(attackerSide, isCrit, damageDealt, blockedByShield, isUltimate = false) {
             if (!fighterMeshA || !fighterMeshB) return;
             const attacker = attackerSide === 'A' ? fighterMeshA : fighterMeshB;
             const defender = attackerSide === 'A' ? fighterMeshB : fighterMeshA;
-            const startX = attacker.userData.homeX;
-            const targetX = defender.userData.homeX + (attackerSide === 'A' ? -1.15 : 1.15);
+            const startX = attacker.position.x;
+            const startZ = attacker.position.z;
+            const targetX = defender.position.x + (attackerSide === 'A' ? -1.05 : 1.05);
+            const targetZ = defender.position.z;
 
             active3DStrike = {
                 attacker,
                 defender,
                 attackerSide,
                 startX,
+                startZ,
                 targetX,
-                isCrit,
+                targetZ,
+                isCrit: isCrit || isUltimate,
+                isUltimate,
                 damageDealt,
                 blockedByShield,
                 elapsed: 0,
-                duration: 0.62,
+                duration: isUltimate ? 0.78 : 0.56,
                 impactTriggered: false
             };
         }
@@ -2387,17 +2429,28 @@
             });
         }
 
-        // Main Three.js Animation Loop
+        // Main Three.js Animation Loop (Continuous Footwork, Circling, Sparring & Impacts)
         const clock = new THREE.Clock();
         function animate3DArena() {
             requestAnimationFrame(animate3DArena);
             const dt = Math.min(clock.getDelta(), 0.1);
             const t = clock.getElapsedTime();
 
-            // 1. Fighter Idle Breathing, Shield & Aura Visuals
+            // 0. Pre-Match Live Sparring & Mid-Duel Continuous Skirmishes (Never Dull!)
+            if (fighterMeshA && fighterMeshB && !fighterMeshA.userData.isKO && !fighterMeshB.userData.isKO && !fighterMeshA.userData.victorySpin && !fighterMeshB.userData.victorySpin) {
+                const sparInterval = roundLocked ? 0.95 : 2.65;
+                if (!active3DStrike && (t - lastAutoSparTime) > sparInterval) {
+                    lastAutoSparTime = t;
+                    const side = Math.random() > 0.5 ? 'A' : 'B';
+                    trigger3DCombatClash(side, Math.random() > 0.78, 0, false, false);
+                }
+            }
+
+            // 1. Fighter Dynamic Footwork, Circling, Leg Striding, Shield & Aura Visuals
             [fighterMeshA, fighterMeshB].forEach((f, idx) => {
                 if (!f) return;
                 const ud = f.userData;
+                const other = idx === 0 ? fighterMeshB : fighterMeshA;
 
                 if (ud.isKO) {
                     // Collapsed KO state on arena floor
@@ -2405,26 +2458,55 @@
                     f.position.y = THREE.MathUtils.lerp(f.position.y, 0.35, dt * 6);
                 } else if (ud.victorySpin) {
                     // Winner 360 jump celebration
-                    f.rotation.y += dt * 5.5;
-                    f.position.y = Math.abs(Math.sin(t * 6)) * 0.65;
+                    f.rotation.y += dt * 5.8;
+                    f.position.y = Math.abs(Math.sin(t * 6.5)) * 0.72;
                     ud.rightArmPivot.rotation.x = -Math.PI * 0.75;
+                    ud.leftArmPivot.rotation.x = -Math.PI * 0.65;
                 } else if (!active3DStrike) {
-                    // Normal combat ready stance
-                    f.rotation.z = 0;
-                    f.rotation.y = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
-                    f.position.y = Math.abs(Math.sin(t * 3.5 + ud.phase)) * 0.08;
-                    ud.headGroup.position.y = 2.08 + Math.sin(t * 3.5 + ud.phase) * 0.04;
-                    ud.rightArmPivot.rotation.x = -0.35 + Math.sin(t * 4 + ud.phase) * 0.18;
-                    ud.leftArmPivot.rotation.x = 0.2 - Math.sin(t * 4 + ud.phase) * 0.15;
+                    // Dynamic 3D Ring Footwork: Stalk, Circle & Weave around the Octagon!
+                    const speedMult = roundLocked ? 2.15 : 1.45;
+                    const weaveX = Math.sin(t * 2.2 * speedMult + ud.phase) * 0.68;
+                    const circleZ = Math.cos(t * 1.65 * speedMult + ud.phase) * 1.35;
+                    const targetFootX = ud.homeX + (ud.isLeftCorner ? Math.abs(weaveX) * 0.55 : -Math.abs(weaveX) * 0.55) + weaveX * 0.35;
+                    const targetFootZ = circleZ * (ud.isLeftCorner ? 1 : -1);
+
+                    f.position.x = THREE.MathUtils.lerp(f.position.x, targetFootX, dt * 5.5);
+                    f.position.z = THREE.MathUtils.lerp(f.position.z, targetFootZ, dt * 5.5);
+                    f.rotation.z = Math.sin(t * 3.5 + ud.phase) * 0.04;
+
+                    // Always face the rival fighter dynamically in 3D space
+                    if (other) {
+                        const dx = other.position.x - f.position.x;
+                        const dz = other.position.z - f.position.z;
+                        const desiredYaw = Math.atan2(dx, dz);
+                        f.rotation.y = THREE.MathUtils.lerp(f.rotation.y, desiredYaw, dt * 10);
+                    } else {
+                        f.rotation.y = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
+                    }
+
+                    // Active Boxer Bounce + Bipedal Leg Striding Cycle
+                    const strideFreq = t * 6.8 * speedMult + ud.phase;
+                    f.position.y = Math.abs(Math.sin(strideFreq)) * 0.14;
+                    ud.headGroup.position.y = 2.08 + Math.sin(strideFreq) * 0.05;
+                    ud.torso.rotation.y = Math.sin(strideFreq * 0.5) * 0.14;
+
+                    if (ud.leftLegPivot && ud.rightLegPivot) {
+                        ud.leftLegPivot.rotation.x = Math.sin(strideFreq) * 0.42;
+                        ud.rightLegPivot.rotation.x = -Math.sin(strideFreq) * 0.42;
+                    }
+
+                    // Active Combat Guard & Shadow-Jabbing Arms
+                    ud.rightArmPivot.rotation.x = -0.48 + Math.sin(strideFreq * 1.1) * 0.32;
+                    ud.leftArmPivot.rotation.x = -0.25 - Math.sin(strideFreq * 1.1) * 0.28;
                 }
 
                 // Animate Raider #48 Propeller Hat & Bureau #31 Equalizer Visor Bars
                 if (ud.propellerGroup) {
-                    ud.propellerGroup.rotation.y += dt * 11.0;
+                    ud.propellerGroup.rotation.y += dt * 12.0;
                 }
                 if (ud.eqBars && ud.eqBars.length > 0) {
                     ud.eqBars.forEach(b => {
-                        const s = 0.65 + 0.55 * Math.abs(Math.sin(t * 6.5 + b.phase));
+                        const s = 0.65 + 0.55 * Math.abs(Math.sin(t * 7.5 + b.phase));
                         b.mesh.scale.y = s;
                     });
                 }
@@ -2434,59 +2516,64 @@
                 const hasShield = (side === 'A' && shieldTicksA > 0) || (side === 'B' && shieldTicksB > 0);
                 const hasLeverage = (side === 'A' && leverageTicksA > 0) || (side === 'B' && leverageTicksB > 0);
 
-                ud.shieldDome.material.opacity = hasShield ? (0.32 + Math.sin(t * 8) * 0.1) : 0;
-                ud.shieldDome.rotation.y += dt * 1.5;
+                ud.shieldDome.material.opacity = hasShield ? (0.35 + Math.sin(t * 8) * 0.12) : 0;
+                ud.shieldDome.rotation.y += dt * 1.8;
 
-                ud.auraRing.material.opacity = hasLeverage ? (0.75 + Math.sin(t * 10) * 0.2) : 0;
-                ud.auraRing.scale.setScalar(hasLeverage ? (1 + Math.sin(t * 12) * 0.08) : 1);
+                ud.auraRing.material.opacity = hasLeverage ? (0.8 + Math.sin(t * 10) * 0.2) : 0;
+                ud.auraRing.scale.setScalar(hasLeverage ? (1 + Math.sin(t * 12) * 0.1) : 1);
             });
 
-            // 2. Step Active 3D Dash & Weapon Slash Animation
+            // 2. Step Active 3D Dash, Weapon Slash & Ultimate Meteor Animation
             if (active3DStrike) {
                 active3DStrike.elapsed += dt;
                 const p = Math.min(1, active3DStrike.elapsed / active3DStrike.duration);
-                const { attacker, defender, startX, targetX, isCrit, blockedByShield, attackerSide } = active3DStrike;
+                const { attacker, defender, startX, startZ, targetX, targetZ, isCrit, isUltimate, blockedByShield, attackerSide } = active3DStrike;
                 const weapon = attacker.userData.weaponType || 'broadsword';
 
+                // Stride legs rapidly during dash
+                if (attacker.userData.leftLegPivot && attacker.userData.rightLegPivot) {
+                    attacker.userData.leftLegPivot.rotation.x = Math.sin(p * Math.PI * 6) * 0.65;
+                    attacker.userData.rightLegPivot.rotation.x = -Math.sin(p * Math.PI * 6) * 0.65;
+                }
+
                 if (p < 0.45) {
-                    // Dash forward & wind up weapon according to weapon weight
                     const dashT = p / 0.45;
                     attacker.position.x = THREE.MathUtils.lerp(startX, targetX, dashT);
-                    
-                    if (weapon === 'hammer') {
-                        // High vertical leap with hydraulic rocket
-                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 1.4 : 0.95);
+                    attacker.position.z = THREE.MathUtils.lerp(startZ || 0, targetZ || 0, dashT);
+
+                    if (isUltimate) {
+                        // 360° Sky-Drop Meteor Leap
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 2.35;
+                        attacker.rotation.z = (attackerSide === 'A' ? -1 : 1) * dashT * Math.PI * 2;
+                        attacker.userData.rightArmPivot.rotation.x = -2.8;
+                    } else if (weapon === 'hammer') {
+                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 1.45 : 0.95);
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.6, dashT);
                     } else if (weapon === 'katana') {
-                        // Low swift forward razor slide
-                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.18;
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.22;
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.6, dashT);
                         attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0, 0.8, dashT);
                     } else if (weapon === 'trident') {
-                        // Straight lunging spear stance
-                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.25;
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.28;
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.8, dashT);
                     } else if (weapon === 'scythe') {
-                        // Spinning windup
-                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.45;
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.5;
                         attacker.rotation.y = (attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2) + dashT * Math.PI;
                     } else {
-                        // Greatsword & Battle Axe: heavy overhead arc
-                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.9 : 0.45);
+                        attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.95 : 0.48);
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.3, dashT);
                     }
-                } else if (p < 0.65) {
-                    // Weapon impact & physics strike
-                    const strikeT = (p - 0.45) / 0.2;
+                } else if (p < 0.68) {
+                    const strikeT = (p - 0.45) / 0.23;
+                    attacker.rotation.z = 0;
 
-                    if (weapon === 'hammer') {
-                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.6, 0.85, strikeT);
+                    if (weapon === 'hammer' || isUltimate) {
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.6, 0.9, strikeT);
                         attacker.position.y = THREE.MathUtils.lerp(attacker.position.y, 0, strikeT * 2);
                     } else if (weapon === 'katana') {
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.6, 0.45, strikeT);
                         attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0.8, -0.6, strikeT);
                     } else if (weapon === 'trident') {
-                        // Rapid piercing triple-jab
                         const jab = Math.sin(strikeT * Math.PI * 3) * 0.35;
                         attacker.position.x = targetX + (attackerSide === 'A' ? jab : -jab);
                         attacker.userData.rightArmPivot.rotation.x = -1.5 + jab;
@@ -2499,43 +2586,61 @@
 
                     if (!active3DStrike.impactTriggered) {
                         active3DStrike.impactTriggered = true;
+                        lastAutoSparTime = t;
                         const defPos = defender.position.clone();
-                        const sparkHex = blockedByShield ? 0x00F0FF : (isCrit ? 0xFFD700 : 0xFF3366);
-                        const sparkCount = weapon === 'hammer' ? 36 : (isCrit ? 28 : 16);
-                        spawn3DVoxelBurst(defPos, sparkHex, sparkCount, false);
+                        const sparkHex = blockedByShield ? 0x00F0FF : (isUltimate ? 0x00FF88 : (isCrit ? 0xFFD700 : 0xFF3366));
+                        const sparkCount = isUltimate ? 48 : (weapon === 'hammer' ? 34 : (isCrit ? 26 : 15));
+                        spawn3DVoxelBurst(defPos, sparkHex, sparkCount, isUltimate);
+                        spawn3DShockwaveRing(defPos, sparkHex, isUltimate ? 6.2 : (isCrit ? 4.4 : 2.8));
 
-                        if (weapon === 'hammer' || (isCrit && !blockedByShield)) {
+                        if (isUltimate || weapon === 'hammer' || (isCrit && !blockedByShield)) {
                             const wrap = document.getElementById('arena-3d-wrapper');
                             wrap.classList.remove('shake-crit');
                             void wrap.offsetWidth;
                             wrap.classList.add('shake-crit');
                         }
                     }
-                    // Defender recoil knockback based on weapon impact
-                    const knockDist = weapon === 'hammer' ? 0.65 : (weapon === 'axe' ? 0.52 : 0.42);
-                    defender.position.x = defender.userData.homeX + (attackerSide === 'A' ? knockDist : -knockDist);
-                    defender.position.y = weapon === 'hammer' ? 0.25 : 0;
+                    // Defender recoil knockback
+                    const knockDist = isUltimate ? 1.05 : (weapon === 'hammer' ? 0.65 : (weapon === 'axe' ? 0.52 : 0.42));
+                    defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX + (attackerSide === 'A' ? knockDist : -knockDist), 0.5);
+                    defender.position.y = (isUltimate || weapon === 'hammer') ? 0.32 : 0.08;
                 } else {
-                    // Return back to home stance
-                    const backT = (p - 0.65) / 0.35;
-                    attacker.position.x = THREE.MathUtils.lerp(targetX, startX, backT);
+                    const backT = (p - 0.68) / 0.32;
+                    attacker.position.x = THREE.MathUtils.lerp(targetX, attacker.userData.homeX, backT);
                     attacker.position.y = 0;
+                    attacker.rotation.z = 0;
                     defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX, backT);
                     defender.position.y = THREE.MathUtils.lerp(defender.position.y, 0, backT);
-                    attacker.rotation.y = attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2;
                     attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(0.65, -0.35, backT);
                     attacker.userData.rightArmPivot.rotation.z = 0;
                 }
 
                 if (p >= 1) {
-                    attacker.position.x = startX;
-                    defender.position.x = defender.userData.homeX;
+                    attacker.position.y = 0;
+                    attacker.rotation.z = 0;
                     defender.position.y = 0;
                     active3DStrike = null;
                 }
             }
 
-            // 3. Step 3D Voxel Sparks & Shatter Debris Physics
+            // 3. Step Expanding 3D Shockwave Rings
+            for (let i = shockwaveRings.length - 1; i >= 0; i--) {
+                const sw = shockwaveRings[i];
+                sw.age += dt;
+                const prog = sw.age / sw.maxAge;
+                if (prog >= 1) {
+                    scene.remove(sw.mesh);
+                    sw.mesh.geometry.dispose();
+                    sw.mesh.material.dispose();
+                    shockwaveRings.splice(i, 1);
+                } else {
+                    const sc = 1 + prog * sw.maxScale;
+                    sw.mesh.scale.set(sc, sc, 1);
+                    sw.mesh.material.opacity = 0.9 * (1 - prog);
+                }
+            }
+
+            // 4. Step 3D Voxel Sparks & Shatter Debris Physics
             for (let i = voxelParticles.length - 1; i >= 0; i--) {
                 const pt = voxelParticles[i];
                 pt.age += dt;
@@ -2914,9 +3019,12 @@
         let selectedTeam = null;
         let roundLocked = false;
         let currentBet = 0;
+        let selectedMatchDuration = 60; // 30s Blitz, 60s Standard, 90s Marathon
         let timer = 60;
         let tickCount = 0;
-        const TOTAL_TICKS = 40; // 40 ticks * 1.5s = 60s
+        let TOTAL_TICKS = 40; // 40 ticks * 1.5s = 60s
+        let playerComboCount = 0;
+        let lastComboTapTime = 0;
 
         let unifiedClockInterval = null;
         let oracleTickInterval = null;
@@ -3173,24 +3281,127 @@
             setTimeout(() => el.remove(), 1150);
         }
 
-        // Active Overdrive Skills (Shield Wall & 2x Leverage Strike)
+        // Active Overdrive Skills (Jab/Boost, Shield Wall, 2x Leverage Strike & 360° Meteor Ultimate)
         function updateRageUI() {
             document.getElementById('ragePctText').innerText = `${Math.round(playerRage)}%`;
             document.getElementById('rageBarFill').style.width = `${playerRage}%`;
-            document.getElementById('skillShieldBtn').disabled = !roundLocked || playerRage < 50;
-            document.getElementById('skillLeverageBtn').disabled = !roundLocked || playerRage < 75;
+            const myAsset = selectedTeam === 'B' ? selectB.value : selectA.value;
+            const shieldCost = myAsset === 'MSFT' ? 35 : 40;
+            document.getElementById('skillShieldBtn').disabled = !roundLocked || playerRage < shieldCost;
+            document.getElementById('skillLeverageBtn').disabled = !roundLocked || playerRage < 65;
+            const ultBtn = document.getElementById('skillUltimateBtn');
+            if (ultBtn) ultBtn.disabled = !roundLocked || playerRage < 95;
         }
 
+        // Duration Toggle Button (30s Blitz / 60s Standard / 90s Marathon)
+        const durationToggleBtn = document.getElementById('durationToggleBtn');
+        if (durationToggleBtn) {
+            durationToggleBtn.addEventListener('click', () => {
+                if (roundLocked) return;
+                if (selectedMatchDuration === 60) selectedMatchDuration = 30;
+                else if (selectedMatchDuration === 30) selectedMatchDuration = 90;
+                else selectedMatchDuration = 60;
+                timer = selectedMatchDuration;
+                TOTAL_TICKS = Math.round(selectedMatchDuration / 1.5);
+                countdownEl.innerText = timer;
+                durationToggleBtn.innerText = `${selectedMatchDuration}s ⏱️`;
+                playSfx('coin');
+                spawnArenaFloatText('CENTER', `⏱️ ${selectedMatchDuration}s DUEL MODE SELECTED!`, '#00F0FF');
+            });
+        }
+
+        // Interactive Jab / Combo Boost Handler (Works on Button, 3D Arena Click & Spacebar!)
+        function triggerPlayerActiveJab() {
+            const now = Date.now();
+            if (now - lastComboTapTime < 220) return; // Anti-macro throttle (max ~4.5 taps/sec)
+            if (now - lastComboTapTime < 2200) {
+                playerComboCount++;
+            } else {
+                playerComboCount = 1;
+            }
+            lastComboTapTime = now;
+
+            const side = selectedTeam || 'A';
+            const rivalSide = side === 'A' ? 'B' : 'A';
+            playerRage = Math.min(100, playerRage + 7);
+            updateRageUI();
+
+            // Show live Combo Meter Badge
+            const comboBadge = document.getElementById('comboMeterBadge');
+            if (comboBadge && playerComboCount >= 2) {
+                comboBadge.innerText = `🔥 ${playerComboCount}x HYPE COMBO!`;
+                comboBadge.classList.remove('hidden');
+                clearTimeout(window.comboHideTimer);
+                window.comboHideTimer = setTimeout(() => comboBadge.classList.add('hidden'), 1800);
+            }
+
+            playSfx('hit');
+            trigger3DCombatClash(side, playerComboCount % 5 === 0, 0.85, false, false);
+
+            if (roundLocked) {
+                // Active chip damage during locked duel (respects Last-Stand buffer until final 12s)
+                const minFloor = timer > 12 ? 8 : 0;
+                const chip = playerComboCount >= 5 ? 1.15 : 0.75;
+                if (side === 'A') {
+                    hpB = Math.max(minFloor, hpB - chip);
+                } else {
+                    hpA = Math.max(minFloor, hpA - chip);
+                }
+                updateFighterLiveHUD(
+                    historyA[historyA.length - 1] || 0,
+                    historyB[historyB.length - 1] || 0
+                );
+                spawnArenaFloatText(rivalSide, `👊 JAB -${chip.toFixed(1)} HP (${playerComboCount}x)!`, '#00FF88');
+            } else {
+                spawnArenaFloatText(side, `⚡ WARMUP JAB (${playerComboCount}x)!`, '#00FF88');
+            }
+        }
+
+        const skillJabBtn = document.getElementById('skillJabBtn');
+        if (skillJabBtn) {
+            skillJabBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                triggerPlayerActiveJab();
+            });
+        }
+
+        // Allow clicking/tapping the 3D Arena or pressing SPACEBAR to Jab & Boost
+        let pointerDownPos = null;
+        if (mountEl) {
+            mountEl.addEventListener('pointerdown', (e) => {
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+            mountEl.addEventListener('pointerup', (e) => {
+                if (!pointerDownPos) return;
+                const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+                pointerDownPos = null;
+                if (dist < 10) {
+                    triggerPlayerActiveJab();
+                }
+            });
+        }
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && document.activeElement?.tagName !== 'INPUT') {
+                e.preventDefault();
+                triggerPlayerActiveJab();
+            }
+        });
+
         document.getElementById('skillShieldBtn').addEventListener('click', () => {
-            if (!roundLocked || playerRage < 50 || !selectedTeam) return;
             const myAsset = selectedTeam === 'A' ? selectA.value : selectB.value;
-            const shieldCost = myAsset === 'MSFT' ? 40 : 50; // MSFT Hyperscale Cloud passive
-            const extraTicks = myAsset === 'BNB' ? 4 : 3;   // BNB Quarterly Burn Aura passive
+            const shieldCost = myAsset === 'MSFT' ? 35 : 40;
+            if (!roundLocked || playerRage < shieldCost || !selectedTeam) return;
+            const extraTicks = myAsset === 'BNB' ? 4 : 3;
             playerRage = Math.max(0, playerRage - shieldCost);
-            if (selectedTeam === 'A') shieldTicksA = extraTicks;
-            else shieldTicksB = extraTicks;
+            if (selectedTeam === 'A') {
+                shieldTicksA = extraTicks;
+                hpA = Math.min(100, hpA + 4);
+            } else {
+                shieldTicksB = extraTicks;
+                hpB = Math.min(100, hpB + 4);
+            }
             playSfx('shield');
-            spawnArenaFloatText(selectedTeam, `🛡️ HEX SHIELD ACTIVE (${extraTicks} TICKS)!`, '#00F0FF');
+            spawnArenaFloatText(selectedTeam, `🛡️ HEX SHIELD +4 HP (${extraTicks}T)!`, '#00F0FF');
             updateRageUI();
             broadcastMultiplayerSkill('SHIELD', selectedTeam);
             if (typeof tutStep !== 'undefined' && tutStep === 5) {
@@ -3199,20 +3410,50 @@
         });
 
         document.getElementById('skillLeverageBtn').addEventListener('click', () => {
-            if (!roundLocked || playerRage < 75 || !selectedTeam) return;
+            if (!roundLocked || playerRage < 65 || !selectedTeam) return;
             const myAsset = selectedTeam === 'A' ? selectA.value : selectB.value;
-            const extraLevTicks = myAsset === 'STRIPE' ? 5 : 4; // STRIPE Instant Settlement passive
-            playerRage = Math.max(0, playerRage - 75);
+            const extraLevTicks = myAsset === 'STRIPE' ? 5 : 4;
+            playerRage = Math.max(0, playerRage - 65);
             if (selectedTeam === 'A') leverageTicksA = extraLevTicks;
             else leverageTicksB = extraLevTicks;
             playSfx('crit');
-            spawnArenaFloatText(selectedTeam, `⚡ 2X OVERDRIVE (${extraLevTicks} TICKS)!`, '#FFD700');
+            spawnArenaFloatText(selectedTeam, `⚡ 2X OVERDRIVE (${extraLevTicks}T)!`, '#FFD700');
             updateRageUI();
             broadcastMultiplayerSkill('LEVERAGE', selectedTeam);
             if (typeof tutStep !== 'undefined' && tutStep === 5) {
                 completeInteractiveTutorial();
             }
         });
+
+        const skillUltimateBtn = document.getElementById('skillUltimateBtn');
+        if (skillUltimateBtn) {
+            skillUltimateBtn.addEventListener('click', () => {
+                if (!roundLocked || playerRage < 95 || !selectedTeam) return;
+                playerRage = 0;
+                const rivalSide = selectedTeam === 'A' ? 'B' : 'A';
+                const minFloor = timer > 12 ? 5 : 0;
+                if (selectedTeam === 'A') {
+                    hpB = Math.max(minFloor, hpB - 14);
+                } else {
+                    hpA = Math.max(minFloor, hpA - 14);
+                }
+                playSfx('win');
+                trigger3DCombatClash(selectedTeam, true, 14, false, true);
+                spawnArenaFloatText(rivalSide, '☄️ METEOR ULTIMATE -14 HP!', '#00FF88');
+                updateRageUI();
+                updateFighterLiveHUD(
+                    historyA[historyA.length - 1] || 0,
+                    historyB[historyB.length - 1] || 0
+                );
+                broadcastMultiplayerSkill('ULTIMATE', selectedTeam);
+                if (typeof tutStep !== 'undefined' && tutStep === 5) {
+                    completeInteractiveTutorial();
+                }
+                if (hpA <= 0 || hpB <= 0) {
+                    finishAndResolveDuel();
+                }
+            });
+        }
 
         window.triggerArenaEmote = function(emoteText, fromRemoteSide = null) {
             playSfx('coin');
@@ -3273,11 +3514,26 @@
 
             beginArenaCombatSession(wagerAmount, initialPrices);
 
-            // Unified 1000ms Countdown Timer
+            // Unified 1000ms Countdown Timer + Live Market Flash Events & Final 12s Climax
             unifiedClockInterval = setInterval(() => {
                 if (!roundLocked || timer <= 0) return;
                 timer--;
                 countdownEl.innerText = timer;
+
+                if (timer === 45) {
+                    playerRage = Math.min(100, playerRage + 20);
+                    updateRageUI();
+                    spawnArenaFloatText('CENTER', '🐋 WHALE BUY WALL! +20% RAGE!', '#00F0FF');
+                } else if (timer === 30) {
+                    playerRage = Math.min(100, playerRage + 25);
+                    updateRageUI();
+                    spawnArenaFloatText('CENTER', '⚡ ROBINHOOD CHAIN LIQUIDITY SURGE!', '#FFD700');
+                } else if (timer === 12) {
+                    document.getElementById('arenaCenterBanner').innerText = '🔥 FINAL 12s CLIMAX OVERDRIVE — FINISH HIM!';
+                    playSfx('crit');
+                    spawnArenaFloatText('CENTER', '🔥 FINAL 12s CLIMAX OVERDRIVE!', '#FF3366');
+                }
+
                 if (timer <= 0) {
                     finishAndResolveDuel();
                 }
@@ -3354,7 +3610,8 @@
             leverageTicksA = 0; leverageTicksB = 0;
             boosterCatchUsedA = false; boosterCatchUsedB = false;
             primeDeliveryUsedA = false; primeDeliveryUsedB = false;
-            timer = 60;
+            timer = selectedMatchDuration;
+            TOTAL_TICKS = Math.round(selectedMatchDuration / 1.5);
             tickCount = 0;
 
             countdownEl.innerText = timer;
@@ -3395,10 +3652,11 @@
             }
             playerRage = Math.min(100, playerRage + rageGain);
 
-            // Calculate Tick Strike, Weapon Modifiers & Fighter Passives
+            // Calculate Tick Strike, Weapon Modifiers & Fighter Passives (Calibrated for full 60s nail-biter!)
             const stepDiff = Math.abs(tick.stepA - tick.stepB);
             const cumDiff = Math.abs(tick.cumChangeA - tick.cumChangeB);
-            let rawDamage = Math.min(5.2, Math.max(1.3, stepDiff * 4.2 + cumDiff * 1.1)) * (weapStats.dmgMult || 1.0);
+            const climaxMult = timer <= 12 ? 1.65 : 1.0; // Final 12s Climax Overdrive!
+            let rawDamage = Math.min(2.35, Math.max(0.95, stepDiff * 2.2 + cumDiff * 0.55)) * (weapStats.dmgMult || 1.0) * climaxMult;
 
             // Crit check: base volatility + weapon critBonus + OPENAI AGI Inference / AMZN Prime Delivery
             let isCrit = stepDiff >= (0.55 - (weapStats.critBonus || 0)) || cumDiff >= 1.35;
@@ -3409,7 +3667,7 @@
             }
 
             if (isCrit) {
-                rawDamage *= (weapStats.critMult || 1.35);
+                rawDamage *= (weapStats.critMult || 1.30);
                 if (atkKey === 'SOL') rawDamage *= 1.15;     // SOL Proof-of-History Blitz
                 if (atkKey === 'ANDURIL') rawDamage *= 1.12; // ANDURIL Lattice Target Lock
             }
@@ -3424,8 +3682,11 @@
             if (defKey === 'AAPL' && tick.tickCount <= 3) rawDamage *= 0.65;
             if (defKey === 'DANGOTE') rawDamage *= 0.88;
 
+            // Last-Stand Tactical Armor holds fighters at 8 HP minimum until the Final 12s Climax Overdrive so duels go the full distance!
+            const minArmorFloor = timer > 12 ? 8 : 0;
+
             if (attackerSide === 'A') {
-                if (leverageTicksA > 0) rawDamage *= 2.0;
+                if (leverageTicksA > 0) rawDamage *= 1.75;
                 const hasShield = shieldTicksB > 0;
                 const pierce = hasShield ? (weapStats.shieldPierce || 0) : 1.0;
                 const finalDmg = hasShield ? (rawDamage * pierce) : rawDamage;
@@ -3440,7 +3701,7 @@
                         nextHpB = 1;
                         spawnArenaFloatText('B', '🚀 BOOSTER CATCH: SURVIVED AT 1 HP!', '#38BDF8');
                     }
-                    hpB = Math.max(0, nextHpB);
+                    hpB = Math.max(minArmorFloor, nextHpB);
                 }
 
                 // Weapon Lifesteal (Greatsword / Void Scythe)
@@ -3460,7 +3721,7 @@
                     spawnArenaFloatText('B', `-${finalDmg.toFixed(1)} HP`, '#FF3366');
                 }
             } else {
-                if (leverageTicksB > 0) rawDamage *= 2.0;
+                if (leverageTicksB > 0) rawDamage *= 1.75;
                 const hasShield = shieldTicksA > 0;
                 const pierce = hasShield ? (weapStats.shieldPierce || 0) : 1.0;
                 const finalDmg = hasShield ? (rawDamage * pierce) : rawDamage;
@@ -3475,7 +3736,7 @@
                         nextHpA = 1;
                         spawnArenaFloatText('A', '🚀 BOOSTER CATCH: SURVIVED AT 1 HP!', '#38BDF8');
                     }
-                    hpA = Math.max(0, nextHpA);
+                    hpA = Math.max(minArmorFloor, nextHpA);
                 }
 
                 if (weapStats.lifesteal > 0 && finalDmg > 0 && hpB < 100) {
@@ -3751,11 +4012,13 @@
             clearInterval(oracleTickInterval);
             roundLocked = false;
             currentBet = 0;
-            timer = 60;
+            timer = selectedMatchDuration;
+            TOTAL_TICKS = Math.round(selectedMatchDuration / 1.5);
             tickCount = 0;
             hpA = 100;
             hpB = 100;
             playerRage = 0;
+            playerComboCount = 0;
             shieldTicksA = 0; shieldTicksB = 0;
             leverageTicksA = 0; leverageTicksB = 0;
             historyA = [0];
@@ -3763,7 +4026,7 @@
             myLock = false;
             oppLock = false;
 
-            countdownEl.innerText = '60';
+            countdownEl.innerText = String(selectedMatchDuration);
             document.getElementById('poolA').innerText = '0';
             document.getElementById('poolB').innerText = '0';
             placeBetBtn.style.background = "var(--vibe-purple)";
@@ -4153,6 +4416,10 @@
                 } else if (msg.skill === 'LEVERAGE') {
                     if (msg.side === 'A') leverageTicksA = 4; else leverageTicksB = 4;
                     spawnArenaFloatText(msg.side, '⚡ RIVAL 2X OVERDRIVE!', '#FFD700');
+                } else if (msg.skill === 'ULTIMATE') {
+                    const defSide = msg.side === 'A' ? 'B' : 'A';
+                    trigger3DCombatClash(msg.side, true, 14, false, true);
+                    spawnArenaFloatText(defSide, '☄️ RIVAL METEOR ULTIMATE!', '#00FF88');
                 } else if (msg.skill === 'EMOTE') {
                     window.triggerArenaEmote(msg.emoteText, msg.side);
                 }
