@@ -139,8 +139,9 @@
         }
 
         .loser-dim {
-            filter: grayscale(85%) opacity(0.65);
-            transform: scale(0.97) !important;
+            /* Keep losing fighter card 100% vibrant and colorful after every battle */
+            filter: none !important;
+            opacity: 1 !important;
         }
 
         /* 3D Viewport Wrapper */
@@ -2196,9 +2197,10 @@
             auraRing.position.y = 0.15;
             root.add(auraRing);
 
-            // Position & Face Opponent
-            const homeX = isLeftCorner ? -2.45 : 2.45;
-            root.position.set(homeX, 0, 0);
+            // Position & Face Opponent with Independent Tactical Footwork State
+            const homeX = isLeftCorner ? -2.35 : 2.35;
+            const startZ = isLeftCorner ? -0.45 : 0.55;
+            root.position.set(homeX, 0, startZ);
             root.rotation.y = isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
 
             root.userData = {
@@ -2217,7 +2219,18 @@
                 auraRing,
                 propellerGroup,
                 eqBars,
-                phase: isLeftCorner ? 0 : Math.PI,
+                phase: isLeftCorner ? 0 : 1.95,
+                // Independent AI Footwork State Machine (Asynchronous & Asymmetric)
+                footTargetX: isLeftCorner ? -1.45 : 2.65,
+                footTargetZ: isLeftCorner ? 0.95 : -1.15,
+                nextFootDecision: isLeftCorner ? 0.35 : 0.78,
+                moveStyle: isLeftCorner ? 'press_forward' : 'cut_left',
+                moveSpeed: isLeftCorner ? 4.8 : 5.4,
+                stridePhase: isLeftCorner ? 0.2 : 2.7,
+                slipPhase: isLeftCorner ? 0.5 : 4.1,
+                feintTimer: isLeftCorner ? 0.9 : 1.65,
+                activeFeint: 0,
+                feintType: 'jab',
                 isKO: false,
                 victorySpin: false
             };
@@ -2378,15 +2391,97 @@
             }
         }
 
-        // Trigger 3D Dash, Weapon Slash, Knockback & Ultimate Meteor Animation
+        // Independent AI Ring-Generalship Footwork Planner (Asynchronous & Asymmetric per Fighter)
+        function pickNextTacticalFootwork(f, other, t) {
+            const ud = f.userData;
+            const styles = ['press_forward', 'cut_left', 'cut_right', 'flank_diagonal', 'backstep_pivot', 'pocket_weave', 'circle_orbit'];
+            // Pick a new maneuver different from current style
+            let chosen = styles[Math.floor(Math.random() * styles.length)];
+            if (chosen === ud.moveStyle) {
+                chosen = styles[(styles.indexOf(chosen) + 2) % styles.length];
+            }
+            ud.moveStyle = chosen;
+
+            // Independent decision cadence so Fighter A and Fighter B never step or change direction at the same time
+            const cadenceBase = roundLocked ? 0.42 : 0.62;
+            const cadenceJitter = roundLocked ? 0.58 : 0.85;
+            ud.nextFootDecision = t + cadenceBase + Math.random() * cadenceJitter;
+            ud.moveSpeed = (roundLocked ? 5.2 : 3.8) + Math.random() * 2.8;
+
+            const signX = ud.isLeftCorner ? -1 : 1; // Left fighter generally stays on negative X side, right on positive X, with dynamic pocket cross-overs
+            const oppX = other ? other.position.x : -ud.homeX;
+            const oppZ = other ? other.position.z : 0;
+            const oppTargetZ = (other && other.userData) ? (other.userData.footTargetZ || 0) : 0;
+
+            let tx = ud.homeX;
+            let tz = 0;
+
+            if (chosen === 'press_forward') {
+                // Step aggressively into the center pocket toward rival
+                tx = signX * (0.75 + Math.random() * 0.75);
+                tz = oppZ + (Math.random() - 0.5) * 1.4;
+            } else if (chosen === 'cut_left') {
+                // Sharp lateral side-step toward negative Z
+                tx = signX * (1.25 + Math.random() * 1.15);
+                tz = -1.15 - Math.random() * 1.25;
+            } else if (chosen === 'cut_right') {
+                // Sharp lateral side-step toward positive Z
+                tx = signX * (1.25 + Math.random() * 1.15);
+                tz = 1.15 + Math.random() * 1.25;
+            } else if (chosen === 'flank_diagonal') {
+                // Cut diagonally across the octagon to take an off-center angle on the opponent
+                tx = signX * (0.9 + Math.random() * 0.95);
+                tz = (oppTargetZ >= 0 ? -1 : 1) * (1.1 + Math.random() * 1.25);
+            } else if (chosen === 'backstep_pivot') {
+                // Pull back out of danger toward outer octagon ring while pivoting sideways
+                tx = signX * (2.35 + Math.random() * 0.95);
+                tz = (f.position.z >= 0 ? -1 : 1) * (0.65 + Math.random() * 1.35);
+            } else if (chosen === 'pocket_weave') {
+                // Inside fighting in the center of the octagon with tight angles
+                tx = signX * (0.85 + Math.random() * 0.65);
+                tz = (Math.random() - 0.5) * 2.2;
+            } else {
+                // Circle orbit around octagon perimeter
+                tx = signX * (1.55 + Math.random() * 1.1);
+                tz = (Math.random() > 0.5 ? 1 : -1) * (0.95 + Math.random() * 1.4);
+            }
+
+            // Anti-Mirror Guard: Never let both fighters drift to the same Z lane at the same time!
+            if (Math.abs(tz - oppTargetZ) < 0.75) {
+                tz = oppTargetZ >= 0 ? -Math.max(1.05, Math.abs(tz)) : Math.max(1.05, Math.abs(tz));
+            }
+
+            // Keep inside Colosseum Octagon safe bounds
+            ud.footTargetX = THREE.MathUtils.clamp(tx, -3.35, 3.35);
+            ud.footTargetZ = THREE.MathUtils.clamp(tz, -2.45, 2.45);
+        }
+
+        // Trigger 3D Dash, Multi-Style Weapon Slash, Evasive Defender Reaction & Ultimate Meteor Animation
         function trigger3DCombatClash(attackerSide, isCrit, damageDealt, blockedByShield, isUltimate = false) {
             if (!fighterMeshA || !fighterMeshB) return;
             const attacker = attackerSide === 'A' ? fighterMeshA : fighterMeshB;
             const defender = attackerSide === 'A' ? fighterMeshB : fighterMeshA;
             const startX = attacker.position.x;
             const startZ = attacker.position.z;
-            const targetX = defender.position.x + (attackerSide === 'A' ? -1.05 : 1.05);
-            const targetZ = defender.position.z;
+            const defStartX = defender.position.x;
+            const defStartZ = defender.position.z;
+
+            // Compute 3D attack vector toward defender's current live 3D position with flanking offset
+            const dx = defStartX - startX;
+            const dz = defStartZ - startZ;
+            const dist = Math.max(0.5, Math.hypot(dx, dz));
+            const dirX = dx / dist;
+            const dirZ = dz / dist;
+
+            const strikeStyles = ['leap_smash', 'spin_slash', 'flank_blitz', 'triple_flurry', 'uppercut_rush'];
+            const strikeStyle = isUltimate ? 'meteor_ult' : strikeStyles[Math.floor(Math.random() * strikeStyles.length)];
+            const defReactions = ['sidestep_evade', 'cross_brace', 'lean_counter'];
+            const defReaction = blockedByShield ? 'cross_brace' : defReactions[Math.floor(Math.random() * defReactions.length)];
+            const flankSign = Math.random() > 0.5 ? 1 : -1;
+
+            const stopDist = 1.02;
+            const targetX = THREE.MathUtils.clamp(defStartX - dirX * stopDist, -3.1, 3.1);
+            const targetZ = THREE.MathUtils.clamp(defStartZ - dirZ * stopDist + (strikeStyle === 'flank_blitz' ? flankSign * 0.55 : 0), -2.35, 2.35);
 
             active3DStrike = {
                 attacker,
@@ -2394,14 +2489,21 @@
                 attackerSide,
                 startX,
                 startZ,
+                defStartX,
+                defStartZ,
+                dirX,
+                dirZ,
+                flankSign,
                 targetX,
                 targetZ,
+                strikeStyle,
+                defReaction,
                 isCrit: isCrit || isUltimate,
                 isUltimate,
                 damageDealt,
                 blockedByShield,
                 elapsed: 0,
-                duration: isUltimate ? 0.78 : 0.56,
+                duration: isUltimate ? 0.78 : 0.54,
                 impactTriggered: false
             };
         }
@@ -2429,7 +2531,7 @@
             });
         }
 
-        // Main Three.js Animation Loop (Continuous Footwork, Circling, Sparring & Impacts)
+        // Main Three.js Animation Loop (Autonomous Footwork, Forward/Lateral Cuts, Feints & Impacts)
         const clock = new THREE.Clock();
         function animate3DArena() {
             requestAnimationFrame(animate3DArena);
@@ -2438,15 +2540,15 @@
 
             // 0. Pre-Match Live Sparring & Mid-Duel Continuous Skirmishes (Never Dull!)
             if (fighterMeshA && fighterMeshB && !fighterMeshA.userData.isKO && !fighterMeshB.userData.isKO && !fighterMeshA.userData.victorySpin && !fighterMeshB.userData.victorySpin) {
-                const sparInterval = roundLocked ? 0.95 : 2.65;
+                const sparInterval = roundLocked ? 0.92 : 2.35;
                 if (!active3DStrike && (t - lastAutoSparTime) > sparInterval) {
                     lastAutoSparTime = t;
                     const side = Math.random() > 0.5 ? 'A' : 'B';
-                    trigger3DCombatClash(side, Math.random() > 0.78, 0, false, false);
+                    trigger3DCombatClash(side, Math.random() > 0.76, 0, false, false);
                 }
             }
 
-            // 1. Fighter Dynamic Footwork, Circling, Leg Striding, Shield & Aura Visuals
+            // 1. Fighter Autonomous 3D Footwork, Forward/Side Striding, Feints, Shield & Aura Visuals
             [fighterMeshA, fighterMeshB].forEach((f, idx) => {
                 if (!f) return;
                 const ud = f.userData;
@@ -2463,41 +2565,121 @@
                     ud.rightArmPivot.rotation.x = -Math.PI * 0.75;
                     ud.leftArmPivot.rotation.x = -Math.PI * 0.65;
                 } else if (!active3DStrike) {
-                    // Dynamic 3D Ring Footwork: Stalk, Circle & Weave around the Octagon!
-                    const speedMult = roundLocked ? 2.15 : 1.45;
-                    const weaveX = Math.sin(t * 2.2 * speedMult + ud.phase) * 0.68;
-                    const circleZ = Math.cos(t * 1.65 * speedMult + ud.phase) * 1.35;
-                    const targetFootX = ud.homeX + (ud.isLeftCorner ? Math.abs(weaveX) * 0.55 : -Math.abs(weaveX) * 0.55) + weaveX * 0.35;
-                    const targetFootZ = circleZ * (ud.isLeftCorner ? 1 : -1);
+                    // Independent AI Footwork Decision per Fighter
+                    if (t >= (ud.nextFootDecision || 0) || Math.hypot((ud.footTargetX || 0) - f.position.x, (ud.footTargetZ || 0) - f.position.z) < 0.22) {
+                        pickNextTacticalFootwork(f, other, t);
+                    }
 
-                    f.position.x = THREE.MathUtils.lerp(f.position.x, targetFootX, dt * 5.5);
-                    f.position.z = THREE.MathUtils.lerp(f.position.z, targetFootZ, dt * 5.5);
-                    f.rotation.z = Math.sin(t * 3.5 + ud.phase) * 0.04;
+                    const prevX = f.position.x;
+                    const prevZ = f.position.z;
+
+                    // Add subtle independent micro-footwork weave on top of tactical waypoint pursuit
+                    const microWeaveX = Math.sin(t * (idx === 0 ? 3.1 : 3.9) + ud.slipPhase) * 0.18;
+                    const microWeaveZ = Math.cos(t * (idx === 0 ? 2.7 : 3.4) + ud.phase) * 0.22;
+                    let desiredX = (ud.footTargetX ?? ud.homeX) + microWeaveX;
+                    let desiredZ = (ud.footTargetZ ?? 0) + microWeaveZ;
+
+                    // Maintain personal combat spacing so fighters don't overlap
+                    if (other) {
+                        const sepX = desiredX - other.position.x;
+                        const sepZ = desiredZ - other.position.z;
+                        const sepDist = Math.hypot(sepX, sepZ);
+                        const minSpacing = 1.38;
+                        if (sepDist < minSpacing && sepDist > 0.001) {
+                            desiredX = other.position.x + (sepX / sepDist) * minSpacing;
+                            desiredZ = other.position.z + (sepZ / sepDist) * minSpacing;
+                        }
+                    }
+
+                    desiredX = THREE.MathUtils.clamp(desiredX, -3.4, 3.4);
+                    desiredZ = THREE.MathUtils.clamp(desiredZ, -2.5, 2.5);
+
+                    const chaseSpeed = (ud.moveSpeed || 4.8) * (roundLocked ? 1.15 : 0.9);
+                    f.position.x = THREE.MathUtils.lerp(f.position.x, desiredX, dt * chaseSpeed * 0.55);
+                    f.position.z = THREE.MathUtils.lerp(f.position.z, desiredZ, dt * chaseSpeed * 0.55);
+
+                    // Compute real instantaneous 3D velocity vector (vx, vz)
+                    const vx = (f.position.x - prevX) / Math.max(dt, 0.001);
+                    const vz = (f.position.z - prevZ) / Math.max(dt, 0.001);
+                    const speedMag = Math.min(4.5, Math.hypot(vx, vz));
 
                     // Always face the rival fighter dynamically in 3D space
+                    let facingYaw = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
                     if (other) {
                         const dx = other.position.x - f.position.x;
                         const dz = other.position.z - f.position.z;
-                        const desiredYaw = Math.atan2(dx, dz);
-                        f.rotation.y = THREE.MathUtils.lerp(f.rotation.y, desiredYaw, dt * 10);
+                        facingYaw = Math.atan2(dx, dz);
+                        f.rotation.y = THREE.MathUtils.lerp(f.rotation.y, facingYaw, dt * 11);
                     } else {
-                        f.rotation.y = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
+                        f.rotation.y = facingYaw;
                     }
 
-                    // Active Boxer Bounce + Bipedal Leg Striding Cycle
-                    const strideFreq = t * 6.8 * speedMult + ud.phase;
-                    f.position.y = Math.abs(Math.sin(strideFreq)) * 0.14;
-                    ud.headGroup.position.y = 2.08 + Math.sin(strideFreq) * 0.05;
-                    ud.torso.rotation.y = Math.sin(strideFreq * 0.5) * 0.14;
+                    // Project velocity into Fighter's Local Forward/Back & Lateral Left/Right axes
+                    const fwdX = Math.sin(f.rotation.y);
+                    const fwdZ = Math.cos(f.rotation.y);
+                    const rightX = Math.cos(f.rotation.y);
+                    const rightZ = -Math.sin(f.rotation.y);
+                    const forwardVel = vx * fwdX + vz * fwdZ; // + = advancing forward, - = retreating back
+                    const strafeVel = vx * rightX + vz * rightZ; // + = side-stepping right, - = side-stepping left
 
+                    // Advance independent bipedal stride phase based on actual movement velocity
+                    const baseCadence = idx === 0 ? 6.4 : 7.3;
+                    ud.stridePhase = (ud.stridePhase || 0) + dt * (baseCadence + speedMag * 2.8);
+                    const sPhase = ud.stridePhase;
+
+                    // Boxer footwork bounce + forward/backward lean + lateral strafe bank
+                    f.position.y = Math.abs(Math.sin(sPhase)) * (0.11 + speedMag * 0.035);
+                    f.rotation.z = THREE.MathUtils.lerp(f.rotation.z, THREE.MathUtils.clamp(-strafeVel * 0.085 + Math.sin(t * 4.2 + ud.slipPhase) * 0.04, -0.22, 0.22), dt * 9);
+
+                    // Upper body head slip (weaving side-to-side & forward pitch when pressing)
+                    const slipWave = Math.sin(t * (idx === 0 ? 4.6 : 5.3) + ud.slipPhase);
+                    ud.headGroup.position.y = 2.08 + Math.sin(sPhase) * 0.045;
+                    ud.headGroup.position.x = slipWave * 0.08;
+                    ud.torso.rotation.x = THREE.MathUtils.lerp(ud.torso.rotation.x || 0, THREE.MathUtils.clamp(forwardVel * 0.09, -0.2, 0.24), dt * 8);
+                    ud.torso.rotation.y = Math.sin(sPhase * 0.5) * 0.18 + slipWave * 0.1;
+
+                    // 360° Bipedal Leg Striding (Forward/Back kick + Lateral side-step stance opening)
                     if (ud.leftLegPivot && ud.rightLegPivot) {
-                        ud.leftLegPivot.rotation.x = Math.sin(strideFreq) * 0.42;
-                        ud.rightLegPivot.rotation.x = -Math.sin(strideFreq) * 0.42;
+                        const strideAmp = 0.28 + Math.min(0.42, speedMag * 0.16);
+                        const dirSign = forwardVel >= -0.15 ? 1 : -1;
+                        ud.leftLegPivot.rotation.x = Math.sin(sPhase) * strideAmp * dirSign;
+                        ud.rightLegPivot.rotation.x = -Math.sin(sPhase) * strideAmp * dirSign;
+                        const sideStepAngle = THREE.MathUtils.clamp(strafeVel * 0.12, -0.28, 0.28);
+                        ud.leftLegPivot.rotation.z = Math.max(0, sideStepAngle) + Math.abs(Math.cos(sPhase)) * 0.05;
+                        ud.rightLegPivot.rotation.z = Math.min(0, sideStepAngle) - Math.abs(Math.cos(sPhase)) * 0.05;
                     }
 
-                    // Active Combat Guard & Shadow-Jabbing Arms
-                    ud.rightArmPivot.rotation.x = -0.48 + Math.sin(strideFreq * 1.1) * 0.32;
-                    ud.leftArmPivot.rotation.x = -0.25 - Math.sin(strideFreq * 1.1) * 0.28;
+                    // Independent Combat Feints, Shadow Jabs & Weapon Flourishes while moving
+                    if (t >= (ud.feintTimer || 0)) {
+                        ud.feintTimer = t + 0.95 + Math.random() * 1.45;
+                        ud.activeFeint = 0.34;
+                        const fTypes = ['lead_jab', 'weapon_flourish', 'high_guard', 'low_feint'];
+                        ud.feintType = fTypes[Math.floor(Math.random() * fTypes.length)];
+                    }
+
+                    if (ud.activeFeint > 0) {
+                        ud.activeFeint = Math.max(0, ud.activeFeint - dt);
+                        const fp = Math.sin((ud.activeFeint / 0.34) * Math.PI);
+                        if (ud.feintType === 'lead_jab') {
+                            ud.leftArmPivot.rotation.x = -0.35 - fp * 1.25;
+                            ud.rightArmPivot.rotation.x = -0.5 + Math.sin(sPhase) * 0.25;
+                            ud.torso.rotation.y = -fp * 0.32;
+                        } else if (ud.feintType === 'weapon_flourish') {
+                            ud.rightArmPivot.rotation.x = -0.55 - fp * 1.35;
+                            ud.rightArmPivot.rotation.z = fp * 0.65;
+                            ud.leftArmPivot.rotation.x = -0.4;
+                        } else if (ud.feintType === 'high_guard') {
+                            ud.rightArmPivot.rotation.x = -1.25 * fp - 0.4;
+                            ud.leftArmPivot.rotation.x = -1.15 * fp - 0.35;
+                        } else {
+                            ud.rightArmPivot.rotation.x = -0.2 + fp * 0.55;
+                            ud.leftArmPivot.rotation.x = -0.75 - fp * 0.6;
+                        }
+                    } else {
+                        ud.rightArmPivot.rotation.x = -0.48 + Math.sin(sPhase * 1.05) * 0.34;
+                        ud.rightArmPivot.rotation.z = THREE.MathUtils.lerp(ud.rightArmPivot.rotation.z || 0, 0, dt * 8);
+                        ud.leftArmPivot.rotation.x = -0.32 - Math.cos(sPhase * 1.05) * 0.3;
+                    }
                 }
 
                 // Animate Raider #48 Propeller Hat & Bureau #31 Equalizer Visor Bars
@@ -2523,63 +2705,102 @@
                 ud.auraRing.scale.setScalar(hasLeverage ? (1 + Math.sin(t * 12) * 0.1) : 1);
             });
 
-            // 2. Step Active 3D Dash, Weapon Slash & Ultimate Meteor Animation
+            // 2. Step Active 3D Dash, Multi-Style Weapon Slash, Defender Evasion & Ultimate Meteor Animation
             if (active3DStrike) {
                 active3DStrike.elapsed += dt;
                 const p = Math.min(1, active3DStrike.elapsed / active3DStrike.duration);
-                const { attacker, defender, startX, startZ, targetX, targetZ, isCrit, isUltimate, blockedByShield, attackerSide } = active3DStrike;
+                const {
+                    attacker, defender, startX, startZ, defStartX, defStartZ,
+                    dirX, dirZ, flankSign, targetX, targetZ,
+                    strikeStyle, defReaction, isCrit, isUltimate, blockedByShield, attackerSide
+                } = active3DStrike;
                 const weapon = attacker.userData.weaponType || 'broadsword';
 
-                // Stride legs rapidly during dash
+                // Keep both fighters dynamically facing each other during the exchange
+                const faceDx = defender.position.x - attacker.position.x;
+                const faceDz = defender.position.z - attacker.position.z;
+                const atkYaw = Math.atan2(faceDx, faceDz);
+                const defYaw = Math.atan2(-faceDx, -faceDz);
+                attacker.rotation.y = THREE.MathUtils.lerp(attacker.rotation.y, atkYaw, dt * 14);
+                defender.rotation.y = THREE.MathUtils.lerp(defender.rotation.y, defYaw, dt * 14);
+
+                // Stride legs rapidly during dash for both attacker & reacting defender
                 if (attacker.userData.leftLegPivot && attacker.userData.rightLegPivot) {
-                    attacker.userData.leftLegPivot.rotation.x = Math.sin(p * Math.PI * 6) * 0.65;
-                    attacker.userData.rightLegPivot.rotation.x = -Math.sin(p * Math.PI * 6) * 0.65;
+                    attacker.userData.leftLegPivot.rotation.x = Math.sin(p * Math.PI * 6) * 0.68;
+                    attacker.userData.rightLegPivot.rotation.x = -Math.sin(p * Math.PI * 6) * 0.68;
+                }
+                if (defender.userData.leftLegPivot && defender.userData.rightLegPivot) {
+                    defender.userData.leftLegPivot.rotation.x = -Math.sin(p * Math.PI * 5) * 0.45;
+                    defender.userData.rightLegPivot.rotation.x = Math.sin(p * Math.PI * 5) * 0.45;
                 }
 
                 if (p < 0.45) {
                     const dashT = p / 0.45;
+                    // Curve attacker's approach slightly on flank blitzes
+                    const curveOffsetZ = strikeStyle === 'flank_blitz' ? Math.sin(dashT * Math.PI) * flankSign * 0.75 : 0;
                     attacker.position.x = THREE.MathUtils.lerp(startX, targetX, dashT);
-                    attacker.position.z = THREE.MathUtils.lerp(startZ || 0, targetZ || 0, dashT);
+                    attacker.position.z = THREE.MathUtils.clamp(THREE.MathUtils.lerp(startZ, targetZ, dashT) + curveOffsetZ, -2.5, 2.5);
+
+                    // Defender actively reacts during incoming dash (never stands frozen!)
+                    if (defReaction === 'sidestep_evade') {
+                        defender.position.z = THREE.MathUtils.clamp(defStartZ + Math.sin(dashT * Math.PI * 0.5) * (-flankSign * 0.48), -2.45, 2.45);
+                        defender.rotation.z = -flankSign * dashT * 0.14;
+                        defender.userData.leftArmPivot.rotation.x = -0.9;
+                    } else if (defReaction === 'cross_brace') {
+                        defender.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -1.45, dashT);
+                        defender.userData.leftArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.35, dashT);
+                        defender.userData.torso.rotation.x = -0.12 * dashT;
+                    } else {
+                        // Lean back & wind up counter-hand
+                        defender.position.x = THREE.MathUtils.clamp(defStartX + dirX * 0.25 * dashT, -3.35, 3.35);
+                        defender.userData.torso.rotation.x = -0.18 * dashT;
+                        defender.userData.leftArmPivot.rotation.x = -1.1 * dashT;
+                    }
 
                     if (isUltimate) {
                         // 360° Sky-Drop Meteor Leap
                         attacker.position.y = Math.sin(dashT * Math.PI) * 2.35;
                         attacker.rotation.z = (attackerSide === 'A' ? -1 : 1) * dashT * Math.PI * 2;
                         attacker.userData.rightArmPivot.rotation.x = -2.8;
-                    } else if (weapon === 'hammer') {
+                    } else if (strikeStyle === 'leap_smash' || weapon === 'hammer') {
                         attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 1.45 : 0.95);
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.6, dashT);
-                    } else if (weapon === 'katana') {
-                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.22;
-                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.6, dashT);
-                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0, 0.8, dashT);
-                    } else if (weapon === 'trident') {
+                    } else if (strikeStyle === 'spin_slash' || weapon === 'scythe') {
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.52;
+                        attacker.rotation.y = atkYaw + dashT * Math.PI * 2 * flankSign;
+                        attacker.userData.rightArmPivot.rotation.x = -1.4;
+                    } else if (weapon === 'katana' || strikeStyle === 'flank_blitz') {
                         attacker.position.y = Math.sin(dashT * Math.PI) * 0.28;
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.75, dashT);
+                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0, 0.85, dashT);
+                    } else if (weapon === 'trident' || strikeStyle === 'triple_flurry') {
+                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.25;
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.3, -1.8, dashT);
-                    } else if (weapon === 'scythe') {
-                        attacker.position.y = Math.sin(dashT * Math.PI) * 0.5;
-                        attacker.rotation.y = (attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2) + dashT * Math.PI;
+                        attacker.userData.leftArmPivot.rotation.x = -0.4 - Math.sin(dashT * Math.PI * 2) * 0.9;
                     } else {
                         attacker.position.y = Math.sin(dashT * Math.PI) * (isCrit ? 0.95 : 0.48);
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-0.4, -2.3, dashT);
                     }
-                } else if (p < 0.68) {
-                    const strikeT = (p - 0.45) / 0.23;
+                } else if (p < 0.70) {
+                    const strikeT = (p - 0.45) / 0.25;
                     attacker.rotation.z = 0;
 
-                    if (weapon === 'hammer' || isUltimate) {
+                    if (weapon === 'hammer' || isUltimate || strikeStyle === 'leap_smash') {
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.6, 0.9, strikeT);
                         attacker.position.y = THREE.MathUtils.lerp(attacker.position.y, 0, strikeT * 2);
-                    } else if (weapon === 'katana') {
-                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.6, 0.45, strikeT);
-                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0.8, -0.6, strikeT);
-                    } else if (weapon === 'trident') {
-                        const jab = Math.sin(strikeT * Math.PI * 3) * 0.35;
-                        attacker.position.x = targetX + (attackerSide === 'A' ? jab : -jab);
+                    } else if (weapon === 'katana' || strikeStyle === 'flank_blitz') {
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.75, 0.55, strikeT);
+                        attacker.userData.rightArmPivot.rotation.z = THREE.MathUtils.lerp(0.85, -0.65, strikeT);
+                        attacker.userData.leftArmPivot.rotation.x = -0.4 - Math.sin(strikeT * Math.PI) * 0.85;
+                    } else if (weapon === 'trident' || strikeStyle === 'triple_flurry') {
+                        const jab = Math.sin(strikeT * Math.PI * 3) * 0.38;
+                        attacker.position.x = targetX + dirX * jab;
+                        attacker.position.z = targetZ + dirZ * jab;
                         attacker.userData.rightArmPivot.rotation.x = -1.5 + jab;
-                    } else if (weapon === 'scythe') {
-                        attacker.rotation.y = (attackerSide === 'A' ? Math.PI / 2 : -Math.PI / 2) + (1 + strikeT) * Math.PI;
-                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.2, 0.5, strikeT);
+                        attacker.userData.leftArmPivot.rotation.x = -0.5 - jab * 1.4;
+                    } else if (weapon === 'scythe' || strikeStyle === 'spin_slash') {
+                        attacker.rotation.y = atkYaw + strikeT * Math.PI * 2;
+                        attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-1.2, 0.55, strikeT);
                     } else {
                         attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(-2.3, 0.75, strikeT);
                     }
@@ -2600,18 +2821,28 @@
                             wrap.classList.add('shake-crit');
                         }
                     }
-                    // Defender recoil knockback
-                    const knockDist = isUltimate ? 1.05 : (weapon === 'hammer' ? 0.65 : (weapon === 'axe' ? 0.52 : 0.42));
-                    defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX + (attackerSide === 'A' ? knockDist : -knockDist), 0.5);
-                    defender.position.y = (isUltimate || weapon === 'hammer') ? 0.32 : 0.08;
+
+                    // 3D Directional Knockback & Lateral Recoil on Defender
+                    const knockDist = isUltimate ? 1.15 : (weapon === 'hammer' ? 0.72 : (weapon === 'axe' ? 0.58 : 0.46));
+                    const knockTargetX = THREE.MathUtils.clamp(defStartX + dirX * knockDist, -3.35, 3.35);
+                    const knockTargetZ = THREE.MathUtils.clamp(defender.position.z + dirZ * knockDist * 0.75, -2.45, 2.45);
+                    defender.position.x = THREE.MathUtils.lerp(defender.position.x, knockTargetX, 0.45);
+                    defender.position.z = THREE.MathUtils.lerp(defender.position.z, knockTargetZ, 0.45);
+                    defender.position.y = (isUltimate || weapon === 'hammer') ? 0.34 : 0.1;
+                    defender.userData.torso.rotation.x = -0.22;
                 } else {
-                    const backT = (p - 0.68) / 0.32;
-                    attacker.position.x = THREE.MathUtils.lerp(targetX, attacker.userData.homeX, backT);
+                    // Organic post-clash step-out & guard reset (Transitions smoothly into independent footwork!)
+                    const backT = (p - 0.70) / 0.30;
+                    const stepOutX = THREE.MathUtils.clamp(targetX - dirX * 0.65, -3.2, 3.2);
+                    const stepOutZ = THREE.MathUtils.clamp(targetZ + flankSign * 0.35, -2.4, 2.4);
+                    attacker.position.x = THREE.MathUtils.lerp(targetX, stepOutX, backT);
+                    attacker.position.z = THREE.MathUtils.lerp(attacker.position.z, stepOutZ, backT * 0.5);
                     attacker.position.y = 0;
                     attacker.rotation.z = 0;
-                    defender.position.x = THREE.MathUtils.lerp(defender.position.x, defender.userData.homeX, backT);
                     defender.position.y = THREE.MathUtils.lerp(defender.position.y, 0, backT);
-                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(0.65, -0.35, backT);
+                    defender.rotation.z = THREE.MathUtils.lerp(defender.rotation.z, 0, backT);
+                    defender.userData.torso.rotation.x = THREE.MathUtils.lerp(defender.userData.torso.rotation.x || 0, 0, backT);
+                    attacker.userData.rightArmPivot.rotation.x = THREE.MathUtils.lerp(0.65, -0.38, backT);
                     attacker.userData.rightArmPivot.rotation.z = 0;
                 }
 
@@ -2619,6 +2850,10 @@
                     attacker.position.y = 0;
                     attacker.rotation.z = 0;
                     defender.position.y = 0;
+                    defender.rotation.z = 0;
+                    // Immediately assign fresh independent tactical angles so they keep moving dynamically!
+                    pickNextTacticalFootwork(attacker, defender, t);
+                    pickNextTacticalFootwork(defender, attacker, t);
                     active3DStrike = null;
                 }
             }
@@ -3893,21 +4128,32 @@
                 });
             }
 
-            // Trigger 3D Voxel Shatter Explosion on Loser & Victory Spin on Winner
+            // Trigger 3D Voxel Shatter Explosion on Loser & Victory Spin on Winner, then revive for continuous sparring!
             if (fighterMeshA && fighterMeshB) {
                 const winMesh = winner === 'A' ? fighterMeshA : fighterMeshB;
                 const loseMesh = winner === 'A' ? fighterMeshB : fighterMeshA;
                 winMesh.userData.victorySpin = true;
                 loseMesh.userData.isKO = true;
                 spawn3DVoxelBurst(loseMesh.position.clone(), 0xFF3366, 36, true);
+                setTimeout(() => {
+                    if (!roundLocked && fighterMeshA && fighterMeshB) {
+                        [fighterMeshA, fighterMeshB].forEach(m => {
+                            m.userData.isKO = false;
+                            m.userData.victorySpin = false;
+                            m.rotation.z = 0;
+                            m.position.y = 0;
+                        });
+                    }
+                }, 4200);
             }
 
+            // Highlight winner card with gold glow while keeping both cards 100% vibrant (never greyed out!)
+            teamACard.classList.remove('winner-glow', 'loser-dim');
+            teamBCard.classList.remove('winner-glow', 'loser-dim');
             if (winner === 'A') {
                 teamACard.classList.add('winner-glow');
-                teamBCard.classList.add('loser-dim');
             } else {
                 teamBCard.classList.add('winner-glow');
-                teamACard.classList.add('loser-dim');
             }
 
             const cfgA = ASSETS[selectA.value];
@@ -4048,6 +4294,16 @@
                 else placeBetBtn.innerText = "Select a Fighter Card First";
             }
 
+            teamACard.classList.remove('winner-glow', 'loser-dim');
+            teamBCard.classList.remove('winner-glow', 'loser-dim');
+            if (fighterMeshA && fighterMeshB) {
+                [fighterMeshA, fighterMeshB].forEach(m => {
+                    m.userData.isKO = false;
+                    m.userData.victorySpin = false;
+                    m.rotation.z = 0;
+                    m.position.y = 0;
+                });
+            }
             syncFighterSelectionUI();
             updateFighterLiveHUD(0, 0);
             updateRageUI();
