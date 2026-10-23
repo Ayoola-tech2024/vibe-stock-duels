@@ -994,13 +994,66 @@
          MODAL 2: LEADERBOARD & MATCH HISTORY MODAL
          ======================================================================= -->
     <div id="leaderboardModal" class="modal-backdrop hidden">
-        <div class="danfo-sheet max-w-xl w-full p-5 sm:p-6 max-h-[88vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-black/15">
-                <h2 class="text-xl font-black uppercase">🏆 Top Arena Raiders</h2>
+        <div class="danfo-sheet max-w-2xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-black/15">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black uppercase text-[#111]">🏆 Arena Leaderboard & Raider Metrics</h2>
+                    <p class="text-[11px] sm:text-xs text-neutral-600 font-bold">Top rankings, combat win rates, signature assets & on-chain $VCT volume</p>
+                </div>
                 <button id="closeLeaderboardBtn" class="btn-neubrutal bg-[#111] text-white px-3 py-1 text-sm">✕</button>
             </div>
-            <div id="leaderboardList" class="flex flex-col gap-2 text-left mb-4">
-                <!-- Populated dynamically -->
+
+            <!-- Quick Action: Direct Bridge to 15-Asset Deep Matrix & Protocol Analytics -->
+            <div class="mb-3.5 flex items-center justify-between gap-2 flex-wrap bg-[#111] text-white p-2.5 rounded-xl border-2 border-black">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📊</span>
+                    <div class="text-[11px] sm:text-xs">
+                        <span class="font-extrabold text-[#00F0FF]">Looking for 15-Asset Deep Matrix & Protocol KPIs?</span>
+                        <span class="text-neutral-400 hidden sm:inline"> View full oracle telemetry, volatility tiers & weapon stats.</span>
+                    </div>
+                </div>
+                <button type="button" id="leaderboardOpenAnalyticsBtn" class="btn-neubrutal bg-[#00FF88] text-black px-2.5 py-1 text-xs font-black shrink-0 hover:brightness-110">
+                    Deep Stats ➔
+                </button>
+            </div>
+
+            <!-- Metric Filter Tabs -->
+            <div class="flex items-center gap-1.5 mb-3 overflow-x-auto no-scrollbar">
+                <button type="button" onclick="switchLeaderboardSort('balance')" id="tabLbBalanceBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2.5 py-1 text-xs font-black shrink-0">
+                    🏆 Net Balance
+                </button>
+                <button type="button" onclick="switchLeaderboardSort('streak')" id="tabLbStreakBtn" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    🔥 Win Streaks
+                </button>
+                <button type="button" onclick="switchLeaderboardSort('winRate')" id="tabLbWinRateBtn" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    🎯 Win Rate %
+                </button>
+                <button type="button" onclick="switchLeaderboardSort('duels')" id="tabLbDuelsBtn" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    ⚔️ Most Active
+                </button>
+            </div>
+
+            <!-- Leaderboard List with Deep Metrics on Every Card -->
+            <div id="leaderboardList" class="flex flex-col gap-2.5 text-left mb-2">
+                <!-- Populated dynamically with rich metrics -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 2B: RAIDER COMBAT DOSSIER & PROFILE METRICS
+         ======================================================================= -->
+    <div id="raiderDossierModal" class="modal-backdrop hidden">
+        <div class="tactile-dark max-w-md w-full p-5 border-4 border-[#FFD700] rounded-2xl relative shadow-[0_0_35px_rgba(255,215,0,0.4)]">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-white/15">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🧬</span>
+                    <h3 class="text-base font-black uppercase text-[#FFD700]">Raider Combat Dossier</h3>
+                </div>
+                <button type="button" id="closeRaiderDossierBtn" class="btn-neubrutal bg-[#FF3366] text-white px-2.5 py-0.5 text-xs">✕</button>
+            </div>
+            <div id="raiderDossierBody" class="flex flex-col gap-3">
+                <!-- Dynamically populated dossier -->
             </div>
         </div>
     </div>
@@ -3227,11 +3280,11 @@
             { winner: "Robinhood_Whale", assetWin: "$BTC", assetLose: "$DOGE", payout: 975, won: true, time: "14m ago" }
         ];
         const DEFAULT_COMMUNITY_RAIDERS = [
-            { nickname: "Meta_Alchemist", balance: 14850, streak: 6 },
-            { nickname: "HappyForge_Lead", balance: 11400, streak: 4 },
-            { nickname: "Vibe_Whale_0x", balance: 9650, streak: 3 },
-            { nickname: "Satoshi_Viber", balance: 7820, streak: 2 },
-            { nickname: "Solana_Monowheel", balance: 6450, streak: 2 }
+            { nickname: "Meta_Alchemist", level: 5, archetype: "Apex Cyber Alchemist", balance: 14850, streak: 6, winRate: 84, duels: 58, profit: 9850, favoriteAsset: "$BTC", weapon: "Titan Greatsword", portrait: "assets/vibers/viber1.webp" },
+            { nickname: "HappyForge_Lead", level: 4, archetype: "Forge Master General", balance: 11400, streak: 4, winRate: 78, duels: 46, profit: 6400, favoriteAsset: "$NVDA", weapon: "Void Scythe", portrait: "assets/vibers/viber3.webp" },
+            { nickname: "Vibe_Whale_0x", level: 4, archetype: "Deep Sea Testnet Whale", balance: 9650, streak: 3, winRate: 74, duels: 38, profit: 4650, favoriteAsset: "$SOL", weapon: "Laser Claws", portrait: "assets/vibers/viber2.webp" },
+            { nickname: "Satoshi_Viber", level: 3, archetype: "Genesis Block Hermit", balance: 7820, streak: 2, winRate: 68, duels: 32, profit: 2820, favoriteAsset: "$BTC", weapon: "Katana", portrait: "assets/vibers/viber1.webp" },
+            { nickname: "Solana_Monowheel", level: 3, archetype: "Sub-Second Monowheeler", balance: 6450, streak: 2, winRate: 65, duels: 28, profit: 1450, favoriteAsset: "$SOL", weapon: "Gravity Hammer", portrait: "assets/vibers/viber4.webp" }
         ];
 
         let telemetryState = {
@@ -3660,41 +3713,170 @@
             }
         }
 
+        let currentLeaderboardSort = 'balance';
+        let cachedCloudPlayers = [];
+
+        window.switchLeaderboardSort = function(mode) {
+            currentLeaderboardSort = mode;
+            const tabs = {
+                balance: document.getElementById('tabLbBalanceBtn'),
+                streak: document.getElementById('tabLbStreakBtn'),
+                winRate: document.getElementById('tabLbWinRateBtn'),
+                duels: document.getElementById('tabLbDuelsBtn')
+            };
+            Object.keys(tabs).forEach(k => {
+                if (tabs[k]) {
+                    if (k === mode) tabs[k].className = "btn-neubrutal bg-[#8A2BE2] text-white px-2.5 py-1 text-xs font-black shrink-0";
+                    else tabs[k].className = "btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0";
+                }
+            });
+            renderLeaderboardList(cachedCloudPlayers);
+        };
+
+        window.openRaiderDossier = function(raiderIndex) {
+            const r = window.__currentRenderedRaiders?.[raiderIndex];
+            if (!r) return;
+            const body = document.getElementById('raiderDossierBody');
+            if (!body) return;
+
+            body.innerHTML = `
+                <div class="flex items-center gap-3 p-3 bg-black/60 rounded-xl border border-white/10">
+                    <img src="${r.portrait || 'assets/vibers/viber1.webp'}" alt="Avatar" class="w-14 h-14 rounded-xl border-2 border-[#FFD700] object-cover bg-[#111]" />
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-lg text-white truncate">${escapeHtml(r.nickname)}</div>
+                        <div class="text-xs text-[#00F0FF] font-extrabold">${escapeHtml(r.archetype || 'Arena Raider')}</div>
+                        <div class="text-[10px] text-[#FFD700] font-mono-num font-bold">LEVEL ${r.level || 1} VIBER DUELIST</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono-num">
+                    <div class="p-2.5 rounded-lg bg-black/50 border border-white/10">
+                        <div class="text-[10px] text-neutral-400 uppercase font-bold">Win Rate</div>
+                        <div class="text-base font-black text-[#00FF88]">${r.winRate || 65}%</div>
+                        <div class="text-[9px] text-neutral-500">${r.duels || 0} Total Duels</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-black/50 border border-white/10">
+                        <div class="text-[10px] text-neutral-400 uppercase font-bold">Total P&L</div>
+                        <div class="text-base font-black ${(r.profit || 0) >= 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">${(r.profit || 0) >= 0 ? '+' : ''}${Number(r.profit || 0).toLocaleString()} $VCT</div>
+                        <div class="text-[9px] text-neutral-500">Net Return</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-black/50 border border-white/10">
+                        <div class="text-[10px] text-neutral-400 uppercase font-bold">Favored Asset</div>
+                        <div class="text-sm font-black text-[#FFD700]">${escapeHtml(r.favoriteAsset || '$BTC')}</div>
+                        <div class="text-[9px] text-neutral-500">Signature Striker</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-black/50 border border-white/10">
+                        <div class="text-[10px] text-neutral-400 uppercase font-bold">Equipped Weapon</div>
+                        <div class="text-sm font-black text-[#00F0FF] truncate">${escapeHtml(r.weapon || 'Katana')}</div>
+                        <div class="text-[9px] text-neutral-500">Colosseum Loadout</div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="document.getElementById('raiderDossierModal').classList.add('hidden'); document.getElementById('leaderboardModal').classList.add('hidden'); document.getElementById('multiplayerModal').classList.remove('hidden'); switchMultiplayerTab('host');" class="btn-neubrutal flex-1 py-2 bg-gradient-to-r from-[#8A2BE2] to-[#FF007A] text-white text-xs font-black">
+                        ⚔️ Challenge in Multiplayer Room
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('raiderDossierModal').classList.remove('hidden');
+        };
+
         function renderLeaderboardList(cloudPlayers = []) {
+            if (cloudPlayers && cloudPlayers.length > 0) cachedCloudPlayers = cloudPlayers;
             const listEl = document.getElementById('leaderboardList');
+            if (!listEl) return;
+
             const rInfo = typeof getRaiderLevelInfo === 'function' ? getRaiderLevelInfo() : { level: 1, rankTitle: 'Rookie Raider' };
+            const totalDuels = playerStats.wins + playerStats.losses;
+            const pWinRate = totalDuels > 0 ? Math.round((playerStats.wins / totalDuels) * 100) : 65;
+            const favAsset = Object.entries(playerStats.assetWins).sort((a,b) => b[1] - a[1])[0]?.[0] || 'BTC';
+
             const localPlayer = {
-                nickname: `${playerNickname || "You"} (Lv.${rInfo.level})`,
+                nickname: playerNickname || "You",
+                level: rInfo.level || 1,
+                archetype: rInfo.rankTitle || 'Rookie Raider',
                 balance: userBalance,
                 streak: winStreak,
+                winRate: pWinRate,
+                duels: Math.max(1, totalDuels),
+                profit: playerStats.netPnL,
+                favoriteAsset: `$${favAsset}`,
+                weapon: WEAPON_REGISTRY[currentWeaponA]?.name || 'Titan Katana',
+                portrait: 'assets/vibers/viber1.webp',
                 isLocal: true
             };
-            const merged = [localPlayer, ...cloudPlayers, ...DEFAULT_COMMUNITY_RAIDERS];
+
+            const merged = [localPlayer, ...cachedCloudPlayers, ...DEFAULT_COMMUNITY_RAIDERS];
             const uniqueMap = new Map();
             merged.forEach(p => {
                 if (!p.nickname) return;
-                if (!uniqueMap.has(p.nickname) || uniqueMap.get(p.nickname).balance < p.balance) {
-                    uniqueMap.set(p.nickname, p);
+                const cleanName = p.nickname.replace(/\s*\(Lv\.\d+\)/g, '').trim();
+                if (!uniqueMap.has(cleanName) || uniqueMap.get(cleanName).balance < p.balance) {
+                    uniqueMap.set(cleanName, { ...p, nickname: cleanName });
                 }
             });
 
-            const sorted = Array.from(uniqueMap.values()).sort((a, b) => (b.balance || 0) - (a.balance || 0)).slice(0, 8);
-            listEl.innerHTML = sorted.map((p, idx) => `
-                <div class="flex items-center justify-between p-3 rounded-xl bg-[#111] text-white border-2 ${p.isLocal ? 'border-[#00FF88]' : 'border-black'}">
-                    <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-lg ${idx === 0 ? 'bg-[#FFD700] text-[#111]' : 'bg-[#8A2BE2] text-white'} font-black flex items-center justify-center text-xs">
-                            #${idx + 1}
-                        </span>
-                        <div>
-                            <div class="font-extrabold text-sm ${p.isLocal ? 'text-[#00FF88]' : 'text-[#00F0FF]'}">${escapeHtml(p.nickname)}</div>
-                            <div class="text-[11px] text-amber-400 font-bold">🔥 ${p.streak || 0} Win Streak</div>
+            let sorted = Array.from(uniqueMap.values());
+            if (currentLeaderboardSort === 'streak') {
+                sorted.sort((a, b) => (b.streak || 0) - (a.streak || 0));
+            } else if (currentLeaderboardSort === 'winRate') {
+                sorted.sort((a, b) => (b.winRate || 0) - (a.winRate || 0));
+            } else if (currentLeaderboardSort === 'duels') {
+                sorted.sort((a, b) => (b.duels || 0) - (a.duels || 0));
+            } else {
+                sorted.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+            }
+
+            sorted = sorted.slice(0, 10);
+            window.__currentRenderedRaiders = sorted;
+
+            listEl.innerHTML = sorted.map((p, idx) => {
+                let medalBadge = `#${idx + 1}`;
+                let medalBg = 'bg-[#8A2BE2] text-white';
+                if (idx === 0) { medalBadge = '🥇 #1'; medalBg = 'bg-[#FFD700] text-black shadow-[0_0_12px_#FFD700]'; }
+                else if (idx === 1) { medalBadge = '🥈 #2'; medalBg = 'bg-neutral-300 text-black'; }
+                else if (idx === 2) { medalBadge = '🥉 #3'; medalBg = 'bg-amber-600 text-white'; }
+
+                const isYou = p.isLocal;
+                const profitSign = (p.profit || 0) >= 0 ? '+' : '';
+                const profitColor = (p.profit || 0) >= 0 ? 'text-[#00FF88]' : 'text-[#FF3366]';
+
+                return `
+                    <div onclick="openRaiderDossier(${idx})" class="cursor-pointer p-2.5 sm:p-3 rounded-xl bg-[#111] hover:bg-[#1a1826] text-white border-2 ${isYou ? 'border-[#00FF88] shadow-[0_0_15px_rgba(0,255,136,0.35)]' : 'border-black hover:border-[#00F0FF]/50'} transition-all flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg ${medalBg} font-black flex items-center justify-center text-[10px] sm:text-xs shrink-0 font-mono-num">
+                                ${medalBadge}
+                            </span>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-black text-xs sm:text-sm ${isYou ? 'text-[#00FF88]' : 'text-[#00F0FF]'} truncate">${escapeHtml(p.nickname)}</span>
+                                    <span class="px-1.5 py-0.2 rounded bg-neutral-800 text-[#FFD700] font-mono-num font-black text-[9px] shrink-0">Lv.${p.level || 1}</span>
+                                    ${isYou ? '<span class="px-1.5 py-0.2 rounded bg-[#00FF88] text-black font-black text-[8px] uppercase tracking-wider shrink-0 animate-pulse">YOU</span>' : ''}
+                                </div>
+                                <div class="flex items-center gap-1.5 sm:gap-2 mt-0.5 text-[10px] sm:text-[11px] font-mono-num text-neutral-300 flex-wrap">
+                                    <span class="text-emerald-400 font-extrabold">🎯 ${p.winRate || 65}% WR</span>
+                                    <span>•</span>
+                                    <span class="text-amber-300 font-bold">🔥 ${p.streak || 0}x</span>
+                                    <span>•</span>
+                                    <span class="text-cyan-300 font-bold hidden xs:inline">🪙 ${p.favoriteAsset || '$BTC'}</span>
+                                    <span class="hidden sm:inline">•</span>
+                                    <span class="text-neutral-400 hidden sm:inline">⚔️ ${p.duels || 1} Duels</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-right shrink-0">
+                            <div class="font-mono-num font-black text-sm sm:text-base text-[#FFD700]">
+                                ${Number(p.balance || 0).toLocaleString()} $VCT
+                            </div>
+                            <div class="text-[10px] sm:text-[11px] font-mono-num font-bold ${profitColor}">
+                                ${profitSign}${Number(p.profit || 0).toLocaleString()} P&L
+                            </div>
                         </div>
                     </div>
-                    <div class="font-mono-num font-black text-base text-[#FFD700]">
-                        ${Number(p.balance || 0).toLocaleString()} $VCT
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function escapeHtml(str) {
@@ -5732,6 +5914,20 @@
         document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
             document.getElementById('leaderboardModal').classList.add('hidden');
         });
+        const lbOpenAnalytics = document.getElementById('leaderboardOpenAnalyticsBtn');
+        if (lbOpenAnalytics) {
+            lbOpenAnalytics.addEventListener('click', () => {
+                document.getElementById('leaderboardModal').classList.add('hidden');
+                renderAnalyticsDashboard();
+                document.getElementById('analyticsModal').classList.remove('hidden');
+            });
+        }
+        const closeDossier = document.getElementById('closeRaiderDossierBtn');
+        if (closeDossier) {
+            closeDossier.addEventListener('click', () => {
+                document.getElementById('raiderDossierModal').classList.add('hidden');
+            });
+        }
 
         document.getElementById('multiplayerBtn').addEventListener('click', () => {
             document.getElementById('multiplayerModal').classList.remove('hidden');
