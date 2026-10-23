@@ -326,6 +326,12 @@
                 <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2.5 sm:px-3 py-1 text-xs font-black shrink-0">
                     👥 PvP Arena
                 </button>
+                <button id="viberCodexBtn" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0" title="Viber 3D Lore, Progression & Raider Skins">
+                    🧬 Vibers & Lore <span id="raiderLvlHeaderBadge" class="px-1.5 py-0.2 rounded bg-[#111] text-[#FFD700] text-[10px]">Lv.1</span>
+                </button>
+                <button id="referralHubBtn" class="btn-neubrutal bg-[#FF3366] text-white px-2.5 sm:px-3 py-1 text-xs font-black shrink-0" title="Referral Flywheel & Raider Rewards">
+                    🚀 Refer & Earn
+                </button>
                 <button id="leaderboardBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0">
                     🏆 Ranks
                 </button>
@@ -335,7 +341,10 @@
                 <button id="tutorialBtn" class="btn-neubrutal bg-[#00FF88] text-[#111] px-2.5 sm:px-3 py-1 text-xs font-black shrink-0" title="Combat Manual">
                     📖 Guide
                 </button>
-                <button id="nicknamePill" class="hidden px-2 py-1 rounded-lg bg-[#FF3366] text-white border-2 border-black font-extrabold text-xs shadow-[2px_2px_0_#111] cursor-pointer shrink-0" title="Change Name">
+                <a href="https://testnet.vibevibe.fun/token/0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697" target="_blank" rel="noopener noreferrer" class="btn-neubrutal bg-[#111] text-[#FFD700] px-2.5 py-1 text-[11px] font-black shrink-0" title="View Live $VCT Token on vibe/vibe Testnet">
+                    🪙 $VCT Token ↗
+                </a>
+                <button id="nicknamePill" class="hidden px-2 py-1 rounded-lg bg-[#111] text-[#00F0FF] border-2 border-black font-extrabold text-xs shadow-[2px_2px_0_#111] cursor-pointer shrink-0" title="Change Name">
                     👤 <span id="playerNameDisplay">Raider</span>
                 </button>
                 <div id="streakPill" class="px-2 py-1 rounded-lg bg-orange-500 text-white border-2 border-black font-extrabold text-xs shadow-[2px_2px_0_#111] shrink-0" title="Win Streak">
@@ -389,15 +398,36 @@
                         </div>
                     </div>
 
-                    <!-- 3D Mecha Class Preview Badge -->
-                    <div class="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-3">
-                        <div id="miniSwatchA" class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg border-2 border-[#00F0FF] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0" style="background: #2a1b12;">
-                            🤖
+                    <!-- 3D Viber Portrait, Mastery Level & Lore Preview Badge A -->
+                    <div class="p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-2.5">
+                        <div class="flex items-center gap-2 sm:gap-2.5">
+                            <div id="miniSwatchA" class="relative w-10 h-10 sm:w-14 sm:h-14 rounded-lg border-2 border-[#00F0FF] overflow-hidden flex items-center justify-center shrink-0 bg-[#1a1826]">
+                                <img id="viberPortraitImgA" src="assets/vibers/viber1.webp" alt="Viber A" class="w-full h-full object-cover" />
+                                <span id="viberLvlBadgeA" class="absolute bottom-0 right-0 px-1 bg-black/90 text-[#FFD700] font-mono-num font-black text-[8px] sm:text-[9px] border-t border-l border-[#00F0FF] rounded-tl">Lv.1</span>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <div id="mechaNameA" class="font-extrabold text-xs sm:text-sm text-[#FFD700] truncate">Satoshi Prime</div>
+                                    <button type="button" id="openSkinPickerABtn" class="px-1.5 py-0.5 rounded bg-[#8A2BE2] hover:bg-[#9d4edd] text-white text-[9px] font-black border border-black shrink-0 cursor-pointer" title="Swap Raider Skin or Read Lore">
+                                        🎨 Skin/Lore
+                                    </button>
+                                </div>
+                                <div id="viberArchetypeA" class="text-[9px] sm:text-[10px] text-[#00F0FF] font-extrabold truncate">Genesis Block Hermit</div>
+                                <div id="weaponNameA" class="text-[10px] sm:text-[11px] text-neutral-300 truncate">🗡️ Greatsword</div>
+                                <div id="statusBuffA" class="text-[9px] sm:text-[10px] text-emerald-400 font-bold hidden sm:block truncate">Ready for Combat</div>
+                            </div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div id="mechaNameA" class="font-extrabold text-xs sm:text-sm text-[#FFD700] truncate">Satoshi Prime</div>
-                            <div id="weaponNameA" class="text-[10px] sm:text-xs text-neutral-300 truncate">🗡️ Greatsword</div>
-                            <div id="statusBuffA" class="text-[9px] sm:text-[11px] text-[#00F0FF] font-bold mt-0.5 hidden sm:block">Ready for Combat</div>
+                        <!-- Character Lore / Shortcoming Snippet & Mastery XP Bar -->
+                        <div class="mt-1.5 pt-1.5 border-t border-white/10">
+                            <div id="viberLoreQuoteA" class="text-[9px] sm:text-[10px] text-amber-200/90 italic leading-tight line-clamp-2">
+                                "HODLs through 90% drawdowns; refuses to sell a single satoshi."
+                            </div>
+                            <div class="mt-1 flex items-center gap-1.5">
+                                <span class="text-[8px] sm:text-[9px] font-mono-num text-neutral-400 font-bold shrink-0" id="viberXpTextA">0/100 XP</span>
+                                <div class="flex-1 h-1.5 bg-black rounded-full overflow-hidden border border-white/15">
+                                    <div id="viberXpBarA" class="h-full bg-gradient-to-r from-[#00F0FF] to-[#8A2BE2] transition-all duration-300" style="width: 12%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -573,15 +603,36 @@
                         </div>
                     </div>
 
-                    <!-- 3D Mecha Class Preview Badge B -->
-                    <div class="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-3">
-                        <div id="miniSwatchB" class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg border-2 border-[#FF3366] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0" style="background: #1e242b;">
-                            🦾
+                    <!-- 3D Viber Portrait, Mastery Level & Lore Preview Badge B -->
+                    <div class="p-1.5 sm:p-2.5 rounded-xl bg-[#111] text-white border-2 border-black mb-2 sm:mb-2.5">
+                        <div class="flex items-center gap-2 sm:gap-2.5">
+                            <div id="miniSwatchB" class="relative w-10 h-10 sm:w-14 sm:h-14 rounded-lg border-2 border-[#FF3366] overflow-hidden flex items-center justify-center shrink-0 bg-[#1a1826]">
+                                <img id="viberPortraitImgB" src="assets/vibers/viber4.webp" alt="Viber B" class="w-full h-full object-cover" />
+                                <span id="viberLvlBadgeB" class="absolute bottom-0 right-0 px-1 bg-black/90 text-[#FFD700] font-mono-num font-black text-[8px] sm:text-[9px] border-t border-l border-[#FF3366] rounded-tl">Lv.1</span>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <div id="mechaNameB" class="font-extrabold text-xs sm:text-sm text-[#00F0FF] truncate">Solana Vanguard</div>
+                                    <button type="button" id="openSkinPickerBBtn" class="px-1.5 py-0.5 rounded bg-[#FF3366] hover:bg-[#fb7185] text-white text-[9px] font-black border border-black shrink-0 cursor-pointer" title="Swap Raider Skin or Read Lore">
+                                        🎨 Skin/Lore
+                                    </button>
+                                </div>
+                                <div id="viberArchetypeB" class="text-[9px] sm:text-[10px] text-[#FF3366] font-extrabold truncate">High-Frequency Monowheel</div>
+                                <div id="weaponNameB" class="text-[10px] sm:text-[11px] text-neutral-300 truncate">🔨 Gravity Hammer</div>
+                                <div id="statusBuffB" class="text-[9px] sm:text-[10px] text-rose-400 font-bold hidden sm:block truncate">Ready for Combat</div>
+                            </div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div id="mechaNameB" class="font-extrabold text-xs sm:text-sm text-[#00F0FF] truncate">Solana Vanguard</div>
-                            <div id="weaponNameB" class="text-[10px] sm:text-xs text-neutral-300 truncate">🔨 Gravity Hammer</div>
-                            <div id="statusBuffB" class="text-[9px] sm:text-[11px] text-[#FF3366] font-bold mt-0.5 hidden sm:block">Ready for Combat</div>
+                        <!-- Character Lore / Shortcoming Snippet & Mastery XP Bar -->
+                        <div class="mt-1.5 pt-1.5 border-t border-white/10">
+                            <div id="viberLoreQuoteB" class="text-[9px] sm:text-[10px] text-amber-200/90 italic leading-tight line-clamp-2">
+                                "Blazing 65,000 TPS monowheel, but risks overheating at peak congestion."
+                            </div>
+                            <div class="mt-1 flex items-center gap-1.5">
+                                <span class="text-[8px] sm:text-[9px] font-mono-num text-neutral-400 font-bold shrink-0" id="viberXpTextB">0/100 XP</span>
+                                <div class="flex-1 h-1.5 bg-black rounded-full overflow-hidden border border-white/15">
+                                    <div id="viberXpBarB" class="h-full bg-gradient-to-r from-[#FF3366] to-[#FFD700] transition-all duration-300" style="width: 12%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -949,6 +1000,194 @@
     </div>
 
     <!-- =======================================================================
+         MODAL 6: VIBER 3D LORE CODEX, PROGRESSION & "FOR RAIDERS" WARDROBE
+         ======================================================================= -->
+    <div id="viberCodexModal" class="modal-backdrop hidden">
+        <div class="tactile-dark max-w-5xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto border-4 border-[#00F0FF]">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b-2 border-white/15">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl sm:text-3xl">🧬</span>
+                    <div>
+                        <h2 class="text-lg sm:text-2xl font-black text-[#00F0FF] uppercase tracking-wide">Vibe Vibers 3D Lore, Mastery & Raiders Wardrobe</h2>
+                        <p class="text-xs text-neutral-300">Every Viber's story, fatal shortcoming, mastery progression & official <a href="https://testnet.vibevibe.fun/vibe-vibers/for-raiders" target="_blank" class="text-[#FFD700] underline font-bold">vibe-vibers/for-raiders</a> 3D skins</p>
+                    </div>
+                </div>
+                <button id="closeViberCodexBtn" class="btn-neubrutal bg-[#FF3366] text-white px-3 py-1 text-sm">✕ Close</button>
+            </div>
+
+            <!-- Raider Account Progression Banner -->
+            <div class="bg-black/80 border-2 border-[#FFD700] rounded-xl p-3 sm:p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div id="codexRaiderRankBadge" class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8A2BE2] to-[#00F0FF] border-2 border-white flex items-center justify-center font-mono-num font-black text-base text-white shadow-lg shrink-0">
+                        Lv.1
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span id="codexRaiderTitle" class="font-black text-sm sm:text-base text-[#FFD700] uppercase">Spark Novice Raider</span>
+                            <span id="codexRaiderBonusPill" class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[10px] font-black">+2% Mastery Payout Boost</span>
+                        </div>
+                        <p class="text-[11px] text-neutral-300 mt-0.5">Fight duels in the 3D Colosseum to level up your Vibers, unlock Raider lore chapters & boost $VCT rewards!</p>
+                    </div>
+                </div>
+                <div class="w-full sm:w-64 shrink-0">
+                    <div class="flex justify-between text-[11px] font-mono-num font-extrabold text-[#00F0FF] mb-1">
+                        <span id="codexTotalXpText">0 XP</span>
+                        <span id="codexNextLvlXpText">Next Rank: 250 XP</span>
+                    </div>
+                    <div class="w-full h-3 bg-neutral-900 rounded-full overflow-hidden border border-white/20 p-0.5">
+                        <div id="codexRaiderXpBar" class="h-full bg-gradient-to-r from-[#00F0FF] via-[#8A2BE2] to-[#FFD700] rounded-full transition-all duration-300" style="width: 10%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs: 15 Fighter Lore & Mastery vs 26 Official "For Raiders" Collection -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div class="flex gap-2">
+                    <button id="tabCodexFightersBtn" class="btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#00F0FF] text-[#111]">
+                        🤖 15 Arena Champions (Lore & Mastery)
+                    </button>
+                    <button id="tabCodexRaidersBtn" class="btn-neubrutal px-3.5 py-2 text-xs sm:text-sm bg-[#111] text-white border-white/30">
+                        🏴‍☠️ 26 "For Raiders" Collection Skins
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-neutral-400 font-bold">Active Custom Skins:</span>
+                    <span id="activeSkinBadgeA" class="px-2 py-0.5 rounded bg-[#00F0FF]/20 border border-[#00F0FF] text-[#00F0FF] font-bold">Corner A: Default</span>
+                    <span id="activeSkinBadgeB" class="px-2 py-0.5 rounded bg-[#FF3366]/20 border border-[#FF3366] text-[#FF3366] font-bold">Corner B: Default</span>
+                    <button id="resetCustomSkinsBtn" class="text-[11px] underline text-neutral-400 hover:text-white cursor-pointer">Reset Skins</button>
+                </div>
+            </div>
+
+            <!-- Panel 1: 15 Fighter Vibers Lore, Shortcomings, Journey & Mastery Grid -->
+            <div id="codexFightersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Panel 2: 26 Official "For Raiders" Collection Wardrobe (testnet.vibevibe.fun/vibe-vibers/for-raiders) -->
+            <div id="codexRaidersPanel" class="hidden">
+                <div class="bg-[#111] border-2 border-[#8A2BE2] rounded-xl p-3 mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div class="text-xs text-neutral-200">
+                        <strong class="text-[#FFD700]">🏴‍☠️ Official Vibe Vibers "For Raiders" Collection:</strong> Equip any of the 26 authentic Raider Vibers directly onto your 3D Fighter in Corner A or Corner B, or download the high-res portrait as your Raider PFP!
+                    </div>
+                    <a href="https://testnet.vibevibe.fun/vibe-vibers/for-raiders" target="_blank" rel="noopener noreferrer" class="btn-neubrutal bg-[#FFD700] text-[#111] px-3 py-1.5 text-xs shrink-0">
+                        🌐 Open vibevibe.fun/for-raiders ↗
+                    </a>
+                </div>
+                <div id="codexRaidersGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
+         MODAL 7: RAIDER GROWTH & REFERRAL FLYWHEEL HUB + LIVE $VCT TOKEN
+         ======================================================================= -->
+    <div id="referralModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-3xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto text-left">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-black/15">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl sm:text-3xl">🚀</span>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black uppercase text-[#111] leading-none">Raider Growth & Referral Flywheel</h2>
+                        <p class="text-xs font-bold text-neutral-700 mt-1">Invite Raiders, complete Daily Vibe Quests & earn $VCT + XP</p>
+                    </div>
+                </div>
+                <button id="closeReferralModalBtn" class="btn-neubrutal bg-[#111] text-white px-3 py-1 text-sm">✕</button>
+            </div>
+
+            <!-- Top Referral Link & Ambassador Tier Box -->
+            <div class="bg-[#111] text-white border-3 border-black rounded-2xl p-4 mb-4 shadow-[4px_5px_0_#8A2BE2]">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <span class="px-2.5 py-0.5 rounded bg-[#00FF88] text-[#111] font-black text-xs uppercase">
+                        ⚡ Two-Sided Flywheel: You get +1,000 $VCT • Friend gets +1,500 $VCT
+                    </span>
+                    <span id="refTierBadge" class="font-mono-num text-xs font-extrabold text-[#FFD700]">
+                        🎖️ Tier: Raider Recruiter (0 Invited)
+                    </span>
+                </div>
+                <p class="text-xs text-neutral-300 mb-3">
+                    Share your personal Raider Invite Link on X, WhatsApp, or Telegram. Every player who joins with your link or code receives an instant <strong>+1,500 $VCT</strong> drop, and you earn <strong>+1,000 $VCT + 150 XP</strong>!
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                    <input type="text" id="referralLinkInput" readonly
+                        class="flex-1 px-3 py-2.5 bg-neutral-900 text-[#00F0FF] border-2 border-[#00F0FF] rounded-xl font-mono-num text-xs font-bold focus:outline-none"
+                        value="https://vibe-stock-duels.vercel.app/?ref=RAIDER">
+                    <button id="copyRefLinkBtn" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-4 py-2.5 text-xs font-black shrink-0">
+                        📋 Copy Invite Link
+                    </button>
+                </div>
+
+                <!-- 1-Click Viral Raid Share Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button id="shareRefTwitterBtn" class="btn-neubrutal bg-[#1d9bf0] text-white py-2 px-3 text-xs font-black">
+                        𝕏 Post Raid on X (@vibevibeeco)
+                    </button>
+                    <button id="shareRefWhatsAppBtn" class="btn-neubrutal bg-[#25D366] text-[#111] py-2 px-3 text-xs font-black">
+                        💬 Invite Squad on WhatsApp
+                    </button>
+                    <button id="shareRefTelegramBtn" class="btn-neubrutal bg-[#FFD700] text-[#111] py-2 px-3 text-xs font-black">
+                        ✈️ Share on Telegram
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two-Column Section: Daily Raider Quests & Redeem Friend Code + Live $VCT Contract -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Daily Quests Flywheel -->
+                <div class="bg-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#000]">
+                    <h3 class="text-sm font-black uppercase text-[#111] mb-2.5 flex items-center justify-between">
+                        <span>🎯 Raider Growth Quests</span>
+                        <span class="text-[11px] text-purple-700 font-extrabold">Instant $VCT + XP</span>
+                    </h3>
+                    <div id="raiderQuestsList" class="space-y-2 text-xs">
+                        <!-- Dynamically populated quests -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Redeem Referral Code & Official $VCT Token Info -->
+                <div class="flex flex-col gap-3">
+                    <div class="bg-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#000]">
+                        <h3 class="text-sm font-black uppercase text-[#111] mb-1">🎁 Were You Invited by a Raider?</h3>
+                        <p class="text-[11px] font-semibold text-neutral-600 mb-2">Enter a teammate's Raider Code to claim your +1,500 $VCT + 100 XP Welcome Drop:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="redeemCodeInput" maxlength="20" placeholder="Enter Raider Code..."
+                                class="flex-1 px-3 py-2 bg-[#111] text-[#FFD700] border-2 border-black rounded-lg font-mono-num text-xs font-bold uppercase focus:outline-none">
+                            <button id="redeemCodeBtn" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">
+                                ⚡ Claim +1,500
+                            </button>
+                        </div>
+                        <p id="redeemStatusMsg" class="text-[11px] font-bold mt-1.5 hidden"></p>
+                    </div>
+
+                    <!-- Official $VCT Token on vibe/vibe Testnet Card -->
+                    <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#FFD700]">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-black text-[#FFD700] uppercase">🪙 VibeCrushToken ($VCT) Live</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400 text-[10px] font-bold">vibe/vibe Testnet</span>
+                        </div>
+                        <p class="text-[11px] text-neutral-300 mb-2">
+                            Powered by HappyForge on the vibe/vibe & Robinhood Chain ecosystem.
+                        </p>
+                        <div class="p-2 rounded bg-black border border-white/15 font-mono-num text-[10px] text-[#00F0FF] break-all mb-2">
+                            0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="copyVctContractBtn" class="btn-neubrutal flex-1 bg-white text-[#111] py-1.5 text-xs font-black">
+                                📋 Copy Contract
+                            </button>
+                            <a href="https://testnet.vibevibe.fun/token/0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697" target="_blank" rel="noopener noreferrer" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-1.5 text-xs font-black text-center">
+                                Trade $VCT ↗
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================================
          INTERACTIVE AAA ONBOARDING COACH BANNER & SPOTLIGHT
          ======================================================================= -->
     <div id="tutorialOverlayDim" class="tut-overlay-dim hidden"></div>
@@ -987,97 +1226,220 @@
         const ASSETS = {
             BTC: {
                 name: "Bitcoin", ticker: "$BTC", type: "crypto", base: 85420,
-                mechaTitle: "Satoshi Prime V1", weaponName: "🗡️ Cyber Broadsword", weaponType: "sword",
-                color: "#FFD700", bodyHex: 0x5c3824, visorHex: 0xe6e1d6, antennaHex: 0x76ff7a, accentHex: 0xFFD700,
+                mechaTitle: "Satoshi Prime V1", weaponName: "🗡️ Cyber Broadsword", weaponType: "broadsword",
+                viberImg: "assets/vibers/viber1.webp", viberModel: "viber1",
+                archetype: "The Genesis Block Hermit",
+                loreQuote: "HODLs through 90% drawdowns; refuses to sell a single satoshi.",
+                journey: "Forged in the 2009 cypherpunk underground, Satoshi Prime guards the first block of the Robinhood Chain vault with twin-strapped titanium armor.",
+                shortcoming: "Stubbornly refuses to take profits during parabolic tops because '1 BTC = 1 BTC'.",
+                passive: "Diamond Standard: +5% bonus $VCT payout on 60s Oracle victories.",
+                color: "#FFD700", bodyHex: 0x4e3020, visorHex: 0xe6e1d6, antennaHex: 0x8ef58e, accentHex: 0xFFD700,
                 earStyle: "horn"
             },
             ETH: {
                 name: "Ethereum", ticker: "$ETH", type: "crypto", base: 4480,
                 mechaTitle: "Ether Sentinel V2", weaponName: "⚔️ Dual Ether Blades", weaponType: "katana",
+                viberImg: "assets/vibers/viber2.webp", viberModel: "viber2",
+                archetype: "The Gas-Fee Alchemist",
+                loreQuote: "Runs infinite smart contracts on his lime-green backpack reactor.",
+                journey: "A hyper-intellectual state-machine architect from the EVM Citadel who routes 95% of trading fees into tokenized AI stock baskets.",
+                shortcoming: "Overthinks simple strikes and occasionally spikes his own gas fees mid-combo.",
+                passive: "Smart Contract Rollup: Starts every duel with +5% extra Overdrive Rage.",
                 color: "#00F0FF", bodyHex: 0x3b86b6, visorHex: 0x9cff9c, antennaHex: 0x00F0FF, accentHex: 0xA855F7,
                 earStyle: "twin_eyes"
             },
             SOL: {
                 name: "Solana", ticker: "$SOL", type: "crypto", base: 188.60,
                 mechaTitle: "Solana Vanguard V4", weaponName: "🔨 Gravity Hammer", weaponType: "hammer",
-                color: "#FF3366", bodyHex: 0x414852, visorHex: 0xffa654, antennaHex: 0xff9d42, accentHex: 0x00F0FF,
+                viberImg: "assets/vibers/viber4.webp", viberModel: "viber4",
+                archetype: "The High-Frequency Monowheel",
+                loreQuote: "Blazing 65,000 TPS monowheel, but risks overheating at peak congestion.",
+                journey: "Built on a single gyroscopic turbo-wheel with massive hydraulic boxer gauntlets, he blitzes the Colosseum faster than any L1 rival.",
+                shortcoming: "Pushes his orange CRT core so hard that meme-coin congestion nearly trips his breaker.",
+                passive: "Proof-of-History Blitz: Critical strikes trigger extra voxel shockwaves.",
+                color: "#FF3366", bodyHex: 0x4a525d, visorHex: 0xff9e44, antennaHex: 0xff9e44, accentHex: 0x00F0FF,
                 earStyle: "mono_visor"
             },
             BNB: {
                 name: "BNB Chain", ticker: "$BNB", type: "crypto", base: 642.10,
-                mechaTitle: "Bsc Imperator V9", weaponName: "🔱 Golden Halberd", weaponType: "spear",
-                color: "#F3BA2F", bodyHex: 0x2b2820, visorHex: 0xF3BA2F, antennaHex: 0xFFD700, accentHex: 0xF3BA2F,
+                mechaTitle: "BSC Imperator V9", weaponName: "🔱 Golden Halberd", weaponType: "trident",
+                viberImg: "assets/vibers/viber9.webp", viberModel: "viber9",
+                archetype: "The Validator Warlord",
+                loreQuote: "Dual mint-charged shield gauntlets and ivory tusks built for liquidity wars.",
+                journey: "Veteran of a thousand pancake-swap skirmishes, carrying twin energy shields on his forearms to deflect FUD and bear raids.",
+                shortcoming: "Obsessed with quarterly token burns—sometimes tries to burn his own spare parts.",
+                passive: "Quarterly Burn Aura: +10% shield durability during Overdrive.",
+                color: "#F3BA2F", bodyHex: 0x9e7b56, visorHex: 0x98f598, antennaHex: 0x98f598, accentHex: 0xF3BA2F,
                 earStyle: "crest"
             },
             DOGE: {
                 name: "Dogecoin", ticker: "$DOGE", type: "crypto", base: 0.342,
                 mechaTitle: "Shiba Mecha V10", weaponName: "🏏 Mega Bonk Club", weaponType: "hammer",
-                color: "#EAB308", bodyHex: 0xd49b35, visorHex: 0x98f598, antennaHex: 0xffe484, accentHex: 0xfef08a,
+                viberImg: "assets/vibers/viber10.webp", viberModel: "viber10",
+                archetype: "The Meme-Rocket Berserker",
+                loreQuote: "Fights purely on timeline hype, chaos, and unbreakable community vibes.",
+                journey: "Started as a joke in the scrapyard, now rocks crimson armor, a purple-tipped telemetry antenna, and giant white brawler fists.",
+                shortcoming: "Easily distracted by midnight tweets and shiny objects in the arena stands.",
+                passive: "Much Wow Momentum: Comeback strikes deal extra knockback when below 50 HP.",
+                color: "#EAB308", bodyHex: 0xc23b2b, visorHex: 0xe6e1d6, antennaHex: 0xa87ffb, accentHex: 0xfef08a,
                 earStyle: "doge_ears"
             },
             TSLA: {
                 name: "Tesla", ticker: "$TSLA", type: "stock", base: 377.81,
                 mechaTitle: "Cybertruck Mecha V5", weaponName: "⚡ Gigafactory Maul", weaponType: "hammer",
-                color: "#FF3366", bodyHex: 0x991b1b, visorHex: 0xff3366, antennaHex: 0x00F0FF, accentHex: 0xFF3366,
+                viberImg: "assets/vibers/viber5.webp", viberModel: "viber5",
+                archetype: "The Autopilot Outlaw",
+                loreQuote: "Cold-rolled lavender steel and a chef hat—ships FSD 'next month, definitely'.",
+                journey: "Engineered on the Austin Gigafactory floor to bridge Wall Street equities and the Robinhood Chain AI stock machine.",
+                shortcoming: "Insists on fighting in Full Self-Driving beta mode even when the radar is jammed.",
+                passive: "Ludicrous Torque: Dash animations accelerate with electric cyan sparks.",
+                color: "#FF3366", bodyHex: 0x8b76af, visorHex: 0x8ab4f8, antennaHex: 0xb89772, accentHex: 0xFF3366,
                 earStyle: "mono_visor"
             },
             AAPL: {
                 name: "Apple", ticker: "$AAPL", type: "stock", base: 236.67,
                 mechaTitle: "Cupertino Core V6", weaponName: "🗡️ Titanium Katana", weaponType: "katana",
-                color: "#FDFBF7", bodyHex: 0xd4a238, visorHex: 0x8ef58e, antennaHex: 0xffffff, accentHex: 0x38bdf8,
+                viberImg: "assets/vibers/viber6.webp", viberModel: "viber6",
+                archetype: "The Walled-Garden Guardian",
+                loreQuote: "Anodized golden chassis with giant acoustic ears and a hover-pedestal base.",
+                journey: "Designed in an ultra-secret circularinfinite loop lab; glides across the arena on a twin-tiered dark titanium pedestal.",
+                shortcoming: "Requires a proprietary $999 dongle just to recharge his katana sheath.",
+                passive: " Cash-Pile Fortress: Takes reduced chip damage on the first 3 oracle ticks.",
+                color: "#FDFBF7", bodyHex: 0xd49b35, visorHex: 0x98f598, antennaHex: 0x98f598, accentHex: 0x38bdf8,
                 earStyle: "doge_ears"
             },
             NVDA: {
                 name: "NVIDIA", ticker: "$NVDA", type: "stock", base: 138.50,
-                mechaTitle: "Blackwell GPU V8", weaponName: "🟢 Tensor Ray-Scythe", weaponType: "sword",
-                color: "#76B900", bodyHex: 0x1a2e05, visorHex: 0x76B900, antennaHex: 0xa3e635, accentHex: 0x76B900,
+                mechaTitle: "Blackwell GPU V8", weaponName: "🟢 Tensor Ray-Scythe", weaponType: "scythe",
+                viberImg: "assets/vibers/viber8.webp", viberModel: "viber8",
+                archetype: "The Silicon Blacksmith",
+                loreQuote: "Powers the entire AI Stock Machine while rocking a copper-striped flat cap.",
+                journey: "Every AI model in the metaverse pays tribute to his tensor cores; his chest rig carries a pure white H200 wafer cube.",
+                shortcoming: "Runs at 95°C under load and refuses to take off his leather-black beard visor.",
+                passive: "CUDA Overclock: +15% Rage generation on upward stock ticks.",
+                color: "#76B900", bodyHex: 0x32353d, visorHex: 0x18181b, antennaHex: 0xa46347, accentHex: 0x76B900,
                 earStyle: "crest"
             },
             MSFT: {
                 name: "Microsoft", ticker: "$MSFT", type: "stock", base: 468.00,
                 mechaTitle: "Azure Titan V7", weaponName: "🔨 Cloud Warhammer", weaponType: "hammer",
-                color: "#00A4EF", bodyHex: 0x1e3a8a, visorHex: 0x38bdf8, antennaHex: 0x00A4EF, accentHex: 0x60a5fa,
+                viberImg: "assets/vibers/viber7.webp", viberModel: "viber7",
+                archetype: "The Enterprise Overlord",
+                loreQuote: "Wears a sharp necktie into a gladiator fight and acquires his rivals mid-duel.",
+                journey: "From 90s desktop monopoly to hyperscale AI cloud colossus, he fights with glowing orange visor lenses and corporate precision.",
+                shortcoming: "Occasionally forces a mandatory Windows Update right at tick 38 of 40.",
+                passive: "Hyperscale Cloud: +10% faster Shield recovery.",
+                color: "#00A4EF", bodyHex: 0x9eb8c7, visorHex: 0xff9e44, antennaHex: 0xd8cce6, accentHex: 0x60a5fa,
                 earStyle: "twin_eyes"
             },
             AMZN: {
                 name: "Amazon", ticker: "$AMZN", type: "stock", base: 215.00,
-                mechaTitle: "Prime Automaton V3", weaponName: "🪓 Logistics Cleaver", weaponType: "spear",
-                color: "#FF9900", bodyHex: 0xe09f7d, visorHex: 0x18181b, antennaHex: 0xdc2626, accentHex: 0xFF9900,
+                mechaTitle: "Prime Automaton V3", weaponName: "🪓 Logistics Cleaver", weaponType: "axe",
+                viberImg: "assets/vibers/viber3.webp", viberModel: "viber3",
+                archetype: "The Drone Dispatcher",
+                loreQuote: "Same-day delivery of critical hits via his red cross-antenna satellite link.",
+                journey: "Commands a planetary fleet of fulfillment bots and AWS servers, locking onto targets with his red cross-shaped beacon.",
+                shortcoming: "Counts every millisecond of idle breathing animation as 'time off task'.",
+                passive: "Prime Delivery: First strike of every duel lands with guaranteed bonus sparks.",
+                color: "#FF9900", bodyHex: 0xe29d78, visorHex: 0x18181b, antennaHex: 0xd14334, accentHex: 0xFF9900,
                 earStyle: "cross_antenna"
             },
             SPACEX: {
                 name: "SpaceX", ticker: "$SPACEX", type: "synth", base: 350.00,
-                mechaTitle: "Starship Mecha V11", weaponName: "🚀 Raptor Plasma Lance", weaponType: "spear",
-                color: "#38BDF8", bodyHex: 0x94a3b8, visorHex: 0x38bdf8, antennaHex: 0xf97316, accentHex: 0x38BDF8,
+                mechaTitle: "Starship Mecha V11", weaponName: "🚀 Raptor Plasma Lance", weaponType: "trident",
+                viberImg: "assets/vibers/viber11.webp", viberModel: "viber11",
+                archetype: "The Orbital Pirate",
+                loreQuote: "One glowing green telemetry monocle, one battle scar, zero fear of rapid unscheduled disassembly.",
+                journey: "A scarred orbital raider who catches booster stages with mech chopsticks and raids synthetic pre-IPO liquidity pools.",
+                shortcoming: "Calls every catastrophic armor explosion 'an exciting test of the flight envelope'.",
+                passive: "Booster Catch: Survives at 1 HP once if a non-crit strike would KO.",
+                color: "#38BDF8", bodyHex: 0x7c3f23, visorHex: 0x98f598, antennaHex: 0xdad4c8, accentHex: 0x38BDF8,
                 earStyle: "horn"
             },
             DANGOTE: {
                 name: "Dangote Ind.", ticker: "$DANGOTE", type: "synth", base: 420.50,
                 mechaTitle: "Lagos Refinery V12", weaponName: "🔨 Crude Mega-Crusher", weaponType: "hammer",
-                color: "#00FF88", bodyHex: 0x065f46, visorHex: 0xFFD700, antennaHex: 0x00FF88, accentHex: 0xFFD700,
+                viberImg: "assets/vibers/viber12.webp", viberModel: "viber12",
+                archetype: "The Industrial Juggernaut",
+                loreQuote: "Full-visored purple knight armored in three-tier Lekki industrial steel ribs.",
+                journey: "Champion of African industrial sovereignty; refined in Lagos to dominate global commodities and synthetic stock duels.",
+                shortcoming: "Takes 5 years to warm up his refinery furnace, but once online, nothing stops him.",
+                passive: "Lekki Heavy Armor: Heavy warhammer strikes shake the entire Colosseum.",
+                color: "#00FF88", bodyHex: 0x9b82ce, visorHex: 0x22252a, antennaHex: 0xb49ce4, accentHex: 0x00FF88,
                 earStyle: "crest"
             },
             OPENAI: {
                 name: "OpenAI", ticker: "$OPENAI", type: "synth", base: 510.00,
-                mechaTitle: "Omni Singularity V13", weaponName: "⚡ Neural Scepter", weaponType: "sword",
-                color: "#A855F7", bodyHex: 0x2e1065, visorHex: 0xe9d5ff, antennaHex: 0xc084fc, accentHex: 0xA855F7,
+                mechaTitle: "Omni Singularity V13", weaponName: "⚡ Neural Scepter", weaponType: "broadsword",
+                viberImg: "assets/vibers/viber13.webp", viberModel: "viber13",
+                archetype: "The Neural Admiral",
+                loreQuote: "Predicts your next 10 moves with glowing cyan AGI eyes under an Admiral cap.",
+                journey: "Ascended from transformer weights into a full-fledged synthetic equity commander at the heart of the AI Stock Basket.",
+                shortcoming: "Sometimes hallucinates an imaginary 5th corner of the octagonal arena.",
+                passive: "AGI Inference: +10% critical hit visual intensity.",
+                color: "#A855F7", bodyHex: 0x472d21, visorHex: 0x67e8f9, antennaHex: 0xdad4c8, accentHex: 0xA855F7,
                 earStyle: "mono_visor"
             },
             STRIPE: {
                 name: "Stripe", ticker: "$STRIPE", type: "synth", base: 195.00,
                 mechaTitle: "PayRail Strider V14", weaponName: "🗡️ Liquidity Katana", weaponType: "katana",
-                color: "#6366F1", bodyHex: 0x312e81, visorHex: 0x00F0FF, antennaHex: 0x818cf8, accentHex: 0x00F0FF,
+                viberImg: "assets/vibers/viber14.webp", viberModel: "viber14",
+                archetype: "The Liquidity Cyborg",
+                loreQuote: "Twin crimson horns and a green settlement monocle—clears 200bps on every slash.",
+                journey: "Routes trillions in internet commerce and stablecoin rails; scarred from battling legacy banking mainframes.",
+                shortcoming: "Tries to charge a 2.9% + 30¢ processing fee every time he blocks an attack.",
+                passive: "Instant Settlement: Fast katana recovery after every dash.",
+                color: "#6366F1", bodyHex: 0xba3826, visorHex: 0x98f598, antennaHex: 0xdad4c8, accentHex: 0x00F0FF,
                 earStyle: "twin_eyes"
             },
             ANDURIL: {
                 name: "Anduril", ticker: "$ANDURIL", type: "synth", base: 275.00,
-                mechaTitle: "Lattice Stealth V15", weaponName: "🗡️ Autonomous Rail-Blade", weaponType: "sword",
-                color: "#F43F5E", bodyHex: 0x18181b, visorHex: 0xf43f5e, antennaHex: 0xf43f5e, accentHex: 0xfb7185,
+                mechaTitle: "Lattice Stealth V15", weaponName: "🗡️ Autonomous Rail-Blade", weaponType: "broadsword",
+                viberImg: "assets/vibers/viber15.webp", viberModel: "viber15",
+                archetype: "The Autonomous Ronin",
+                loreQuote: "Three-tiered slate samurai helm, glowing green slit eyes, and twin jetpack pods.",
+                journey: "Built for autonomous defense superiority; his Lattice OS locks onto volatility anomalies before human traders blink.",
+                shortcoming: "Speaks exclusively in classified military acronyms during post-match interviews.",
+                passive: "Lattice Target Lock: Unlocks glowing green samurai crest aura.",
+                color: "#F43F5E", bodyHex: 0x262930, visorHex: 0x98f598, antennaHex: 0x7d8594, accentHex: 0xfb7185,
                 earStyle: "horn"
             }
         };
 
+        // Official 26 "For Raiders" Collection from https://testnet.vibevibe.fun/vibe-vibers/for-raiders
+        const RAIDERS_COLLECTION = [
+            { id: "viber-6", name: "Raider #6 — Mint Horn", img: "assets/vibers/raiders/viber-6.webp", desc: "Brown Viber with little mint eyes, cream brow band, and twin stepped horns.", bodyHex: 0x472d21, eyeStyle: "inset_glow", eyeHex: 0x98f598, hatStyle: "horns_brow", hatHex: 0xdad4c8, chestStyle: "collar_tabs", bootHex: 0x5c4d3c },
+            { id: "viber-10", name: "Raider #10 — Turquoise Cap", img: "assets/vibers/raiders/viber-10.webp", desc: "Forest green Viber with a backwards cap and oversized turquoise glasses.", bodyHex: 0x284e43, eyeStyle: "tall_glasses", eyeHex: 0x76ffe8, hatStyle: "back_cap", hatHex: 0x3b6e5c, chestStyle: "tie", bootHex: 0x76ffe8 },
+            { id: "viber-32", name: "Raider #32 — Silver Twin-Link", img: "assets/vibers/raiders/viber-32.webp", desc: "Silver Viber with dual orange-tipped antennas, T-visors, and orange boots.", bodyHex: 0x9fa6b2, eyeStyle: "orange_t_eyes", eyeHex: 0xe68a38, hatStyle: "twin_antennas", hatHex: 0xe68a38, chestStyle: "vest_core", bootHex: 0xe68a38 },
+            { id: "viber-31", name: "Raider #31 — Crimson Mohawk", img: "assets/vibers/raiders/viber-31.webp", desc: "Red Viber with a tall 4-spike block mohawk and back katana quiver.", bodyHex: 0xc2412d, eyeStyle: "big_white_eyes", eyeHex: 0xe6e1d6, hatStyle: "mohawk", hatHex: 0x9e5a42, chestStyle: "bib_patch", bootHex: 0x18181b, hasQuiver: true },
+            { id: "viber-42", name: "Raider #42 — Twin Tower Scout", img: "assets/vibers/raiders/viber-42.webp", desc: "Orange Viber with a green cap base, twin white tower antennas, and cyan eyes.", bodyHex: 0xd98a4e, eyeStyle: "inset_glow", eyeHex: 0x76ffe8, hatStyle: "twin_towers", hatHex: 0xe6e1d6, chestStyle: "belt_gem", bootHex: 0xe6e1d6, hasQuiver: true },
+            { id: "viber-48", name: "Raider #48 — Propeller Prodigy", img: "assets/vibers/raiders/viber-48.webp", desc: "Teal Viber with a spinning 4-blade propeller hat and glowing mint glasses.", bodyHex: 0x267373, eyeStyle: "tall_glasses", eyeHex: 0x98f598, hatStyle: "propeller", hatHex: 0xe6e1d6, chestStyle: "tusks", bootHex: 0x98f598 },
+            { id: "viber-63", name: "Raider #63 — Violet Punk", img: "assets/vibers/raiders/viber-63.webp", desc: "Espresso Viber with oversized purple glasses and a tall red block mohawk.", bodyHex: 0x472d21, eyeStyle: "tall_glasses", eyeHex: 0xa87ffb, hatStyle: "mohawk", hatHex: 0xc23b2b, chestStyle: "red_belt_pods", bootHex: 0x5c4d3c },
+            { id: "viber-71", name: "Raider #71 — Dread Pirate", img: "assets/vibers/raiders/viber-71.webp", desc: "Rust-brown pirate Viber with a glowing mint scouter monocle and eye patch.", bodyHex: 0x7c3f23, viberModel: "viber11" },
+            { id: "viber-103", name: "Raider #103 — Gold Bullion", img: "assets/vibers/raiders/viber-103.webp", desc: "Gold-toned Viber with twin horns and a black-and-white barcode chest.", bodyHex: 0x9e8c62, eyeStyle: "inset_glow", eyeHex: 0xf4f1eb, hatStyle: "horns", hatHex: 0x9e8c62, chestStyle: "piano_stripes", bootHex: 0x18181b },
+            { id: "viber-123", name: "Raider #123 — Lavender Chef", img: "assets/vibers/raiders/viber-123.webp", desc: "Purple Viber with a white blocky chef cap and glowing blue visor eyes.", bodyHex: 0x8b76af, viberModel: "viber5" },
+            { id: "viber-141", name: "Raider #141 — Ronin Overlord", img: "assets/vibers/raiders/viber-141.webp", desc: "Dark stealth Viber with a 3-tiered silver helm and glowing green slit eyes.", bodyHex: 0x262930, viberModel: "viber15" },
+            { id: "viber-142", name: "Raider #142 — Copper Outlaw", img: "assets/vibers/raiders/viber-142.webp", desc: "Copper Viber with a wide brown fedora, coral eyes, and twin chest straps.", bodyHex: 0xd49678, eyeStyle: "inset_glow", eyeHex: 0xff7b6b, hatStyle: "fedora", hatHex: 0x5c4d3c, chestStyle: "tusks", bootHex: 0x18181b },
+            { id: "bureau-31", name: "Bureau #31 — Lime Equalizer", img: "assets/vibers/raiders/bureau-31.webp", desc: "Turquoise Viber with 4 animated glowing lime frequency bars and single antenna.", bodyHex: 0x2bd9c4, eyeStyle: "equalizer", eyeHex: 0xd4ff47, hatStyle: "single_antenna", hatHex: 0xd4ff47, chestStyle: "dark_core", bootHex: 0x18181b },
+            { id: "bureau-25", name: "Bureau #25 — Noir Detective", img: "assets/vibers/raiders/bureau-25.webp", desc: "Charcoal Viber with a cream fedora, glowing mint glasses, and grey tie.", bodyHex: 0x2b2d36, eyeStyle: "tall_glasses", eyeHex: 0x98f598, hatStyle: "fedora", hatHex: 0xe6e1d6, chestStyle: "tie", bootHex: 0x8d99ae },
+            { id: "bureau-24", name: "Bureau #24 — Heavy Walker", img: "assets/vibers/raiders/bureau-24.webp", desc: "Orange Viber with a full black face shield, mint antenna, and wide tank boots.", bodyHex: 0xe69553, eyeStyle: "black_face_visor", eyeHex: 0xe6e1d6, hatStyle: "single_antenna", hatHex: 0x98f598, chestStyle: "white_plate", bootHex: 0x18181b },
+            { id: "bureau-23", name: "Bureau #23 — Gold Mummy", img: "assets/vibers/raiders/bureau-23.webp", desc: "Yellow-gold Viber with a flat black mortarboard cap and cream face bands.", bodyHex: 0xd4ad42, eyeStyle: "wrapped_bands", eyeHex: 0x18181b, hatStyle: "flat_mortar", hatHex: 0x18181b, chestStyle: "dark_core", bootHex: 0xb89772 },
+            { id: "bureau-8", name: "Bureau #8 — Abyssal Gorilla", img: "assets/vibers/raiders/bureau-8.webp", desc: "Purple Viber with a black mask, ice-blue eyes, and long black knuckle-arms.", bodyHex: 0x9b82ce, eyeStyle: "masked_blue", eyeHex: 0x8ab4f8, hatStyle: "none", hatHex: 0x9b82ce, chestStyle: "dark_core", bootHex: 0x18181b },
+            { id: "bureau-4", name: "Bureau #4 — Ivory Inspector", img: "assets/vibers/raiders/bureau-4.webp", desc: "Cream Viber with a white fedora, sky-blue glasses, and back katana pack.", bodyHex: 0xd4cfc4, eyeStyle: "tall_glasses", eyeHex: 0x76e5ff, hatStyle: "fedora", hatHex: 0xe6e1d6, chestStyle: "tie", bootHex: 0x18181b, hasQuiver: true },
+            { id: "viber-84", name: "Raider #84 — Red-Brow Striker", img: "assets/vibers/raiders/viber-84.webp", desc: "Cream Viber with a backwards red cap, red brow bar, and black shades.", bodyHex: 0xdad4c8, eyeStyle: "red_brow_shades", eyeHex: 0xc23b2b, hatStyle: "back_cap", hatHex: 0xc23b2b, chestStyle: "vest_core", bootHex: 0x5c4d3c },
+            { id: "viber-extra-24", name: "Raider X24 — Gold-Eye Boss", img: "assets/vibers/raiders/viber-extra-24.webp", desc: "Espresso Viber with a white fedora, glowing gold eyes, and white tie.", bodyHex: 0x472d21, eyeStyle: "inset_glow", eyeHex: 0xffd166, hatStyle: "fedora", hatHex: 0xe6e1d6, chestStyle: "tie", bootHex: 0x22252a },
+            { id: "viber-extra-20", name: "Raider X20 — Desert Punk", img: "assets/vibers/raiders/viber-extra-20.webp", desc: "Sand-colored Viber with a tall red mohawk, crazy eyes, and red boots.", bodyHex: 0xc7b999, eyeStyle: "big_white_eyes", eyeHex: 0xe6e1d6, hatStyle: "mohawk", hatHex: 0xc23b2b, chestStyle: "tie", bootHex: 0xc23b2b },
+            { id: "viber-extra-19", name: "Raider X19 — Top-Hat Baron", img: "assets/vibers/raiders/viber-extra-19.webp", desc: "Brown Viber with a tall black top hat, cyan ribbon, and glowing mint eyes.", bodyHex: 0x472d21, eyeStyle: "masked_mint", eyeHex: 0x98f598, hatStyle: "top_hat", hatHex: 0x18181b, chestStyle: "belt_gem", bootHex: 0x18181b, hasQuiver: true },
+            { id: "viber-extra-15", name: "Raider X15 — Holo Phantom", img: "assets/vibers/raiders/viber-extra-15.webp", desc: "Translucent turquoise hologram Viber with a square voxel smile.", bodyHex: 0x5ce6d0, eyeStyle: "holo_smile", eyeHex: 0x2b6e63, hatStyle: "flat_cap", hatHex: 0x5ce6d0, chestStyle: "none", bootHex: 0x5ce6d0, isHolo: true },
+            { id: "viber-extra-12", name: "Raider X12 — Sideband Gold", img: "assets/vibers/raiders/viber-extra-12.webp", desc: "Gold-toned Viber with glowing yellow eyes, side antenna, and 4 chest blocks.", bodyHex: 0x948257, eyeStyle: "inset_glow", eyeHex: 0xfff380, hatStyle: "side_antenna_only", hatHex: 0x948257, chestStyle: "rib_armor", bootHex: 0x18181b },
+            { id: "viber-extra-11", name: "Raider X11 — Lime-Lens Duck", img: "assets/vibers/raiders/viber-extra-11.webp", desc: "Brown Viber with huge glowing lime glasses, coral beak, and back pack.", bodyHex: 0x4e3020, eyeStyle: "tall_glasses_beak", eyeHex: 0xd4ff70, hatStyle: "flat_cap", hatHex: 0x6e6252, chestStyle: "dark_core", bootHex: 0x22252a, hasQuiver: true },
+            { id: "viber-extra-9", name: "Raider X9 — Cobalt Ranger", img: "assets/vibers/raiders/viber-extra-9.webp", desc: "Cobalt blue Viber with a horned brown ranger hat, glowing gold eyes & green pack.", bodyHex: 0x1e6ea6, eyeStyle: "inset_glow", eyeHex: 0xffeb7a, hatStyle: "horned_cap", hatHex: 0x6e5d4b, chestStyle: "belt_gem", bootHex: 0xffeb7a }
+        ];
+
         window.ASSETS = ASSETS;
+        window.RAIDERS_COLLECTION = RAIDERS_COLLECTION;
+        let customSkinA = localStorage.getItem('vibe_custom_skin_a') || '';
+        let customSkinB = localStorage.getItem('vibe_custom_skin_b') || '';
 
         /***********************************************************************
          * 2. RETRO 8-BIT WEB AUDIO SYNTHESIZER (ZERO EXTERNAL SOUND FILES)
@@ -1267,125 +1629,531 @@
         buildCyberColosseum();
 
         // Helper: Add Thick Black Cartoon/Voxel Outline to any Box Mesh
-        function createVoxelBox(w, h, d, hexColor, emissiveHex = 0x000000) {
+        function createVoxelBox(w, h, d, hexColor, emissiveHex = 0x000000, opacity = 1.0) {
             const geo = new THREE.BoxGeometry(w, h, d);
             const mat = new THREE.MeshStandardMaterial({
                 color: hexColor,
-                roughness: 0.32,
-                metalness: 0.18,
+                roughness: 0.28,
+                metalness: 0.14,
                 emissive: emissiveHex,
-                emissiveIntensity: emissiveHex ? 0.45 : 0
+                emissiveIntensity: emissiveHex ? 0.52 : 0,
+                transparent: opacity < 1.0,
+                opacity: opacity
             });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
 
-            // Neubrutalist black voxel edge outline
+            // Neubrutalist black (or cyan for holo) voxel edge outline
             const edges = new THREE.EdgesGeometry(geo);
-            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x09090b }));
+            const edgeColor = opacity < 1.0 ? 0x26d9b8 : 0x09090b;
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: edgeColor }));
             mesh.add(line);
             return mesh;
         }
 
-        // Build Procedural 3D Voxel Mecha Fighter matching the user's Viber WebP designs
+        // Helper: Add a child voxel block at (x, y, z)
+        function addVox(parent, w, h, d, hex, x, y, z, emissive = 0, opacity = 1.0) {
+            const m = createVoxelBox(w, h, d, hex, emissive, opacity);
+            m.position.set(x, y, z);
+            parent.add(m);
+            return m;
+        }
+
+        // Authentic 3D Voxel Vibe Viber Sculptor (Matches viber1.webp–viber15.webp & 26 Raiders Collection)
         function buildVoxelViberFighter(assetKey, isLeftCorner, chosenWeapon = null) {
-            const cfg = ASSETS[assetKey] || ASSETS.BTC;
+            const baseCfg = ASSETS[assetKey] || ASSETS.BTC;
+            const activeSkinId = isLeftCorner ? customSkinA : customSkinB;
+            const raiderSkin = activeSkinId ? RAIDERS_COLLECTION.find(r => r.id === activeSkinId) : null;
+
+            const modelId = (raiderSkin && raiderSkin.viberModel) ? raiderSkin.viberModel : (raiderSkin ? 'raider_custom' : (baseCfg.viberModel || 'viber1'));
+            const bodyHex = raiderSkin ? raiderSkin.bodyHex : baseCfg.bodyHex;
+            const op = (raiderSkin && raiderSkin.isHolo) ? 0.65 : 1.0;
+
             const root = new THREE.Group();
-
-            // 1. Legs (Left & Right Pivots)
             const leftLegPivot = new THREE.Group();
-            leftLegPivot.position.set(-0.28, 0.65, 0);
-            const leftLeg = createVoxelBox(0.38, 0.65, 0.42, 0x27272a);
-            leftLeg.position.y = -0.32;
-            const leftBoot = createVoxelBox(0.42, 0.22, 0.52, 0x111111);
-            leftBoot.position.set(0, -0.55, 0.05);
-            leftLegPivot.add(leftLeg, leftBoot);
-
+            leftLegPivot.position.set(-0.28, 0.55, 0);
             const rightLegPivot = new THREE.Group();
-            rightLegPivot.position.set(0.28, 0.65, 0);
-            const rightLeg = createVoxelBox(0.38, 0.65, 0.42, 0x27272a);
-            rightLeg.position.y = -0.32;
-            const rightBoot = createVoxelBox(0.42, 0.22, 0.52, 0x111111);
-            rightBoot.position.set(0, -0.55, 0.05);
-            rightLegPivot.add(rightLeg, rightBoot);
-
-            root.add(leftLegPivot, rightLegPivot);
-
-            // 2. Blocky Torso & Glowing Core
-            const torso = createVoxelBox(1.05, 0.92, 0.72, cfg.bodyHex);
-            torso.position.y = 1.12;
-            const corePlate = createVoxelBox(0.55, 0.48, 0.12, 0x18181b);
-            corePlate.position.set(0, 0, 0.36);
-            const coreGem = createVoxelBox(0.24, 0.24, 0.16, cfg.accentHex, cfg.accentHex);
-            coreGem.position.set(0, 0, 0.38);
-            torso.add(corePlate, coreGem);
-            root.add(torso);
-
-            // 3. Oversized Voxel Head (Signature Viber Proportions)
+            rightLegPivot.position.set(0.28, 0.55, 0);
+            const torso = new THREE.Group();
+            torso.position.y = 1.04;
             const headGroup = new THREE.Group();
-            headGroup.position.y = 2.15;
-            const cranium = createVoxelBox(1.32, 1.12, 1.08, cfg.bodyHex);
+            headGroup.position.y = 2.08;
+            const leftArmPivot = new THREE.Group();
+            leftArmPivot.position.set(-0.68, 1.32, 0);
+            const rightArmPivot = new THREE.Group();
+            rightArmPivot.position.set(0.68, 1.32, 0);
+
+            let propellerGroup = null;
+            const eqBars = [];
+
+            // 1. BASE CHASSIS: LEGS, MONOWHEEL OR HOVER PEDESTAL + TORSO + CRANIUM
+            const coreBody = createVoxelBox(1.04, 0.84, 0.74, bodyHex, 0, op);
+            torso.add(coreBody);
+
+            const cranium = createVoxelBox(1.42, 1.18, 1.14, bodyHex, 0, op);
             headGroup.add(cranium);
 
-            // Visor / Eyes Variation based on Viber WebP art
-            if (cfg.earStyle === 'twin_eyes' || cfg.earStyle === 'doge_ears') {
-                const frameL = createVoxelBox(0.46, 0.52, 0.14, 0x111111);
-                frameL.position.set(-0.32, 0.02, 0.52);
-                const pupilL = createVoxelBox(0.24, 0.28, 0.16, cfg.visorHex, cfg.visorHex);
-                pupilL.position.set(-0.32, 0.02, 0.54);
-
-                const frameR = createVoxelBox(0.46, 0.52, 0.14, 0x111111);
-                frameR.position.set(0.32, 0.02, 0.52);
-                const pupilR = createVoxelBox(0.24, 0.28, 0.16, cfg.visorHex, cfg.visorHex);
-                pupilR.position.set(0.32, 0.02, 0.54);
-
-                headGroup.add(frameL, pupilL, frameR, pupilR);
+            if (modelId === 'viber4' || (raiderSkin && raiderSkin.id === 'viber-142')) {
+                // Single Central Monowheel / Monopod (Viber #4 Solana & Raider #142)
+                addVox(leftLegPivot, 0.48, 0.54, 0.52, 0x18181b, 0.28, -0.26, 0);
+                addVox(leftLegPivot, 0.64, 0.12, 0.58, 0x4a525d, 0.28, 0.02, 0);
+                addVox(leftLegPivot, 0.14, 0.18, 0.18, 0xe6e1d6, 0.28, -0.24, -0.32);
+            } else if (modelId === 'viber6') {
+                // Stacked Hover-Tank Pedestal Base (Viber #6 Apple)
+                addVox(leftLegPivot, 1.08, 0.18, 0.78, 0x22252a, 0.28, -0.10, 0);
+                addVox(leftLegPivot, 1.18, 0.22, 0.86, 0x18181b, 0.28, -0.34, 0);
             } else {
-                // Wide Cyber Visor (Viber #1 & #4 style)
-                const visorFrame = createVoxelBox(1.18, 0.46, 0.16, 0x111111);
-                visorFrame.position.set(0, 0.04, 0.52);
-                const visorGlow = createVoxelBox(0.96, 0.32, 0.18, cfg.visorHex, cfg.visorHex);
-                visorGlow.position.set(0, 0.04, 0.53);
-                headGroup.add(visorFrame, visorGlow);
+                // Bipedal Voxel Legs & Authentic Two-Tone / Custom Boots
+                let legHex = bodyHex;
+                let bootHexL = 0x18181b;
+                let bootHexR = 0x18181b;
+                let toeCapR = null;
+
+                if (modelId === 'viber1' || (raiderSkin && (raiderSkin.id === 'bureau-31' || raiderSkin.id === 'viber-extra-19'))) {
+                    legHex = 0xdad4c8;
+                    bootHexL = 0x18181b;
+                    bootHexR = 0x18181b;
+                    toeCapR = 0xe6e1d6;
+                } else if (modelId === 'viber3') {
+                    legHex = 0xdad4c8;
+                } else if (modelId === 'viber5') {
+                    legHex = 0x1c1e24;
+                } else if (modelId === 'viber7' || modelId === 'viber9' || modelId === 'viber10' || modelId === 'viber12' || modelId === 'viber14' || modelId === 'viber15') {
+                    bootHexL = 0xe6e1d6;
+                    bootHexR = 0xe6e1d6;
+                    if (modelId === 'viber15') legHex = 0x18181b;
+                } else if (modelId === 'viber8') {
+                    legHex = 0x18181b;
+                    bootHexL = 0xa46347;
+                    bootHexR = 0xa46347;
+                } else if (modelId === 'viber13') {
+                    legHex = 0x5c5343;
+                    bootHexL = 0x473e30;
+                    bootHexR = 0x473e30;
+                } else if (raiderSkin) {
+                    bootHexL = raiderSkin.bootHex || 0x18181b;
+                    bootHexR = raiderSkin.bootHex || 0x18181b;
+                }
+
+                addVox(leftLegPivot, 0.36, 0.42, 0.38, legHex, 0, -0.18, 0, 0, op);
+                addVox(leftLegPivot, 0.42, 0.22, 0.54, bootHexL, 0, -0.44, 0.06, 0, op);
+
+                addVox(rightLegPivot, 0.36, 0.42, 0.38, legHex, 0, -0.18, 0, 0, op);
+                addVox(rightLegPivot, 0.42, 0.22, 0.54, bootHexR, 0, -0.44, 0.06, 0, op);
+
+                if (toeCapR) {
+                    addVox(rightLegPivot, 0.43, 0.23, 0.24, toeCapR, 0, -0.44, 0.22, 0, op);
+                }
             }
 
-            // Ear / Antenna Variations
-            const antennaStem = createVoxelBox(0.16, 0.48, 0.16, 0x111111);
-            antennaStem.position.set(0, 0.78, 0);
-            const antennaTip = createVoxelBox(0.22, 0.22, 0.22, cfg.antennaHex, cfg.antennaHex);
-            antennaTip.position.set(0, 1.06, 0);
-            headGroup.add(antennaStem, antennaTip);
+            // 2. BESPOKE VIBER MODEL DETAILS (HEAD, EYES, HATS, CHEST & ARMS)
+            if (modelId === 'viber1') {
+                // VIBER #1 ($BTC): Brown cube, wrap-around black glasses + white lenses, mint-tip antenna + side antenna, bib + twin grey straps
+                addVox(headGroup, 1.48, 0.38, 0.18, 0x18181b, 0, -0.02, 0.54);
+                addVox(headGroup, 0.36, 0.34, 0.22, 0xe6e1d6, -0.36, -0.02, 0.57);
+                addVox(headGroup, 0.36, 0.34, 0.22, 0xe6e1d6, 0.36, -0.02, 0.57);
+                addVox(headGroup, 0.20, 0.20, 0.24, 0x111111, 0, -0.18, 0.58);
+                // Center antenna + glowing mint tip
+                addVox(headGroup, 0.18, 0.54, 0.18, 0x18181b, 0, 0.84, 0);
+                addVox(headGroup, 0.20, 0.24, 0.20, 0x8ef58e, 0, 1.20, 0, 0x8ef58e);
+                // Secondary back-left antenna
+                addVox(headGroup, 0.16, 0.24, 0.16, 0xe6e1d6, -0.52, 0.68, -0.36);
+                addVox(headGroup, 0.18, 0.22, 0.18, 0x525866, -0.52, 0.88, -0.36);
+                // Chest bib + twin grey vertical harness straps
+                addVox(torso, 0.78, 0.72, 0.14, 0x22252a, 0, 0, 0.36);
+                addVox(torso, 0.20, 0.74, 0.18, 0x525866, -0.32, 0, 0.40);
+                addVox(torso, 0.28, 0.18, 0.22, 0x525866, -0.28, 0.28, 0.42);
+                addVox(torso, 0.20, 0.74, 0.18, 0x525866, 0.28, -0.02, 0.40);
+                addVox(torso, 0.28, 0.18, 0.22, 0x525866, 0.24, 0.26, 0.42);
+                // Arms & dark mech fists
+                addVox(leftArmPivot, 0.28, 0.48, 0.28, 0x18181b, 0, -0.18, 0);
+                addVox(leftArmPivot, 0.42, 0.38, 0.42, 0x262930, 0, -0.52, 0);
+                addVox(rightArmPivot, 0.28, 0.48, 0.28, 0x18181b, 0, -0.18, 0);
+                addVox(rightArmPivot, 0.42, 0.38, 0.42, 0x262930, 0, -0.52, 0);
+            } else if (modelId === 'viber2') {
+                // VIBER #2 ($ETH): Sky blue, flat cap + black band, tall glowing mint glasses + white pupils + twin grey teeth, lime backpack
+                addVox(headGroup, 1.44, 0.16, 1.16, 0x18181b, 0, 0.34, 0);
+                addVox(headGroup, 1.12, 0.22, 0.88, 0x4da0d4, 0, 0.68, 0);
+                // Tall glowing mint glasses + vertical white pupils
+                addVox(headGroup, 0.48, 0.66, 0.16, 0x9cff9c, -0.36, -0.10, 0.56, 0x9cff9c);
+                addVox(headGroup, 0.22, 0.44, 0.20, 0xf4f1eb, -0.38, -0.12, 0.59);
+                addVox(headGroup, 0.48, 0.66, 0.16, 0x9cff9c, 0.36, -0.10, 0.56, 0x9cff9c);
+                addVox(headGroup, 0.22, 0.44, 0.20, 0xf4f1eb, 0.34, -0.12, 0.59);
+                // Twin front teeth blocks
+                addVox(headGroup, 0.15, 0.30, 0.22, 0xd4d0c8, -0.09, -0.44, 0.58);
+                addVox(headGroup, 0.15, 0.30, 0.22, 0xd4d0c8, 0.09, -0.44, 0.58);
+                // Chest core + Lime backpack
+                addVox(torso, 0.34, 0.36, 0.18, 0x1c1c21, 0, 0.04, 0.38);
+                addVox(torso, 0.72, 0.64, 0.26, 0x9cff9c, 0, 0.12, -0.44, 0x9cff9c);
+                // Blue shoulders + long white twin-bar arms
+                addVox(leftArmPivot, 0.34, 0.30, 0.34, bodyHex, 0, -0.06, 0);
+                addVox(leftArmPivot, 0.26, 0.58, 0.26, 0xf0ede6, 0, -0.46, 0);
+                addVox(rightArmPivot, 0.34, 0.30, 0.34, bodyHex, 0, -0.06, 0);
+                addVox(rightArmPivot, 0.26, 0.58, 0.26, 0xf0ede6, 0, -0.46, 0);
+            } else if (modelId === 'viber3') {
+                // VIBER #3 ($AMZN): Peach body, red cross antenna, black cube eyes, red/brown beak, white chest plate, raised brawler arms
+                addVox(headGroup, 0.20, 0.38, 0.20, 0x18181b, 0, 0.76, 0);
+                addVox(headGroup, 0.54, 0.18, 0.20, 0xd14334, 0, 1.00, 0, 0xd14334);
+                addVox(headGroup, 0.20, 0.20, 0.20, 0xd14334, 0, 1.16, 0, 0xd14334);
+                // Black square eyes + red/brown snout
+                addVox(headGroup, 0.34, 0.34, 0.18, 0x18181b, -0.34, 0.04, 0.56);
+                addVox(headGroup, 0.34, 0.34, 0.18, 0x18181b, 0.34, 0.04, 0.56);
+                addVox(headGroup, 0.72, 0.32, 0.22, 0xd14334, 0, -0.36, 0.58);
+                addVox(headGroup, 0.46, 0.18, 0.26, 0x5c4d3c, 0, -0.42, 0.64);
+                // White chest plate + black button
+                addVox(torso, 0.74, 0.56, 0.16, 0xe6e1d6, 0, -0.04, 0.36);
+                addVox(torso, 0.22, 0.22, 0.20, 0x18181b, 0, -0.06, 0.42);
+                // Raised brawler arms + white fists
+                addVox(leftArmPivot, 0.32, 0.54, 0.32, bodyHex, -0.12, 0.25, 0);
+                addVox(leftArmPivot, 0.36, 0.32, 0.36, 0xe6e1d6, -0.12, 0.62, 0);
+                addVox(rightArmPivot, 0.32, 0.54, 0.32, bodyHex, 0.12, 0.25, 0);
+                addVox(rightArmPivot, 0.36, 0.32, 0.36, 0xe6e1d6, 0.12, 0.62, 0);
+            } else if (modelId === 'viber4') {
+                // VIBER #4 ($SOL): Slate grey, orange-tip antenna, huge orange CRT visor + white screen, orange chest bar, giant boxer gauntlets
+                addVox(headGroup, 0.20, 0.56, 0.20, 0x18181b, 0, 0.86, 0);
+                addVox(headGroup, 0.22, 0.22, 0.22, 0xff9e44, 0, 1.22, 0, 0xff9e44);
+                // Giant orange CRT visor + cream screen + black nose
+                addVox(headGroup, 1.06, 0.72, 0.16, 0xff9e44, 0, 0.08, 0.54, 0xff9e44);
+                addVox(headGroup, 0.78, 0.46, 0.20, 0xede8dc, 0, 0.06, 0.58);
+                addVox(headGroup, 0.22, 0.20, 0.22, 0x18181b, 0, -0.34, 0.56);
+                addVox(headGroup, 0.22, 0.26, 0.24, 0x525866, -0.78, -0.18, 0);
+                addVox(headGroup, 0.22, 0.26, 0.24, 0x525866, 0.78, -0.18, 0);
+                // Chest core + giant boxer gauntlets
+                addVox(torso, 0.48, 0.52, 0.14, 0x22252a, 0, 0.04, 0.36);
+                addVox(torso, 0.20, 0.34, 0.18, 0xff9e44, 0, 0.08, 0.40, 0xff9e44);
+                addVox(leftArmPivot, 0.32, 0.28, 0.32, bodyHex, 0, -0.08, 0);
+                addVox(leftArmPivot, 0.62, 0.56, 0.62, 0x262930, -0.10, -0.46, 0.08);
+                addVox(rightArmPivot, 0.32, 0.28, 0.32, bodyHex, 0, -0.08, 0);
+                addVox(rightArmPivot, 0.62, 0.56, 0.62, 0x262930, 0.10, -0.46, 0.08);
+            } else if (modelId === 'viber5') {
+                // VIBER #5 ($TSLA / Raider #123): Lavender body, white blocky chef hat + knob + side antenna, black mask + blue eyes + white mouth grille
+                addVox(headGroup, 1.02, 0.48, 0.92, 0xede8dc, 0, 0.80, 0);
+                addVox(headGroup, 0.22, 0.20, 0.22, 0xd4d0c8, 0, 1.12, 0);
+                addVox(headGroup, 0.18, 0.34, 0.18, 0xb89772, -0.56, 0.72, -0.34);
+                // Black lower mask + glowing blue eyes + white grille
+                addVox(headGroup, 1.46, 0.68, 0.18, 0x18181b, 0, -0.22, 0.54);
+                addVox(headGroup, 0.34, 0.20, 0.22, 0x8ab4f8, -0.38, -0.02, 0.57, 0x8ab4f8);
+                addVox(headGroup, 0.34, 0.20, 0.22, 0x8ab4f8, 0.38, -0.02, 0.57, 0x8ab4f8);
+                addVox(headGroup, 0.62, 0.20, 0.24, 0xe6e1d6, 0, -0.32, 0.59);
+                // Blue chest + tan belt bar + cream arms
+                addVox(torso, 0.66, 0.38, 0.16, 0x8ab4f8, 0, 0.12, 0.36);
+                addVox(torso, 0.88, 0.18, 0.20, 0xb89772, 0, -0.18, 0.38);
+                addVox(leftArmPivot, 0.32, 0.52, 0.32, 0xede8dc, 0, -0.22, 0);
+                addVox(leftArmPivot, 0.34, 0.18, 0.34, 0xb89772, 0, -0.54, 0);
+                addVox(rightArmPivot, 0.32, 0.52, 0.32, 0xede8dc, 0, -0.22, 0);
+                addVox(rightArmPivot, 0.34, 0.18, 0.34, 0xb89772, 0, -0.54, 0);
+            } else if (modelId === 'viber6') {
+                // VIBER #6 ($AAPL): Golden ochre, giant stepped doge ears, black eye sockets + mint pupils, horizontal wing arms, lime backpack
+                addVox(headGroup, 0.44, 0.68, 0.54, bodyHex, -0.90, 0.26, 0);
+                addVox(headGroup, 0.32, 0.50, 0.42, bodyHex, -1.24, 0.30, 0);
+                addVox(headGroup, 0.44, 0.68, 0.54, bodyHex, 0.90, 0.26, 0);
+                addVox(headGroup, 0.32, 0.50, 0.42, bodyHex, 1.24, 0.30, 0);
+                // Black eye frames + mint pupils + nose + fangs
+                addVox(headGroup, 0.48, 0.48, 0.18, 0x18181b, -0.38, -0.06, 0.54);
+                addVox(headGroup, 0.20, 0.20, 0.22, 0x98f598, -0.40, -0.10, 0.58, 0x98f598);
+                addVox(headGroup, 0.48, 0.48, 0.18, 0x18181b, 0.38, -0.06, 0.54);
+                addVox(headGroup, 0.20, 0.20, 0.22, 0x98f598, 0.36, -0.10, 0.58, 0x98f598);
+                addVox(headGroup, 0.26, 0.22, 0.22, 0x18181b, 0, -0.34, 0.56);
+                addVox(headGroup, 0.28, 0.26, 0.18, bodyHex, -0.32, -0.54, 0.52);
+                addVox(headGroup, 0.28, 0.26, 0.18, bodyHex, 0.32, -0.54, 0.52);
+                // Lime backpack + horizontal wing arms
+                addVox(torso, 0.72, 0.64, 0.24, 0x98f598, 0, 0.14, -0.42, 0x98f598);
+                addVox(leftArmPivot, 0.36, 0.34, 0.36, bodyHex, 0, -0.08, 0);
+                addVox(leftArmPivot, 0.38, 0.14, 0.38, 0xe6e1d6, 0, -0.30, 0);
+                addVox(leftArmPivot, 0.68, 0.18, 0.48, bodyHex, -0.18, -0.44, 0.08);
+                addVox(rightArmPivot, 0.36, 0.34, 0.36, bodyHex, 0, -0.08, 0);
+                addVox(rightArmPivot, 0.38, 0.14, 0.38, 0xe6e1d6, 0, -0.30, 0);
+                addVox(rightArmPivot, 0.68, 0.18, 0.48, bodyHex, 0.18, -0.44, 0.08);
+            } else if (modelId === 'viber7') {
+                // VIBER #7 ($MSFT): Steel blue, cream cap + lavender band + black visor brim, tall glowing orange glasses, suit & tie
+                addVox(headGroup, 1.42, 0.26, 1.14, 0xe6e1d6, 0, 0.66, 0);
+                addVox(headGroup, 1.48, 0.16, 0.42, 0x18181b, 0, 0.50, 0.58);
+                addVox(headGroup, 1.24, 0.16, 0.18, 0xd8cce6, 0, 0.64, 0.62);
+                // Tall orange glasses + white pupils + twin teeth
+                addVox(headGroup, 0.48, 0.66, 0.16, 0xff9e44, -0.36, -0.02, 0.56, 0xff9e44);
+                addVox(headGroup, 0.22, 0.42, 0.20, 0xede8dc, -0.38, -0.04, 0.59);
+                addVox(headGroup, 0.48, 0.66, 0.16, 0xff9e44, 0.36, -0.02, 0.56, 0xff9e44);
+                addVox(headGroup, 0.22, 0.42, 0.20, 0xede8dc, 0.34, -0.04, 0.59);
+                addVox(headGroup, 0.15, 0.28, 0.22, 0xd4d0c8, -0.09, -0.40, 0.58);
+                addVox(headGroup, 0.15, 0.28, 0.22, 0xd4d0c8, 0.09, -0.40, 0.58);
+                // Suit tie & belt
+                addVox(torso, 0.22, 0.56, 0.18, 0x1c1e24, 0, 0.06, 0.38);
+                addVox(torso, 0.18, 0.52, 0.16, 0xd4d0c8, -0.28, 0.04, 0.36);
+                addVox(torso, 0.18, 0.52, 0.16, 0xd4d0c8, 0.28, 0.04, 0.36);
+                addVox(torso, 0.94, 0.16, 0.20, 0x5c4d3c, 0, -0.30, 0.38);
+                addVox(leftArmPivot, 0.32, 0.52, 0.32, 0xd4d0c8, 0, -0.20, 0);
+                addVox(leftArmPivot, 0.34, 0.16, 0.34, 0xd8cce6, 0, -0.52, 0);
+                addVox(rightArmPivot, 0.32, 0.52, 0.32, 0xd4d0c8, 0, -0.20, 0);
+                addVox(rightArmPivot, 0.34, 0.16, 0.34, 0xd8cce6, 0, -0.52, 0);
+            } else if (modelId === 'viber8') {
+                // VIBER #8 ($NVDA): Charcoal slate, cream cap + copper band + black brim, black cube eyes + wide black beard bar, olive pouch + white GPU cube
+                addVox(headGroup, 1.42, 0.26, 1.14, 0xe6e1d6, 0, 0.66, 0);
+                addVox(headGroup, 1.48, 0.16, 0.42, 0x18181b, 0, 0.50, 0.58);
+                addVox(headGroup, 1.24, 0.16, 0.18, 0xa46347, 0, 0.64, 0.62);
+                addVox(headGroup, 0.24, 0.24, 0.18, 0x111111, -0.34, 0.10, 0.56);
+                addVox(headGroup, 0.24, 0.24, 0.18, 0x111111, 0.34, 0.10, 0.56);
+                addVox(headGroup, 1.36, 0.36, 0.20, 0x141519, 0, -0.30, 0.56);
+                addVox(headGroup, 0.20, 0.20, 0.24, 0x09090b, 0, -0.34, 0.60);
+                // Chest pouch + white GPU tensor cube + long white arms
+                addVox(torso, 0.18, 0.18, 0.18, 0xa46347, 0, 0.28, 0.38);
+                addVox(torso, 0.48, 0.42, 0.18, 0x635847, 0, -0.02, 0.38);
+                addVox(torso, 0.20, 0.20, 0.22, 0xe6e1d6, 0.24, -0.14, 0.42);
+                addVox(leftArmPivot, 0.32, 0.26, 0.32, bodyHex, 0, -0.06, 0);
+                addVox(leftArmPivot, 0.24, 0.64, 0.24, 0xede8dc, 0, -0.48, 0);
+                addVox(rightArmPivot, 0.32, 0.26, 0.32, bodyHex, 0, -0.06, 0);
+                addVox(rightArmPivot, 0.24, 0.64, 0.24, 0xede8dc, 0, -0.48, 0);
+            } else if (modelId === 'viber9') {
+                // VIBER #9 ($BNB): Tan brown, mint-tip antenna, black eyes, grey snout, twin long white chest tusks, massive black/mint arm shields
+                addVox(headGroup, 0.20, 0.54, 0.20, 0x18181b, 0, 0.84, 0);
+                addVox(headGroup, 0.22, 0.22, 0.22, 0x98f598, 0, 1.20, 0, 0x98f598);
+                addVox(headGroup, 0.36, 0.36, 0.18, 0x18181b, -0.36, 0.04, 0.56);
+                addVox(headGroup, 0.36, 0.36, 0.18, 0x18181b, 0.36, 0.04, 0.56);
+                addVox(headGroup, 0.72, 0.34, 0.22, 0x68768a, 0, -0.36, 0.58);
+                addVox(headGroup, 0.46, 0.18, 0.26, 0x59493b, 0, -0.40, 0.64);
+                addVox(headGroup, 0.18, 0.34, 0.22, bodyHex, -0.76, -0.04, 0);
+                addVox(headGroup, 0.18, 0.34, 0.22, bodyHex, 0.76, -0.04, 0);
+                // Twin white tusks + glowing mint core
+                addVox(torso, 0.28, 0.68, 0.18, 0xe6e1d6, -0.30, 0.02, 0.38);
+                addVox(torso, 0.28, 0.68, 0.18, 0xe6e1d6, 0.26, 0.02, 0.38);
+                addVox(torso, 0.22, 0.22, 0.20, 0x98f598, 0, 0.06, 0.38, 0x98f598);
+                // Huge black shoulder/arm shields with glowing mint energy bars
+                addVox(leftArmPivot, 0.40, 0.88, 0.48, 0x1e2026, -0.14, -0.18, 0);
+                addVox(leftArmPivot, 0.48, 0.18, 0.24, 0x98f598, -0.16, -0.34, 0.22, 0x98f598);
+                addVox(rightArmPivot, 0.40, 0.88, 0.48, 0x1e2026, 0.14, -0.18, 0);
+                addVox(rightArmPivot, 0.48, 0.18, 0.24, 0x98f598, 0.16, -0.34, 0.22, 0x98f598);
+            } else if (modelId === 'viber10') {
+                // VIBER #10 ($DOGE): Crimson red, brown base + silver stalk + purple tip antenna, brown brow + black mask + white eyes, big brown snout, white fists
+                addVox(headGroup, 0.52, 0.18, 0.52, 0x9e5a34, 0, 0.66, 0);
+                addVox(headGroup, 0.20, 0.48, 0.20, 0xd4d0c8, 0, 0.98, 0);
+                addVox(headGroup, 0.22, 0.22, 0.22, 0xa87ffb, 0, 1.30, 0, 0xa87ffb);
+                addVox(headGroup, 1.24, 0.18, 0.18, 0x9e5a34, 0, 0.38, 0.56);
+                addVox(headGroup, 1.26, 0.56, 0.16, 0x18181b, 0, 0.02, 0.54);
+                addVox(headGroup, 0.32, 0.32, 0.20, 0xe6e1d6, -0.34, 0.02, 0.58);
+                addVox(headGroup, 0.32, 0.32, 0.20, 0xe6e1d6, 0.34, 0.02, 0.58);
+                addVox(headGroup, 0.54, 0.34, 0.36, 0x8f5230, -0.06, -0.42, 0.64);
+                addVox(torso, 0.34, 0.44, 0.18, 0x18181b, 0, 0.04, 0.38);
+                addVox(leftArmPivot, 0.30, 0.38, 0.30, bodyHex, 0, -0.14, 0);
+                addVox(leftArmPivot, 0.46, 0.36, 0.48, 0xe6e1d6, 0, -0.50, 0.06);
+                addVox(rightArmPivot, 0.30, 0.38, 0.30, bodyHex, 0, -0.14, 0);
+                addVox(rightArmPivot, 0.46, 0.36, 0.48, 0xe6e1d6, 0, -0.50, 0.06);
+            } else if (modelId === 'viber11' || modelId === 'viber14') {
+                // VIBER #11 ($SPACEX / Raider #71) & VIBER #14 ($STRIPE): Stepped horns, giant green scouter monocle + eyepatch + vertical white scar bars
+                addVox(headGroup, 0.38, 0.34, 0.42, bodyHex, -0.48, 0.72, 0);
+                addVox(headGroup, 0.26, 0.22, 0.32, bodyHex, -0.52, 0.96, 0);
+                addVox(headGroup, 0.38, 0.34, 0.42, bodyHex, 0.48, 0.72, 0);
+                addVox(headGroup, 0.26, 0.22, 0.32, bodyHex, 0.52, 0.96, 0);
+                // Left side (viewer's left): Giant glowing mint scouter monocle + white square pupil
+                addVox(headGroup, 0.68, 0.72, 0.16, 0x98f598, -0.38, -0.06, 0.56, 0x98f598);
+                addVox(headGroup, 0.38, 0.38, 0.20, 0xede8dc, -0.40, -0.08, 0.60);
+                // Right side: Black pirate eyepatch + vertical white scar blocks above & below + black nose
+                addVox(headGroup, 0.38, 0.38, 0.18, 0x18181b, 0.32, -0.10, 0.56);
+                addVox(headGroup, 0.22, 0.36, 0.18, 0xdad4c8, 0.38, 0.34, 0.56);
+                addVox(headGroup, 0.22, 0.36, 0.18, 0xdad4c8, 0.38, -0.50, 0.56);
+                addVox(headGroup, 0.22, 0.20, 0.22, 0x18181b, -0.02, -0.32, 0.58);
 
-            if (cfg.earStyle === 'doge_ears') {
-                const earL = createVoxelBox(0.38, 0.44, 0.44, cfg.bodyHex);
-                earL.position.set(-0.78, 0.35, 0);
-                const earR = createVoxelBox(0.38, 0.44, 0.44, cfg.bodyHex);
-                earR.position.set(0.78, 0.35, 0);
-                headGroup.add(earL, earR);
-            } else if (cfg.earStyle === 'cross_antenna') {
-                const crossBar = createVoxelBox(0.52, 0.14, 0.16, cfg.antennaHex, cfg.antennaHex);
-                crossBar.position.set(0, 0.92, 0);
-                headGroup.add(crossBar);
+                if (modelId === 'viber11') {
+                    // 3 horizontal white rib-armor plates on dark chest
+                    addVox(torso, 0.88, 0.76, 0.14, 0x22252a, 0, 0, 0.36);
+                    addVox(torso, 0.64, 0.16, 0.18, 0xdad4c8, -0.04, 0.20, 0.40);
+                    addVox(torso, 0.64, 0.16, 0.18, 0xdad4c8, -0.04, 0.00, 0.40);
+                    addVox(torso, 0.52, 0.16, 0.18, 0xdad4c8, -0.10, -0.20, 0.40);
+                } else {
+                    // Viber #14: Olive chest pack + white cube
+                    addVox(torso, 0.48, 0.42, 0.18, 0x5c5343, 0, -0.02, 0.38);
+                    addVox(torso, 0.20, 0.20, 0.22, 0xe6e1d6, 0.24, -0.14, 0.42);
+                }
+                addVox(leftArmPivot, 0.30, 0.56, 0.30, bodyHex, 0, -0.22, 0);
+                addVox(leftArmPivot, 0.32, 0.18, 0.32, 0xe6e1d6, 0, -0.54, 0);
+                addVox(rightArmPivot, 0.30, 0.56, 0.30, bodyHex, 0, -0.22, 0);
+                addVox(rightArmPivot, 0.32, 0.18, 0.32, 0xe6e1d6, 0, -0.54, 0);
+            } else if (modelId === 'viber12') {
+                // VIBER #12 ($DANGOTE): Royal lavender, purple cross antenna, full-face dark knight visor + horizontal slit bar, 3 white rib plates
+                addVox(headGroup, 0.20, 0.38, 0.20, 0x18181b, 0, 0.76, 0);
+                addVox(headGroup, 0.52, 0.18, 0.20, 0xb49ce4, 0, 1.00, 0, 0xb49ce4);
+                addVox(headGroup, 0.20, 0.20, 0.20, 0xb49ce4, 0, 1.16, 0, 0xb49ce4);
+                // Full-face dark visor + protruding black horizontal slit bar
+                addVox(headGroup, 1.38, 0.96, 0.16, 0x22252a, 0, -0.06, 0.54);
+                addVox(headGroup, 1.44, 0.18, 0.24, 0x111115, 0, 0.02, 0.60);
+                // 3 horizontal white rib-armor plates
+                addVox(torso, 0.88, 0.76, 0.14, 0x22252a, 0, 0, 0.36);
+                addVox(torso, 0.64, 0.16, 0.18, 0xdad4c8, -0.04, 0.20, 0.40);
+                addVox(torso, 0.64, 0.16, 0.18, 0xdad4c8, -0.04, 0.00, 0.40);
+                addVox(torso, 0.52, 0.16, 0.18, 0xdad4c8, -0.10, -0.20, 0.40);
+                addVox(leftArmPivot, 0.34, 0.64, 0.34, bodyHex, 0, -0.26, 0);
+                addVox(rightArmPivot, 0.34, 0.64, 0.34, bodyHex, 0, -0.26, 0);
+            } else if (modelId === 'viber13') {
+                // VIBER #13 ($OPENAI): Espresso Admiral, oversized cream flat cap + silver badge + black brim, black eye sockets + glowing cyan pupils
+                addVox(headGroup, 1.62, 0.46, 1.36, 0xdad4c8, 0, 0.80, 0);
+                addVox(headGroup, 0.36, 0.16, 0.20, 0xcbd5e1, 0, 0.66, 0.68);
+                addVox(headGroup, 1.56, 0.16, 0.42, 0x18181b, 0, 0.52, 0.62);
+                addVox(headGroup, 1.36, 0.22, 0.16, 0xdad4c8, 0, 0.34, 0.54);
+                addVox(headGroup, 0.54, 0.48, 0.18, 0x18181b, -0.36, -0.04, 0.54);
+                addVox(headGroup, 0.20, 0.20, 0.22, 0x67e8f9, -0.38, -0.06, 0.58, 0x67e8f9);
+                addVox(headGroup, 0.54, 0.48, 0.18, 0x18181b, 0.36, -0.04, 0.54);
+                addVox(headGroup, 0.20, 0.20, 0.22, 0x67e8f9, 0.34, -0.06, 0.58, 0x67e8f9);
+                addVox(torso, 0.20, 0.20, 0.20, 0xcbd5e1, 0, 0.04, 0.38);
+                addVox(leftArmPivot, 0.32, 0.50, 0.32, bodyHex, 0, -0.20, 0);
+                addVox(leftArmPivot, 0.38, 0.34, 0.56, 0xdad4c8, 0, -0.52, 0.12);
+                addVox(rightArmPivot, 0.32, 0.50, 0.32, bodyHex, 0, -0.20, 0);
+                addVox(rightArmPivot, 0.38, 0.34, 0.56, 0xdad4c8, 0, -0.52, 0.12);
+            } else if (modelId === 'viber15') {
+                // VIBER #15 ($ANDURIL / Raider #141): Dark stealth Ronin, 3-tiered slate helmet + glowing mint crest, glowing mint eyes + vertical black slit pupils, shoulder pods
+                addVox(headGroup, 1.72, 0.28, 1.44, 0x7d8594, 0, 0.56, 0);
+                addVox(headGroup, 1.38, 0.26, 1.18, 0x8b94a3, 0, 0.82, 0);
+                addVox(headGroup, 0.98, 0.20, 0.86, 0x9aa3b2, 0, 1.04, 0);
+                addVox(headGroup, 0.38, 0.18, 0.22, 0x98f598, 0, 0.72, 0.62, 0x98f598);
+                // Glowing mint square eyes + vertical black slit pupils
+                addVox(headGroup, 0.54, 0.62, 0.16, 0x98f598, -0.36, -0.04, 0.56, 0x98f598);
+                addVox(headGroup, 0.20, 0.46, 0.20, 0x18181b, -0.38, -0.02, 0.60);
+                addVox(headGroup, 0.54, 0.62, 0.16, 0x98f598, 0.36, -0.04, 0.56, 0x98f598);
+                addVox(headGroup, 0.20, 0.46, 0.20, 0x18181b, 0.34, -0.02, 0.60);
+                // Armored neck collar + side jetpack pods
+                addVox(torso, 1.44, 0.20, 1.04, 0x7d8594, 0, 0.36, 0);
+                addVox(torso, 0.44, 0.48, 0.58, 0x7d8594, 0.68, 0.48, -0.18);
+                addVox(torso, 0.76, 0.54, 0.16, 0x1c1e24, 0, -0.04, 0.38);
+                addVox(leftArmPivot, 0.32, 0.36, 0.32, bodyHex, 0, -0.14, 0);
+                addVox(leftArmPivot, 0.34, 0.36, 0.34, 0xe6e1d6, 0, -0.48, 0);
+                addVox(rightArmPivot, 0.32, 0.36, 0.32, bodyHex, 0, -0.14, 0);
+                addVox(rightArmPivot, 0.34, 0.36, 0.34, 0xe6e1d6, 0, -0.48, 0);
+            } else if (raiderSkin) {
+                // BESPOKE 26 "FOR RAIDERS" COLLECTION SCULPTS
+                const hs = raiderSkin.hatStyle;
+                const hh = raiderSkin.hatHex || 0xe6e1d6;
+                if (hs === 'mohawk') {
+                    // 4-stepped tall block mohawk (Raider #31, #63, X20)
+                    addVox(headGroup, 0.20, 0.46, 0.22, hh, 0, 0.78, 0.26);
+                    addVox(headGroup, 0.20, 0.72, 0.22, hh, 0, 0.92, 0.04);
+                    addVox(headGroup, 0.20, 0.88, 0.22, hh, 0, 1.00, -0.18);
+                    addVox(headGroup, 0.20, 0.64, 0.22, hh, 0, 0.88, -0.40);
+                } else if (hs === 'propeller') {
+                    // Spinning 4-blade propeller hat (Raider #48)
+                    addVox(headGroup, 1.44, 0.28, 1.16, 0x525d6e, 0, 0.68, 0);
+                    addVox(headGroup, 0.52, 0.18, 0.52, 0xe6e1d6, 0, 0.90, 0);
+                    propellerGroup = new THREE.Group();
+                    propellerGroup.position.set(0, 1.12, 0);
+                    addVox(propellerGroup, 0.16, 0.18, 0.16, 0x18181b, 0, -0.08, 0);
+                    addVox(propellerGroup, 1.18, 0.10, 0.18, 0xe6e1d6, 0, 0.04, 0);
+                    addVox(propellerGroup, 0.18, 0.10, 1.18, 0xe6e1d6, 0, 0.08, 0);
+                    headGroup.add(propellerGroup);
+                } else if (hs === 'fedora') {
+                    // Wide-brimmed Noir Fedora (Raider #142, Bureau #25, Bureau #4, X24)
+                    addVox(headGroup, 1.82, 0.14, 1.54, hh, 0, 0.64, 0);
+                    addVox(headGroup, 1.12, 0.34, 0.94, hh, 0, 0.86, 0);
+                    addVox(headGroup, 0.68, 0.14, 0.20, 0xa46347, -0.16, 0.76, 0.48);
+                } else if (hs === 'top_hat') {
+                    // Tall Top Hat with Cyan Band (Raider X19)
+                    addVox(headGroup, 1.48, 0.16, 1.20, 0x18181b, 0, 0.64, 0);
+                    addVox(headGroup, 0.88, 0.72, 0.82, 0x18181b, 0, 1.04, 0);
+                    addVox(headGroup, 0.92, 0.14, 0.86, 0x38bdf8, 0, 0.80, 0, 0x38bdf8);
+                } else if (hs === 'back_cap') {
+                    // Backwards Cap (Raider #10, #84)
+                    addVox(headGroup, 1.44, 0.34, 1.16, hh, 0, 0.72, 0);
+                    addVox(headGroup, 0.84, 0.18, 0.74, hh, 0, 0.96, 0);
+                    addVox(headGroup, 0.92, 0.14, 0.48, hh, 0, 0.68, -0.72);
+                } else if (hs === 'twin_antennas' || hs === 'twin_towers') {
+                    // Dual Vertical Antennas (Raider #32, #42)
+                    const stemHex = hs === 'twin_towers' ? 0xe6e1d6 : 0x18181b;
+                    if (hs === 'twin_towers') addVox(headGroup, 1.38, 0.18, 1.08, 0x2d5a47, 0, 0.64, 0);
+                    addVox(headGroup, 0.24, 0.56, 0.24, stemHex, -0.32, 0.92, 0);
+                    addVox(headGroup, 0.26, 0.24, 0.26, hh, -0.36, 1.26, 0, hh);
+                    addVox(headGroup, 0.24, 0.56, 0.24, stemHex, 0.32, 0.92, 0);
+                    addVox(headGroup, 0.26, 0.24, 0.26, hh, 0.36, 1.26, 0, hh);
+                } else if (hs === 'single_antenna') {
+                    addVox(headGroup, 0.20, 0.56, 0.20, 0x18181b, 0, 0.86, 0);
+                    addVox(headGroup, 0.22, 0.22, 0.22, hh, 0, 1.22, 0, hh);
+                } else if (hs === 'horns' || hs === 'horns_brow' || hs === 'horned_cap') {
+                    if (hs === 'horns_brow') addVox(headGroup, 1.38, 0.24, 0.18, 0xdad4c8, 0, 0.40, 0.54);
+                    if (hs === 'horned_cap') addVox(headGroup, 1.62, 0.42, 1.34, hh, 0, 0.72, 0);
+                    addVox(headGroup, 0.38, 0.38, 0.40, bodyHex, -0.46, 0.78, 0);
+                    addVox(headGroup, 0.26, 0.24, 0.30, bodyHex, -0.50, 1.04, 0);
+                    addVox(headGroup, 0.38, 0.38, 0.40, bodyHex, 0.46, 0.78, 0);
+                    addVox(headGroup, 0.26, 0.24, 0.30, bodyHex, 0.50, 1.04, 0);
+                } else if (hs === 'flat_mortar') {
+                    addVox(headGroup, 1.68, 0.18, 1.40, 0x18181b, 0, 0.66, 0);
+                    addVox(headGroup, 0.18, 0.18, 0.18, 0xb89772, 0.28, 0.82, 0.24);
+                } else if (hs === 'side_antenna_only') {
+                    addVox(headGroup, 0.22, 0.88, 0.22, bodyHex, -0.78, 0.48, -0.18);
+                } else if (hs === 'flat_cap') {
+                    addVox(headGroup, 1.08, 0.22, 0.90, hh, 0, 0.68, 0, 0, op);
+                    addVox(headGroup, 0.20, 0.18, 0.20, 0xe6e1d6, 0, 0.86, 0, 0, op);
+                }
+
+                // Eyes / Visor for Raider Skin
+                const es = raiderSkin.eyeStyle;
+                const eh = raiderSkin.eyeHex || 0x98f598;
+                if (es === 'equalizer') {
+                    // Bureau #31: 4 Animated Glowing Lime Frequency Bars
+                    addVox(headGroup, 1.38, 0.74, 0.16, 0x18181b, 0, -0.04, 0.54);
+                    const heights = [0.46, 0.62, 0.50, 0.34];
+                    const xs = [-0.46, -0.16, 0.16, 0.46];
+                    heights.forEach((bh, idx) => {
+                        const bar = addVox(headGroup, 0.20, bh, 0.22, eh, xs[idx], -0.06, 0.58, eh);
+                        eqBars.push({ mesh: bar, baseH: bh, phase: idx * 1.1 });
+                    });
+                } else if (es === 'tall_glasses' || es === 'tall_glasses_beak') {
+                    addVox(headGroup, 0.54, 0.64, 0.16, eh, -0.36, -0.04, 0.56, eh);
+                    addVox(headGroup, 0.28, 0.38, 0.20, 0xede8dc, -0.38, -0.06, 0.60);
+                    addVox(headGroup, 0.54, 0.64, 0.16, eh, 0.36, -0.04, 0.56, eh);
+                    addVox(headGroup, 0.28, 0.38, 0.20, 0xede8dc, 0.34, -0.06, 0.60);
+                    if (es === 'tall_glasses_beak') {
+                        addVox(headGroup, 0.92, 0.20, 0.26, 0xd16647, 0, -0.46, 0.60);
+                    }
+                } else if (es === 'inset_glow') {
+                    addVox(headGroup, 0.50, 0.48, 0.18, 0x18181b, -0.36, -0.06, 0.54);
+                    addVox(headGroup, 0.20, 0.20, 0.22, eh, -0.38, -0.08, 0.58, eh);
+                    addVox(headGroup, 0.50, 0.48, 0.18, 0x18181b, 0.36, -0.06, 0.54);
+                    addVox(headGroup, 0.20, 0.20, 0.22, eh, 0.34, -0.08, 0.58, eh);
+                } else if (es === 'orange_t_eyes') {
+                    addVox(headGroup, 0.48, 0.18, 0.20, eh, -0.38, 0.08, 0.58, eh);
+                    addVox(headGroup, 0.20, 0.38, 0.20, eh, -0.38, -0.14, 0.58, eh);
+                    addVox(headGroup, 0.48, 0.18, 0.20, eh, 0.38, 0.08, 0.58, eh);
+                    addVox(headGroup, 0.20, 0.38, 0.20, eh, 0.38, -0.14, 0.58, eh);
+                    addVox(headGroup, 0.22, 0.22, 0.22, 0x18181b, 0, -0.32, 0.58);
+                } else if (es === 'big_white_eyes') {
+                    addVox(headGroup, 0.48, 0.48, 0.18, 0xe6e1d6, -0.38, -0.04, 0.56);
+                    addVox(headGroup, 0.20, 0.20, 0.22, 0x18181b, -0.44, -0.14, 0.60);
+                    addVox(headGroup, 0.48, 0.48, 0.18, 0xe6e1d6, 0.38, -0.04, 0.56);
+                    addVox(headGroup, 0.20, 0.20, 0.22, 0x18181b, 0.32, -0.14, 0.60);
+                    addVox(headGroup, 0.22, 0.26, 0.22, 0x18181b, 0, -0.38, 0.58);
+                } else if (es === 'masked_mint' || es === 'masked_blue' || es === 'black_face_visor') {
+                    addVox(headGroup, 1.38, 0.92, 0.16, 0x18181b, 0, -0.04, 0.54);
+                    addVox(headGroup, 0.22, 0.22, 0.22, eh, -0.40, -0.14, 0.58, eh);
+                    addVox(headGroup, 0.22, 0.22, 0.22, eh, 0.40, -0.14, 0.58, eh);
+                } else if (es === 'wrapped_bands') {
+                    addVox(headGroup, 1.44, 0.30, 0.18, 0xede8dc, 0, 0.34, 0.54);
+                    addVox(headGroup, 1.44, 0.30, 0.18, 0xede8dc, 0, -0.40, 0.54);
+                    addVox(headGroup, 0.38, 0.36, 0.18, 0x18181b, -0.24, -0.02, 0.54);
+                    addVox(headGroup, 0.38, 0.36, 0.18, 0x18181b, 0.24, -0.02, 0.54);
+                } else if (es === 'red_brow_shades') {
+                    addVox(headGroup, 1.48, 0.18, 0.20, 0xc23b2b, 0, 0.08, 0.58);
+                    addVox(headGroup, 0.38, 0.36, 0.22, 0x18181b, -0.36, -0.04, 0.60);
+                    addVox(headGroup, 0.38, 0.36, 0.22, 0x18181b, 0.36, -0.04, 0.60);
+                    addVox(headGroup, 0.22, 0.22, 0.22, 0x18181b, 0, -0.34, 0.58);
+                } else if (es === 'holo_smile') {
+                    addVox(headGroup, 0.36, 0.50, 0.18, eh, -0.36, 0.04, 0.54, 0, 0.85);
+                    addVox(headGroup, 0.36, 0.50, 0.18, eh, 0.36, 0.04, 0.54, 0, 0.85);
+                    addVox(headGroup, 0.20, 0.68, 0.22, eh, 0, -0.44, 0.58, 0, 0.85);
+                    addVox(headGroup, 0.96, 0.16, 0.18, eh, 0, -0.78, 0.54, 0, 0.85);
+                }
+
+                // Back Quiver / Pack if present
+                if (raiderSkin.hasQuiver) {
+                    addVox(torso, 0.36, 0.88, 0.32, 0x5c4d3c, 0.42, 0.32, -0.42);
+                    addVox(torso, 0.18, 0.56, 0.18, 0xe6e1d6, 0.42, 0.92, -0.42);
+                }
+                addVox(torso, 0.58, 0.42, 0.16, 0x18181b, 0, 0, 0.36, 0, op);
+                addVox(leftArmPivot, 0.32, 0.56, 0.32, bodyHex, 0, -0.22, 0, 0, op);
+                addVox(leftArmPivot, 0.34, 0.20, 0.34, 0xe6e1d6, 0, -0.54, 0, 0, op);
+                addVox(rightArmPivot, 0.32, 0.56, 0.32, bodyHex, 0, -0.22, 0, 0, op);
+                addVox(rightArmPivot, 0.34, 0.20, 0.34, 0xe6e1d6, 0, -0.54, 0, 0, op);
             }
 
-            root.add(headGroup);
-
-            // 4. Articulated Left & Right Arms + 3D Voxel Weapon
-            const leftArmPivot = new THREE.Group();
-            leftArmPivot.position.set(-0.72, 1.45, 0);
-            const leftArm = createVoxelBox(0.34, 0.75, 0.34, cfg.bodyHex);
-            leftArm.position.y = -0.32;
-            leftArmPivot.add(leftArm);
-
-            const rightArmPivot = new THREE.Group();
-            rightArmPivot.position.set(0.72, 1.45, 0);
-            const rightArm = createVoxelBox(0.34, 0.75, 0.34, cfg.bodyHex);
-            rightArm.position.y = -0.32;
-            rightArmPivot.add(rightArm);
+            root.add(leftLegPivot, rightLegPivot, torso, headGroup);
 
             // Build Procedural 3D Custom Weapon attached to the front-facing hand
             const activeWeapon = chosenWeapon || (isLeftCorner ? (currentWeaponA || 'broadsword') : (currentWeaponB || 'hammer'));
-            const weaponGroup = buildVoxelWeapon(activeWeapon, cfg.accentHex);
+            const weaponGroup = buildVoxelWeapon(activeWeapon, baseCfg.accentHex);
 
             rightArmPivot.add(weaponGroup);
             root.add(leftArmPivot, rightArmPivot);
@@ -1433,6 +2201,8 @@
                 weaponGroup,
                 shieldDome,
                 auraRing,
+                propellerGroup,
+                eqBars,
                 phase: isLeftCorner ? 0 : Math.PI,
                 isKO: false,
                 victorySpin: false
@@ -1643,9 +2413,20 @@
                     f.rotation.z = 0;
                     f.rotation.y = ud.isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
                     f.position.y = Math.abs(Math.sin(t * 3.5 + ud.phase)) * 0.08;
-                    ud.headGroup.position.y = 2.15 + Math.sin(t * 3.5 + ud.phase) * 0.04;
+                    ud.headGroup.position.y = 2.08 + Math.sin(t * 3.5 + ud.phase) * 0.04;
                     ud.rightArmPivot.rotation.x = -0.35 + Math.sin(t * 4 + ud.phase) * 0.18;
                     ud.leftArmPivot.rotation.x = 0.2 - Math.sin(t * 4 + ud.phase) * 0.15;
+                }
+
+                // Animate Raider #48 Propeller Hat & Bureau #31 Equalizer Visor Bars
+                if (ud.propellerGroup) {
+                    ud.propellerGroup.rotation.y += dt * 11.0;
+                }
+                if (ud.eqBars && ud.eqBars.length > 0) {
+                    ud.eqBars.forEach(b => {
+                        const s = 0.65 + 0.55 * Math.abs(Math.sin(t * 6.5 + b.phase));
+                        b.mesh.scale.y = s;
+                    });
                 }
 
                 // Shield Dome & Overdrive Aura animations
@@ -2150,19 +2931,40 @@
             currentWeaponA = wA;
             currentWeaponB = wB;
 
-            document.getElementById('mechaNameA').innerText = cfgA.mechaTitle;
+            const skinAObj = customSkinA ? RAIDERS_COLLECTION.find(r => r.id === customSkinA) : null;
+            const skinBObj = customSkinB ? RAIDERS_COLLECTION.find(r => r.id === customSkinB) : null;
+
+            document.getElementById('mechaNameA').innerText = skinAObj ? `${cfgA.mechaTitle} (${skinAObj.name.split('—')[0].trim()})` : cfgA.mechaTitle;
             document.getElementById('weaponNameA').innerText = WEAPON_REGISTRY[wA]?.name || cfgA.weaponName;
             document.getElementById('miniSwatchA').style.background = cfgA.color;
             document.getElementById('oracleBadgeA').innerText = cfgA.type === 'crypto' ? 'BINANCE LIVE' : (cfgA.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
             document.getElementById('livePriceA').innerText = `$${cfgA.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('labelTickerA').innerText = cfgA.ticker;
 
-            document.getElementById('mechaNameB').innerText = cfgB.mechaTitle;
+            const imgA = document.getElementById('viberPortraitImgA');
+            if (imgA) imgA.src = skinAObj ? skinAObj.img : (cfgA.viberImg || 'assets/vibers/viber1.webp');
+            const archA = document.getElementById('viberArchetypeA');
+            if (archA) archA.innerText = skinAObj ? `RAIDER SKIN: ${skinAObj.name}` : (cfgA.archetype || 'Vibe Viber Fighter');
+            const loreA = document.getElementById('viberLoreQuoteA');
+            if (loreA) loreA.innerText = `"${cfgA.shortcoming || cfgA.loreQuote || ''}"`;
+
+            document.getElementById('mechaNameB').innerText = skinBObj ? `${cfgB.mechaTitle} (${skinBObj.name.split('—')[0].trim()})` : cfgB.mechaTitle;
             document.getElementById('weaponNameB').innerText = WEAPON_REGISTRY[wB]?.name || cfgB.weaponName;
             document.getElementById('miniSwatchB').style.background = cfgB.color;
             document.getElementById('oracleBadgeB').innerText = cfgB.type === 'crypto' ? 'BINANCE LIVE' : (cfgB.type === 'stock' ? 'YAHOO HYBRID' : 'SYNTH TITAN');
             document.getElementById('livePriceB').innerText = `$${cfgB.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('labelTickerB').innerText = cfgB.ticker;
+
+            const imgB = document.getElementById('viberPortraitImgB');
+            if (imgB) imgB.src = skinBObj ? skinBObj.img : (cfgB.viberImg || 'assets/vibers/viber2.webp');
+            const archB = document.getElementById('viberArchetypeB');
+            if (archB) archB.innerText = skinBObj ? `RAIDER SKIN: ${skinBObj.name}` : (cfgB.archetype || 'Vibe Viber Fighter');
+            const loreB = document.getElementById('viberLoreQuoteB');
+            if (loreB) loreB.innerText = `"${cfgB.shortcoming || cfgB.loreQuote || ''}"`;
+
+            if (typeof updateViberCardMasteryUI === 'function') {
+                updateViberCardMasteryUI();
+            }
 
             spawnFightersIn3D(selectA.value, selectB.value, wA, wB);
             drawTelemetryChart();
@@ -2751,17 +3553,22 @@
             const weapNameA = WEAPON_REGISTRY[currentWeaponA]?.name || cfgA.weaponName;
             const weapNameB = WEAPON_REGISTRY[currentWeaponB]?.name || cfgB.weaponName;
             const playerWon = selectedTeam === winner;
+            const chosenKey = selectedTeam === 'B' ? selectB.value : selectA.value;
 
             let payout = 0;
+            const masteryBonusPct = typeof getRaiderPayoutBonusFraction === 'function' ? getRaiderPayoutBonusFraction(chosenKey) : 0;
             if (playerWon) {
                 winStreak++;
                 const streakBonus = Math.min(0.35, (winStreak - 1) * 0.05);
-                payout = Math.floor(currentBet * (1.95 + streakBonus));
+                payout = Math.floor(currentBet * (1.95 + streakBonus + masteryBonusPct));
                 userBalance += payout;
                 playSfx('win');
             } else {
                 winStreak = 0;
                 playSfx('crit');
+            }
+            if (typeof awardDuelProgressionXP === 'function') {
+                awardDuelProgressionXP(chosenKey, playerWon);
             }
             savePlayerState();
 
@@ -2783,11 +3590,12 @@
             const wonWeap = winner === 'A' ? weapNameA : weapNameB;
             const lostWeap = winner === 'A' ? weapNameB : weapNameA;
             const roomInvite = isMultiplayer && currentRoomOtp ? ` Room #${currentRoomOtp}` : '';
-            const gameUrl = window.location.origin + window.location.pathname;
+            const refCode = typeof getRaiderReferralCode === 'function' ? getRaiderReferralCode() : 'VIBE';
+            const gameUrl = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(refCode)}`;
 
             lastDuelShareText = playerWon
-                ? `🏆 VICTORY in Vibe Stock Duels 3D!\n🤖 My ${wonCfg.ticker} (${wonWeap}) defeated ${lostCfg.ticker} (${lostWeap}) via ${winReason}!\n💰 Won +${payout.toLocaleString()} $VCT (Streak: 🔥 ${winStreak}x)!\n⚔️ Challenge me in the Cyber-Colosseum${roomInvite}:\n${gameUrl}`
-                : `⚔️ Epic match in Vibe Stock Duels 3D!\n🤖 ${wonCfg.ticker} (${wonWeap}) defeated ${lostCfg.ticker} (${lostWeap}) via ${winReason}!\n🎮 Step into the Colosseum and test your financial reflexes:\n${gameUrl}`;
+                ? `🏆 VICTORY in Vibe Stock Duels 3D (@vibevibeeco)!\n🤖 My ${wonCfg.ticker} (${wonCfg.mechaTitle} • ${wonWeap}) defeated ${lostCfg.ticker} (${lostWeap}) via ${winReason}!\n💰 Won +${payout.toLocaleString()} $VCT (Streak: 🔥 ${winStreak}x)!\n⚔️ Claim +1,500 $VCT & challenge me${roomInvite}:\n${gameUrl}`
+                : `⚔️ Epic 3D Viber clash in Vibe Stock Duels (@vibevibeeco)!\n🤖 ${wonCfg.ticker} (${wonCfg.mechaTitle}) defeated ${lostCfg.ticker} via ${winReason}!\n🎮 Claim +1,500 $VCT & step into the Colosseum:\n${gameUrl}`;
 
             const receiptHTML = `
                 <div class="bg-[#111] text-[#00F0FF] p-4 rounded-xl font-mono-num text-left my-2.5 text-xs border-3 border-black shadow-[3px_3px_0_#000]">
@@ -3815,9 +4623,544 @@
         const walletDisplay = document.getElementById('walletAddressDisplay');
         if (walletDisplay) walletDisplay.innerText = userWallet;
 
+        /***********************************************************************
+         * 8. VIBER LORE CODEX, CHARACTER MASTERY & 26 "FOR RAIDERS" WARDROBE
+         ***********************************************************************/
+        let raiderTotalXp = parseInt(localStorage.getItem('vibe_raider_xp')) || 120;
+        let viberMasteryMap = {};
+        try {
+            viberMasteryMap = JSON.parse(localStorage.getItem('vibe_mastery_map') || '{}');
+        } catch (e) {
+            viberMasteryMap = {};
+        }
+
+        const RAIDER_RANKS = [
+            "Rookie Raider",
+            "Voxel Scout",
+            "Oracle Striker",
+            "Liquidity Knight",
+            "Chain Vanguard",
+            "Basket Architect",
+            "Cyber Shogun",
+            "HappyForge Champion",
+            "Vibe Overlord",
+            "Grand Meta Alchemist"
+        ];
+
+        function getRaiderLevelInfo() {
+            const level = Math.max(1, Math.floor(raiderTotalXp / 500) + 1);
+            const currentLevelXp = raiderTotalXp % 500;
+            const rankTitle = RAIDER_RANKS[Math.min(RAIDER_RANKS.length - 1, level - 1)];
+            const bonusPct = Math.min(25, (level - 1) * 2); // +2% payout per Raider Level
+            return { level, currentLevelXp, nextLevelXp: 500, rankTitle, bonusPct };
+        }
+
+        function getViberMasteryInfo(assetKey) {
+            const rec = viberMasteryMap[assetKey] || { xp: 0, wins: 0, matches: 0 };
+            const level = Math.max(1, Math.min(10, Math.floor(rec.xp / 200) + 1));
+            const currentXp = rec.xp % 200;
+            const bonusPct = (level - 1) * 1.5; // +1.5% payout per Viber Mastery Level
+            return { level, xp: rec.xp, currentXp, nextXp: 200, wins: rec.wins || 0, matches: rec.matches || 0, bonusPct };
+        }
+
+        function getRaiderPayoutBonusFraction(assetKey) {
+            const raider = getRaiderLevelInfo();
+            const viber = getViberMasteryInfo(assetKey);
+            return (raider.bonusPct + viber.bonusPct) / 100;
+        }
+
+        function updateViberCardMasteryUI() {
+            const rInfo = getRaiderLevelInfo();
+            const navBadge = document.getElementById('raiderLevelBadgeNav');
+            if (navBadge) navBadge.innerText = `Lv.${rInfo.level}`;
+
+            const keyA = selectA ? selectA.value : 'BTC';
+            const keyB = selectB ? selectB.value : 'ETH';
+            const mA = getViberMasteryInfo(keyA);
+            const mB = getViberMasteryInfo(keyB);
+
+            const bA = document.getElementById('viberLvlBadgeA');
+            if (bA) bA.innerText = `LV.${mA.level}`;
+            const xTA = document.getElementById('viberXpTextA');
+            if (xTA) xTA.innerText = `Lv.${mA.level} (${mA.currentXp}/${mA.nextXp} XP)`;
+            const xBA = document.getElementById('viberXpBarA');
+            if (xBA) xBA.style.width = `${Math.max(8, Math.round((mA.currentXp / mA.nextXp) * 100))}%`;
+
+            const bB = document.getElementById('viberLvlBadgeB');
+            if (bB) bB.innerText = `LV.${mB.level}`;
+            const xTB = document.getElementById('viberXpTextB');
+            if (xTB) xTB.innerText = `Lv.${mB.level} (${mB.currentXp}/${mB.nextXp} XP)`;
+            const xBB = document.getElementById('viberXpBarB');
+            if (xBB) xBB.style.width = `${Math.max(8, Math.round((mB.currentXp / mB.nextXp) * 100))}%`;
+        }
+
+        function awardDuelProgressionXP(assetKey, won) {
+            const xpGain = won ? 120 : 45;
+            raiderTotalXp += xpGain;
+            localStorage.setItem('vibe_raider_xp', raiderTotalXp);
+
+            if (!viberMasteryMap[assetKey]) {
+                viberMasteryMap[assetKey] = { xp: 0, wins: 0, matches: 0 };
+            }
+            const prevLvl = getViberMasteryInfo(assetKey).level;
+            viberMasteryMap[assetKey].xp += xpGain;
+            viberMasteryMap[assetKey].matches += 1;
+            if (won) viberMasteryMap[assetKey].wins += 1;
+            localStorage.setItem('vibe_mastery_map', JSON.stringify(viberMasteryMap));
+
+            const newLvl = getViberMasteryInfo(assetKey).level;
+            if (newLvl > prevLvl) {
+                spawnArenaFloatText('CENTER', `🌟 ${ASSETS[assetKey]?.ticker || assetKey} MASTERY UP! LV.${newLvl}!`, '#CCFF00');
+            }
+
+            // Track daily quest progress
+            incrementQuestMetric('duels', 1);
+            updateViberCardMasteryUI();
+        }
+
+        function renderViberCodexModal() {
+            const rInfo = getRaiderLevelInfo();
+            const rankText = document.getElementById('codexRaiderRankText');
+            if (rankText) rankText.innerText = `Lv.${rInfo.level} • ${rInfo.rankTitle}`;
+            const xpText = document.getElementById('codexRaiderXpText');
+            if (xpText) xpText.innerText = `${rInfo.currentLevelXp} / ${rInfo.nextLevelXp} XP`;
+            const xpBar = document.getElementById('codexRaiderXpBar');
+            if (xpBar) xpBar.style.width = `${Math.max(5, Math.round((rInfo.currentLevelXp / rInfo.nextLevelXp) * 100))}%`;
+            const bonusBadge = document.getElementById('codexRaiderBonusBadge');
+            if (bonusBadge) bonusBadge.innerText = `⚡ +${rInfo.bonusPct}% $VCT Payout Boost Active`;
+
+            // 1. Render 15 Main Fighter Lore Cards
+            const loreGrid = document.getElementById('codexLoreGrid');
+            if (loreGrid) {
+                loreGrid.innerHTML = Object.keys(ASSETS).map(key => {
+                    const a = ASSETS[key];
+                    const m = getViberMasteryInfo(key);
+                    const pct = Math.max(8, Math.round((m.currentXp / m.nextXp) * 100));
+                    return `
+                        <div class="p-3.5 rounded-2xl bg-[#18181b] border-3 border-black shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2.5">
+                            <div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="relative w-14 h-14 rounded-xl bg-black border-2 border-[#CCFF00] overflow-hidden shrink-0 shadow-[2px_2px_0_#000]">
+                                        <img src="${a.viberImg}" alt="${a.name}" class="w-full h-full object-cover" />
+                                        <span class="absolute bottom-0 right-0 px-1 py-0.2 bg-[#CCFF00] text-black font-black text-[9px]">LV.${m.level}</span>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center justify-between gap-1">
+                                            <span class="text-xs font-black px-2 py-0.5 rounded bg-black text-white border border-white/15 font-mono-num">${a.ticker}</span>
+                                            <span class="text-[10px] font-extrabold text-emerald-400 font-mono-num">+${m.bonusPct.toFixed(1)}% Payout</span>
+                                        </div>
+                                        <div class="font-black text-sm text-white truncate mt-0.5">${a.mechaTitle}</div>
+                                        <div class="text-[10px] font-extrabold text-[#CCFF00] truncate">${a.archetype}</div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5 text-[11px] bg-black/50 p-2.5 rounded-xl border border-white/10">
+                                    <div><span class="text-cyan-400 font-black">📖 THE JOURNEY:</span> <span class="text-neutral-200">${a.journey}</span></div>
+                                    <div><span class="text-rose-400 font-black">⚠️ FATAL SHORTCOMING:</span> <span class="text-amber-200 italic">"${a.shortcoming}"</span></div>
+                                    <div><span class="text-[#CCFF00] font-black">⚡ ARENA PASSIVE:</span> <span class="text-neutral-300">${a.passive}</span></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between text-[10px] font-bold text-neutral-400 mb-1">
+                                    <span>Mastery Lv.${m.level} • ${m.wins}W / ${m.matches}M</span>
+                                    <span class="text-[#CCFF00] font-mono-num">${m.currentXp}/${m.nextXp} XP</span>
+                                </div>
+                                <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/15 mb-2">
+                                    <div class="h-full bg-gradient-to-r from-[#CCFF00] to-emerald-400" style="width:${pct}%"></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <button onclick="window.selectFighterFromCodex('A', '${key}')" class="py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500 hover:text-black text-rose-300 border border-rose-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                        ⚔️ Deploy Corner A
+                                    </button>
+                                    <button onclick="window.selectFighterFromCodex('B', '${key}')" class="py-1.5 px-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-400 hover:text-black text-cyan-300 border border-cyan-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                        🛡️ Deploy Corner B
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 2. Render 26 Official "For Raiders" Skins
+            renderRaidersSkinGrid();
+        }
+
+        function renderRaidersSkinGrid() {
+            const skinGrid = document.getElementById('codexRaidersSkinGrid');
+            if (!skinGrid) return;
+            skinGrid.innerHTML = RAIDERS_COLLECTION.map(skin => {
+                const isEqA = customSkinA === skin.id;
+                const isEqB = customSkinB === skin.id;
+                return `
+                    <div class="p-3 rounded-2xl bg-[#18181b] border-3 ${isEqA || isEqB ? 'border-[#CCFF00]' : 'border-black'} shadow-[4px_4px_0_#000] flex flex-col justify-between gap-2">
+                        <div>
+                            <div class="relative w-full aspect-square rounded-xl bg-black border-2 border-white/15 overflow-hidden mb-2">
+                                <img src="${skin.img}" alt="${skin.name}" class="w-full h-full object-cover" loading="lazy" />
+                                ${isEqA ? `<span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-rose-500 text-white font-black text-[9px] border border-black">CORNER A</span>` : ''}
+                                ${isEqB ? `<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-cyan-400 text-black font-black text-[9px] border border-black">CORNER B</span>` : ''}
+                            </div>
+                            <div class="font-black text-xs text-white truncate">${skin.name}</div>
+                            <p class="text-[10px] text-neutral-400 font-semibold leading-snug mt-0.5">${skin.desc}</p>
+                        </div>
+                        <div class="space-y-1 pt-1">
+                            <div class="grid grid-cols-2 gap-1">
+                                <button onclick="window.equipRaiderSkin('A', '${skin.id}')" class="py-1 px-1.5 rounded-lg ${isEqA ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white'} border border-rose-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                    ${isEqA ? '✓ Corner A' : 'Equip A'}
+                                </button>
+                                <button onclick="window.equipRaiderSkin('B', '${skin.id}')" class="py-1 px-1.5 rounded-lg ${isEqB ? 'bg-cyan-400 text-black' : 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-400 hover:text-black'} border border-cyan-500/40 font-black text-[10px] uppercase transition cursor-pointer">
+                                    ${isEqB ? '✓ Corner B' : 'Equip B'}
+                                </button>
+                            </div>
+                            <a href="${skin.img}" download="${skin.id}.webp" class="block text-center py-1 rounded-lg bg-white/5 hover:bg-white/15 text-neutral-300 font-bold text-[10px] border border-white/10">
+                                ⬇ Download Raider PFP
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.selectFighterFromCodex = function(corner, assetKey) {
+            if (roundLocked) return;
+            if (corner === 'A') {
+                selectA.value = assetKey;
+                customSkinA = '';
+                localStorage.setItem('vibe_custom_skin_a', '');
+            } else {
+                selectB.value = assetKey;
+                customSkinB = '';
+                localStorage.setItem('vibe_custom_skin_b', '');
+            }
+            syncFighterSelectionUI();
+            playSfx('coin');
+            document.getElementById('viberCodexModal').classList.add('hidden');
+            spawnArenaFloatText(corner, `🧬 ${ASSETS[assetKey].mechaTitle} DEPLOYED!`, '#CCFF00');
+        };
+
+        window.equipRaiderSkin = function(corner, skinId) {
+            if (roundLocked) return;
+            if (corner === 'A') {
+                customSkinA = (customSkinA === skinId) ? '' : skinId;
+                localStorage.setItem('vibe_custom_skin_a', customSkinA);
+            } else {
+                customSkinB = (customSkinB === skinId) ? '' : skinId;
+                localStorage.setItem('vibe_custom_skin_b', customSkinB);
+            }
+            incrementQuestMetric('skinEquip', 1);
+            syncFighterSelectionUI();
+            renderRaidersSkinGrid();
+            playSfx('powerup');
+            const skinObj = RAIDERS_COLLECTION.find(r => r.id === skinId);
+            if (skinObj) {
+                spawnArenaFloatText(corner, `🎨 3D SKIN: ${skinObj.name.split('—')[0].trim()}!`, '#CCFF00');
+            }
+        };
+
+        function switchCodexTab(tab) {
+            const loreView = document.getElementById('codexTabLoreView');
+            const skinsView = document.getElementById('codexTabSkinsView');
+            const btnLore = document.getElementById('tabCodexLoreBtn');
+            const btnSkins = document.getElementById('tabCodexSkinsBtn');
+            if (tab === 'skins') {
+                if (loreView) loreView.classList.add('hidden');
+                if (skinsView) skinsView.classList.remove('hidden');
+                if (btnSkins) {
+                    btnSkins.className = "px-3.5 py-1.5 rounded-xl bg-[#CCFF00] text-black font-extrabold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer";
+                }
+                if (btnLore) {
+                    btnLore.className = "px-3.5 py-1.5 rounded-xl bg-zinc-800 text-neutral-300 font-extrabold text-xs uppercase border-2 border-black cursor-pointer";
+                }
+            } else {
+                if (loreView) loreView.classList.remove('hidden');
+                if (skinsView) skinsView.classList.add('hidden');
+                if (btnLore) {
+                    btnLore.className = "px-3.5 py-1.5 rounded-xl bg-[#CCFF00] text-black font-extrabold text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer";
+                }
+                if (btnSkins) {
+                    btnSkins.className = "px-3.5 py-1.5 rounded-xl bg-zinc-800 text-neutral-300 font-extrabold text-xs uppercase border-2 border-black cursor-pointer";
+                }
+            }
+        }
+
+        const viberCodexBtn = document.getElementById('viberCodexBtn');
+        if (viberCodexBtn) {
+            viberCodexBtn.addEventListener('click', () => {
+                renderViberCodexModal();
+                switchCodexTab('lore');
+                document.getElementById('viberCodexModal').classList.remove('hidden');
+            });
+        }
+        const closeViberCodexBtn = document.getElementById('closeViberCodexBtn');
+        if (closeViberCodexBtn) {
+            closeViberCodexBtn.addEventListener('click', () => {
+                document.getElementById('viberCodexModal').classList.add('hidden');
+            });
+        }
+        const tabCodexLoreBtn = document.getElementById('tabCodexLoreBtn');
+        if (tabCodexLoreBtn) tabCodexLoreBtn.addEventListener('click', () => switchCodexTab('lore'));
+        const tabCodexSkinsBtn = document.getElementById('tabCodexSkinsBtn');
+        if (tabCodexSkinsBtn) tabCodexSkinsBtn.addEventListener('click', () => switchCodexTab('skins'));
+
+        const openSkinA = document.getElementById('openSkinPickerABtn');
+        if (openSkinA) {
+            openSkinA.addEventListener('click', (e) => {
+                e.stopPropagation();
+                renderViberCodexModal();
+                switchCodexTab('skins');
+                document.getElementById('viberCodexModal').classList.remove('hidden');
+            });
+        }
+        const openSkinB = document.getElementById('openSkinPickerBBtn');
+        if (openSkinB) {
+            openSkinB.addEventListener('click', (e) => {
+                e.stopPropagation();
+                renderViberCodexModal();
+                switchCodexTab('skins');
+                document.getElementById('viberCodexModal').classList.remove('hidden');
+            });
+        }
+        const resetSkinA = document.getElementById('resetSkinABtn');
+        if (resetSkinA) {
+            resetSkinA.addEventListener('click', () => {
+                customSkinA = '';
+                localStorage.setItem('vibe_custom_skin_a', '');
+                syncFighterSelectionUI();
+                renderRaidersSkinGrid();
+                playSfx('coin');
+            });
+        }
+        const resetSkinB = document.getElementById('resetSkinBBtn');
+        if (resetSkinB) {
+            resetSkinB.addEventListener('click', () => {
+                customSkinB = '';
+                localStorage.setItem('vibe_custom_skin_b', '');
+                syncFighterSelectionUI();
+                renderRaidersSkinGrid();
+                playSfx('coin');
+            });
+        }
+
+        /***********************************************************************
+         * 9. RAIDER REFERRAL FLYWHEEL, VIRAL RAID SHARING & DAILY QUESTS
+         ***********************************************************************/
+        function getRaiderReferralCode() {
+            let code = localStorage.getItem('vibe_my_ref_code');
+            if (!code) {
+                const cleanNick = (playerNickname || 'RAIDER').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6) || 'VIBER';
+                const suffix = (userWallet || '0x7777').slice(-4).toUpperCase();
+                code = `${cleanNick}-${suffix}`;
+                localStorage.setItem('vibe_my_ref_code', code);
+            }
+            return code;
+        }
+
+        function getReferralUrl() {
+            const base = window.location.origin + window.location.pathname;
+            return `${base}?ref=${encodeURIComponent(getRaiderReferralCode())}`;
+        }
+
+        let questState = {};
+        try {
+            questState = JSON.parse(localStorage.getItem('vibe_daily_quests') || '{}');
+        } catch (e) {
+            questState = {};
+        }
+
+        const DAILY_QUESTS = [
+            { id: 'q_duel_1', title: '⚔️ Enter the Cyber-Colosseum (Complete 1 Duel)', metric: 'duels', target: 1, rewardVct: 500, rewardXp: 100 },
+            { id: 'q_skin_1', title: '🎨 Customize Your 3D Viber (Equip any "For Raiders" Skin)', metric: 'skinEquip', target: 1, rewardVct: 400, rewardXp: 80 },
+            { id: 'q_share_1', title: '📢 Viral Raider Broadcast (Share Invite on X, WhatsApp or TG)', metric: 'shares', target: 1, rewardVct: 750, rewardXp: 150 },
+            { id: 'q_duel_3', title: '🔥 Arena Veteran (Complete 3 Stock Duels)', metric: 'duels', target: 3, rewardVct: 1200, rewardXp: 250 }
+        ];
+
+        function incrementQuestMetric(metricName, amount = 1) {
+            questState[metricName] = (questState[metricName] || 0) + amount;
+            localStorage.setItem('vibe_daily_quests', JSON.stringify(questState));
+        }
+
+        function renderReferralModal() {
+            const refUrlInput = document.getElementById('myReferralLinkInput');
+            if (refUrlInput) refUrlInput.value = getReferralUrl();
+
+            const invitedCount = parseInt(localStorage.getItem('vibe_referrals_count')) || 0;
+            const refEarnings = parseInt(localStorage.getItem('vibe_referrals_vct')) || 0;
+            const cEl = document.getElementById('refCountStat');
+            if (cEl) cEl.innerText = invitedCount;
+            const vEl = document.getElementById('refEarnedStat');
+            if (vEl) vEl.innerText = `${refEarnings.toLocaleString()} $VCT`;
+
+            const questsContainer = document.getElementById('raiderQuestsList');
+            if (questsContainer) {
+                const claimedMap = questState.claimed || {};
+                questsContainer.innerHTML = DAILY_QUESTS.map(q => {
+                    const progress = Math.min(q.target, questState[q.metric] || 0);
+                    const isReady = progress >= q.target;
+                    const isClaimed = !!claimedMap[q.id];
+                    return `
+                        <div class="p-3 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <div class="font-extrabold text-xs text-white">${q.title}</div>
+                                <div class="text-[11px] font-bold text-neutral-400 mt-0.5">
+                                    Progress: <span class="text-[#CCFF00] font-mono-num">${progress}/${q.target}</span> • Reward: <span class="text-emerald-400 font-mono-num">+${q.rewardVct} $VCT</span> & <span class="text-amber-300 font-mono-num">+${q.rewardXp} XP</span>
+                                </div>
+                            </div>
+                            ${isClaimed ? `
+                                <span class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black text-[10px] uppercase">✓ Claimed</span>
+                            ` : isReady ? `
+                                <button onclick="window.claimRaiderQuest('${q.id}')" class="px-3.5 py-1.5 rounded-xl bg-[#CCFF00] hover:bg-lime-300 text-black font-black text-xs uppercase border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer animate-pulse">
+                                    🎁 Claim +${q.rewardVct} $VCT
+                                </button>
+                            ` : `
+                                <span class="px-3 py-1.5 rounded-xl bg-white/5 text-neutral-400 border border-white/10 font-bold text-[10px] uppercase">${progress}/${q.target}</span>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        window.claimRaiderQuest = function(questId) {
+            const q = DAILY_QUESTS.find(item => item.id === questId);
+            if (!q) return;
+            if (!questState.claimed) questState.claimed = {};
+            if (questState.claimed[questId]) return;
+
+            questState.claimed[questId] = true;
+            localStorage.setItem('vibe_daily_quests', JSON.stringify(questState));
+
+            userBalance += q.rewardVct;
+            raiderTotalXp += q.rewardXp;
+            localStorage.setItem('vibe_raider_xp', raiderTotalXp);
+            savePlayerState();
+            updateViberCardMasteryUI();
+            renderReferralModal();
+            playSfx('win');
+            spawnArenaFloatText('CENTER', `🎁 +${q.rewardVct} $VCT & +${q.rewardXp} XP!`, '#CCFF00');
+        };
+
+        function redeemReferralCode(rawCode, isAutoUrl = false) {
+            const statusEl = document.getElementById('redeemCodeStatus');
+            const cleaned = (rawCode || '').trim().toUpperCase();
+            if (!cleaned || cleaned.length < 3) {
+                if (statusEl) {
+                    statusEl.innerText = "⚠️ Please enter a valid Raider Referral Code.";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-rose-400";
+                    statusEl.classList.remove('hidden');
+                }
+                return;
+            }
+            if (cleaned === getRaiderReferralCode().toUpperCase()) {
+                if (statusEl && !isAutoUrl) {
+                    statusEl.innerText = "⚠️ You cannot redeem your own Raider code! Share it with a friend.";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-amber-400";
+                    statusEl.classList.remove('hidden');
+                }
+                return;
+            }
+            if (localStorage.getItem('vibe_referral_redeemed')) {
+                if (statusEl && !isAutoUrl) {
+                    statusEl.innerText = "✅ Referral welcome drop already claimed on this Raider account!";
+                    statusEl.className = "text-[11px] font-bold mt-1.5 text-emerald-400";
+                    statusEl.classList.remove('hidden');
+                }
+                return;
+            }
+
+            localStorage.setItem('vibe_referral_redeemed', cleaned);
+            userBalance += 1500;
+            raiderTotalXp += 100;
+            localStorage.setItem('vibe_raider_xp', raiderTotalXp);
+            savePlayerState();
+            updateViberCardMasteryUI();
+            playSfx('win');
+
+            if (statusEl) {
+                statusEl.innerText = `🎉 Code ${cleaned} Redeemed! +1,500 $VCT & +100 Raider XP credited!`;
+                statusEl.className = "text-[11px] font-bold mt-1.5 text-[#CCFF00]";
+                statusEl.classList.remove('hidden');
+            }
+            spawnArenaFloatText('CENTER', `🚀 REFERRAL DROP: +1,500 $VCT!`, '#CCFF00');
+            renderReferralModal();
+        }
+
+        const referralBtn = document.getElementById('referralBtn');
+        if (referralBtn) {
+            referralBtn.addEventListener('click', () => {
+                renderReferralModal();
+                document.getElementById('referralModal').classList.remove('hidden');
+            });
+        }
+        const closeReferralBtn = document.getElementById('closeReferralBtn');
+        if (closeReferralBtn) {
+            closeReferralBtn.addEventListener('click', () => {
+                document.getElementById('referralModal').classList.add('hidden');
+            });
+        }
+
+        const copyRefLinkBtn = document.getElementById('copyRefLinkBtn');
+        if (copyRefLinkBtn) {
+            copyRefLinkBtn.addEventListener('click', () => {
+                const url = getReferralUrl();
+                navigator.clipboard?.writeText(url).catch(() => {});
+                incrementQuestMetric('shares', 1);
+                copyRefLinkBtn.innerText = '✅ COPIED!';
+                playSfx('coin');
+                renderReferralModal();
+                setTimeout(() => { copyRefLinkBtn.innerText = '📋 Copy Link'; }, 2000);
+            });
+        }
+
+        function triggerViralReferralShare(platform) {
+            const url = getReferralUrl();
+            const text = `⚔️ Step into Vibe Stock Duels 3D (@vibevibeeco)!\n🤖 Pick your 3D Vibe Viber, duel live AI & Crypto Stock Baskets in 60s arenas & stack $VCT!\n🎁 Use my Raider Invite for an instant +1,500 $VCT Welcome Drop:\n${url}`;
+            incrementQuestMetric('shares', 1);
+
+            // Simulate referral reward flywheel bonus on first viral broadcast
+            const currentCount = parseInt(localStorage.getItem('vibe_referrals_count')) || 0;
+            const currentEarned = parseInt(localStorage.getItem('vibe_referrals_vct')) || 0;
+            if (!localStorage.getItem('vibe_first_raid_share_bonus')) {
+                localStorage.setItem('vibe_first_raid_share_bonus', 'true');
+                localStorage.setItem('vibe_referrals_count', currentCount + 1);
+                localStorage.setItem('vibe_referrals_vct', currentEarned + 1000);
+                userBalance += 1000;
+                raiderTotalXp += 150;
+                localStorage.setItem('vibe_raider_xp', raiderTotalXp);
+                savePlayerState();
+                updateViberCardMasteryUI();
+                spawnArenaFloatText('CENTER', '🚀 RAID BROADCAST BONUS: +1,000 $VCT!', '#CCFF00');
+            }
+            renderReferralModal();
+
+            if (platform === 'x') {
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+            } else if (platform === 'wa') {
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+            } else if (platform === 'tg') {
+                window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+            }
+        }
+
+        const shareRefXBtn = document.getElementById('shareRefXBtn');
+        if (shareRefXBtn) shareRefXBtn.addEventListener('click', () => triggerViralReferralShare('x'));
+        const shareRefWaBtn = document.getElementById('shareRefWaBtn');
+        if (shareRefWaBtn) shareRefWaBtn.addEventListener('click', () => triggerViralReferralShare('wa'));
+        const shareRefTgBtn = document.getElementById('shareRefTgBtn');
+        if (shareRefTgBtn) shareRefTgBtn.addEventListener('click', () => triggerViralReferralShare('tg'));
+
+        const redeemRefCodeBtn = document.getElementById('redeemRefCodeBtn');
+        if (redeemRefCodeBtn) {
+            redeemRefCodeBtn.addEventListener('click', () => {
+                const inp = document.getElementById('redeemCodeInput');
+                redeemReferralCode(inp ? inp.value : '', false);
+            });
+        }
+
         // Initialize Everything on Load
         window.onload = function() {
             savePlayerState();
+            updateViberCardMasteryUI();
             if (playerNickname) {
                 document.getElementById('playerNameDisplay').innerText = playerNickname;
                 document.getElementById('nicknamePill').classList.remove('hidden');
@@ -3840,8 +5183,14 @@
                 }, 800);
             }
 
-            // Check for ?duel=OTP URL invite parameter
+            // Check for ?duel=OTP or ?ref=CODE URL parameters
             const params = new URLSearchParams(window.location.search);
+            const refParam = params.get('ref');
+            if (refParam) {
+                setTimeout(() => {
+                    redeemReferralCode(refParam, true);
+                }, 900);
+            }
             const duelOtp = params.get('duel');
             if (duelOtp && duelOtp.replace(/\D/g, '').length === 6) {
                 const cleanedOtp = duelOtp.replace(/\D/g, '');
