@@ -3264,37 +3264,55 @@
         });
 
         /***********************************************************************
-         * 4. FIREBASE BACKEND: LIVE CREATOR ANALYTICS & CLOUD MULTIPLAYER
+         * 4. FIREBASE BACKEND: 100% REAL TELEMETRY & CLOUD MULTIPLAYER
          ***********************************************************************/
         let db = null;
         let auth = null;
         let currentUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vibe-stock-duels-3d';
 
-        // Local + Cloud Aggregated Analytics State (100% Authentic Telemetry + Baseline Colosseum Activity)
-        const DEFAULT_ASSET_PICKS = { BTC: 18, SOL: 15, NVDA: 14, ETH: 11, TSLA: 9, OPENAI: 8, DOGE: 7, ANDURIL: 6 };
-        const DEFAULT_RECENT_MATCHES = [
-            { winner: "Meta_Alchemist", assetWin: "$NVDA", assetLose: "$BTC", payout: 1950, won: true, time: "2m ago" },
-            { winner: "Ayoola_Raider", assetWin: "$SOL", assetLose: "$ETH", payout: 1025, won: true, time: "5m ago" },
-            { winner: "HappyForge_GG", assetWin: "$ANDURIL", assetLose: "$TSLA", payout: 2100, won: true, time: "9m ago" },
-            { winner: "Robinhood_Whale", assetWin: "$BTC", assetLose: "$DOGE", payout: 975, won: true, time: "14m ago" }
-        ];
-        const DEFAULT_COMMUNITY_RAIDERS = [
-            { nickname: "Meta_Alchemist", level: 5, archetype: "Apex Cyber Alchemist", balance: 14850, streak: 6, winRate: 84, duels: 58, profit: 9850, favoriteAsset: "$BTC", weapon: "Titan Greatsword", portrait: "assets/vibers/viber1.webp" },
-            { nickname: "HappyForge_Lead", level: 4, archetype: "Forge Master General", balance: 11400, streak: 4, winRate: 78, duels: 46, profit: 6400, favoriteAsset: "$NVDA", weapon: "Void Scythe", portrait: "assets/vibers/viber3.webp" },
-            { nickname: "Vibe_Whale_0x", level: 4, archetype: "Deep Sea Testnet Whale", balance: 9650, streak: 3, winRate: 74, duels: 38, profit: 4650, favoriteAsset: "$SOL", weapon: "Laser Claws", portrait: "assets/vibers/viber2.webp" },
-            { nickname: "Satoshi_Viber", level: 3, archetype: "Genesis Block Hermit", balance: 7820, streak: 2, winRate: 68, duels: 32, profit: 2820, favoriteAsset: "$BTC", weapon: "Katana", portrait: "assets/vibers/viber1.webp" },
-            { nickname: "Solana_Monowheel", level: 3, archetype: "Sub-Second Monowheeler", balance: 6450, streak: 2, winRate: 65, duels: 28, profit: 1450, favoriteAsset: "$SOL", weapon: "Gravity Hammer", portrait: "assets/vibers/viber4.webp" }
-        ];
+        // Purge legacy mock data and seed records so all stats are 100% authentic
+        (function purgeLegacyTelemetrySeeds() {
+            try {
+                const REAL_STATS_VERSION = 'vibe_stats_real_v2';
+                if (localStorage.getItem(REAL_STATS_VERSION) !== 'true') {
+                    const keysToPurge = [
+                        'vibe_total_matches',
+                        'vibe_total_volume',
+                        'vibe_total_burned',
+                        'vibe_asset_picks',
+                        'vibe_recent_matches',
+                        'vibe_player_wins',
+                        'vibe_player_losses',
+                        'vibe_player_net_pnl',
+                        'vibe_asset_wins',
+                        'vibe_weapon_picks',
+                        'vibe_weapon_wins',
+                        'vibe_player_history'
+                    ];
+                    keysToPurge.forEach(k => localStorage.removeItem(k));
+                    localStorage.setItem(REAL_STATS_VERSION, 'true');
+                }
+            } catch (e) {}
+        })();
 
+        // 100% Authentic Telemetry State - Zero Placeholders, Zero Mock Seeds
         let telemetryState = {
-            activePlayers: 4,
-            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '42'),
-            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '38500'),
-            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '1925'),
-            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || JSON.stringify(DEFAULT_ASSET_PICKS)),
-            recentMatches: JSON.parse(localStorage.getItem('vibe_recent_matches') || JSON.stringify(DEFAULT_RECENT_MATCHES))
+            activePlayers: 1,
+            totalMatches: parseInt(localStorage.getItem('vibe_total_matches') || '0'),
+            totalVolume: parseInt(localStorage.getItem('vibe_total_volume') || '0'),
+            totalBurned: parseInt(localStorage.getItem('vibe_total_burned') || '0'),
+            assetPicks: JSON.parse(localStorage.getItem('vibe_asset_picks') || '{}'),
+            recentMatches: JSON.parse(localStorage.getItem('vibe_recent_matches') || '[]')
         };
+
+        const COMMUNITY_GLADIATORS = [
+            { nickname: "Apex Alchemist [AI]", level: 5, archetype: "Apex Cyber Alchemist", balance: 14850, streak: 6, winRate: 84, duels: 58, profit: 9850, favoriteAsset: "$BTC", weapon: "Titan Greatsword", portrait: "assets/vibers/viber1.webp", isAi: true },
+            { nickname: "Forge Master [AI]", level: 4, archetype: "Forge Master General", balance: 11400, streak: 4, winRate: 78, duels: 46, profit: 6400, favoriteAsset: "$NVDA", weapon: "Void Scythe", portrait: "assets/vibers/viber3.webp", isAi: true },
+            { nickname: "Deep Sea Raider [AI]", level: 4, archetype: "Deep Sea Testnet Whale", balance: 9650, streak: 3, winRate: 74, duels: 38, profit: 4650, favoriteAsset: "$SOL", weapon: "Laser Claws", portrait: "assets/vibers/viber2.webp", isAi: true },
+            { nickname: "Genesis Hermit [AI]", level: 3, archetype: "Genesis Block Hermit", balance: 7820, streak: 2, winRate: 68, duels: 32, profit: 2820, favoriteAsset: "$BTC", weapon: "Katana", portrait: "assets/vibers/viber1.webp", isAi: true },
+            { nickname: "Monowheeler [AI]", level: 3, archetype: "Sub-Second Monowheeler", balance: 6450, streak: 2, winRate: 65, duels: 28, profit: 1450, favoriteAsset: "$SOL", weapon: "Gravity Hammer", portrait: "assets/vibers/viber4.webp", isAi: true }
+        ];
 
         async function initFirebaseBackend() {
             try {
@@ -3407,20 +3425,15 @@
             }, (err) => console.warn("Matches listener warning:", err));
         }
 
-        // Comprehensive Player Performance, Weapon Meta & Match Ledger Telemetry
+        // Comprehensive 100% Authentic Player Performance, Weapon Meta & Match Ledger
         let playerStats = {
-            wins: parseInt(localStorage.getItem('vibe_player_wins') || '14'),
-            losses: parseInt(localStorage.getItem('vibe_player_losses') || '5'),
-            netPnL: parseInt(localStorage.getItem('vibe_player_net_pnl') || '8450'),
-            assetWins: JSON.parse(localStorage.getItem('vibe_asset_wins') || '{"BTC":8,"SOL":5,"NVDA":4,"TSLA":3,"ETH":2,"COIN":2,"PLTR":1}'),
-            weaponPicks: JSON.parse(localStorage.getItem('vibe_weapon_picks') || '{"katana":12,"laser_claws":8,"broadsword":7,"gravity_hammer":6,"scythe":5}'),
-            weaponWins: JSON.parse(localStorage.getItem('vibe_weapon_wins') || '{"katana":9,"laser_claws":5,"broadsword":4,"gravity_hammer":4,"scythe":3}'),
-            history: JSON.parse(localStorage.getItem('vibe_player_history') || JSON.stringify([
-                { time: "16:42:10", matchup: "$BTC vs $NVDA", striker: "$BTC", wager: 500, won: true, payout: 975, pnl: 475 },
-                { time: "16:38:05", matchup: "$SOL vs $TSLA", striker: "$SOL", wager: 500, won: true, payout: 975, pnl: 475 },
-                { time: "16:31:22", matchup: "$NVDA vs $ETH", striker: "$NVDA", wager: 1000, won: false, payout: 0, pnl: -1000 },
-                { time: "16:24:50", matchup: "$BTC vs $SOL", striker: "$BTC", wager: 500, won: true, payout: 1025, pnl: 525 }
-            ]))
+            wins: parseInt(localStorage.getItem('vibe_player_wins') || '0'),
+            losses: parseInt(localStorage.getItem('vibe_player_losses') || '0'),
+            netPnL: parseInt(localStorage.getItem('vibe_player_net_pnl') || '0'),
+            assetWins: JSON.parse(localStorage.getItem('vibe_asset_wins') || '{}'),
+            weaponPicks: JSON.parse(localStorage.getItem('vibe_weapon_picks') || '{}'),
+            weaponWins: JSON.parse(localStorage.getItem('vibe_weapon_wins') || '{}'),
+            history: JSON.parse(localStorage.getItem('vibe_player_history') || '[]')
         };
 
         window.switchAnalyticsTab = function(mode) {
@@ -3469,15 +3482,16 @@
             // Update player personal stats & ledger
             const chosenKey = matchData.chosenAsset || (matchData.playerWon ? matchData.winnerAsset : matchData.loserAsset);
             const wpn = (matchData.weapon || 'katana').toLowerCase();
+            const profit = matchData.playerWon ? ((matchData.payout || Math.floor(matchData.wager * 1.95)) - matchData.wager) : -matchData.wager;
+
             if (matchData.playerWon) {
                 playerStats.wins++;
-                const profit = (matchData.payout || Math.floor(matchData.wager * 1.95)) - matchData.wager;
                 playerStats.netPnL += profit;
                 playerStats.assetWins[chosenKey] = (playerStats.assetWins[chosenKey] || 0) + 1;
                 playerStats.weaponWins[wpn] = (playerStats.weaponWins[wpn] || 0) + 1;
             } else {
                 playerStats.losses++;
-                playerStats.netPnL -= matchData.wager;
+                playerStats.netPnL += profit;
             }
             playerStats.weaponPicks[wpn] = (playerStats.weaponPicks[wpn] || 0) + 1;
 
@@ -3488,9 +3502,9 @@
                 wager: matchData.wager,
                 won: matchData.playerWon,
                 payout: matchData.payout,
-                pnl: matchData.playerWon ? (matchData.payout - matchData.wager) : -matchData.wager
+                pnl: profit
             });
-            if (playerStats.history.length > 30) playerStats.history = playerStats.history.slice(0, 30);
+            if (playerStats.history.length > 50) playerStats.history = playerStats.history.slice(0, 50);
 
             localStorage.setItem('vibe_player_wins', playerStats.wins);
             localStorage.setItem('vibe_player_losses', playerStats.losses);
@@ -3508,7 +3522,10 @@
                 won: matchData.playerWon,
                 time: "Just now"
             });
-            localStorage.setItem('vibe_recent_matches', JSON.stringify(telemetryState.recentMatches.slice(0, 15)));
+            if (telemetryState.recentMatches.length > 25) {
+                telemetryState.recentMatches = telemetryState.recentMatches.slice(0, 25);
+            }
+            localStorage.setItem('vibe_recent_matches', JSON.stringify(telemetryState.recentMatches));
             renderAnalyticsDashboard();
 
             // Broadcast to Global Arena Feed
@@ -3559,11 +3576,20 @@
             // Top Picked Assets Bars
             const barsEl = document.getElementById('analyticsAssetBars');
             if (barsEl) {
-                const entries = Object.entries(telemetryState.assetPicks).sort((a, b) => b[1] - a[1]).slice(0, 7);
-                const maxPick = Math.max(1, ...entries.map(e => e[1]));
+                const entries = Object.entries(telemetryState.assetPicks)
+                    .filter(([k, v]) => v > 0 && ASSETS[k])
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 7);
+                const maxPick = entries.length > 0 ? Math.max(...entries.map(e => e[1])) : 1;
 
                 if (entries.length === 0) {
-                    barsEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No asset picks logged yet. Duel in the Colosseum to build meta rankings!</div>';
+                    barsEl.innerHTML = `
+                        <div class="py-6 px-4 text-center rounded-xl bg-black/40 border border-white/5 my-auto">
+                            <div class="text-2xl mb-1">⚔️</div>
+                            <div class="text-xs font-bold text-neutral-300">No Asset Picks Logged Yet</div>
+                            <div class="text-[11px] text-neutral-500 mt-1">Lock a duel bet in the Colosseum to begin tracking real asset popularity!</div>
+                        </div>
+                    `;
                 } else {
                     barsEl.innerHTML = entries.map(([key, count]) => {
                         const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
@@ -3572,7 +3598,7 @@
                             <div>
                                 <div class="flex justify-between font-bold mb-0.5">
                                     <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
-                                    <span class="font-mono-num text-neutral-300">${count} picks</span>
+                                    <span class="font-mono-num text-neutral-300">${count} ${count === 1 ? 'pick' : 'picks'}</span>
                                 </div>
                                 <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/10">
                                     <div class="h-full rounded-full transition-all duration-500" style="width:${pct}%; background:${cfg.color}"></div>
@@ -3586,8 +3612,14 @@
             // Live Match Feed
             const feedEl = document.getElementById('analyticsLiveFeed');
             if (feedEl) {
-                if (telemetryState.recentMatches.length === 0) {
-                    feedEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No duels recorded yet. Enter the arena to write match history!</div>';
+                if (!telemetryState.recentMatches || telemetryState.recentMatches.length === 0) {
+                    feedEl.innerHTML = `
+                        <div class="py-6 px-4 text-center rounded-xl bg-black/40 border border-white/5 my-auto">
+                            <div class="text-2xl mb-1">📜</div>
+                            <div class="text-xs font-bold text-neutral-300">No Duel Records Yet</div>
+                            <div class="text-[11px] text-neutral-500 mt-1">Your on-chain match results will appear here live once you fight your first duel!</div>
+                        </div>
+                    `;
                 } else {
                     feedEl.innerHTML = telemetryState.recentMatches.map(m => `
                         <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
@@ -3611,13 +3643,16 @@
             // TAB 2: 15-ASSET DEEP MATRIX
             const matrixBody = document.getElementById('analyticsAssetMatrixBody');
             if (matrixBody) {
-                const totalPicksAll = Math.max(1, Object.values(telemetryState.assetPicks).reduce((a, b) => a + b, 0));
+                const totalPicksAll = Object.values(telemetryState.assetPicks).reduce((a, b) => a + b, 0);
                 matrixBody.innerHTML = Object.keys(ASSETS).map(key => {
                     const a = ASSETS[key];
                     const picks = telemetryState.assetPicks[key] || 0;
-                    const share = Math.round((picks / totalPicksAll) * 100);
+                    const share = totalPicksAll > 0 ? Math.round((picks / totalPicksAll) * 100) : 0;
                     const wins = playerStats.assetWins[key] || 0;
-                    const winRate = picks > 0 ? Math.min(100, Math.round(((wins + 1) / (picks + 2)) * 100)) : 50;
+                    const winRateStr = picks > 0 ? `${Math.round((wins / picks) * 100)}%` : '—';
+                    const winRateColor = picks > 0 
+                        ? ((wins / picks) >= 0.5 ? 'text-[#00FF88]' : 'text-[#FF3366]') 
+                        : 'text-neutral-500';
 
                     let volTier = "📈 High Volatility";
                     let volColor = "text-amber-400";
@@ -3644,7 +3679,7 @@
                             <td class="p-2 sm:p-2.5 font-black text-[#00F0FF]">$${a.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td class="p-2 sm:p-2.5 text-neutral-300">${picks} <span class="text-[10px] text-neutral-500">(${share}%)</span></td>
                             <td class="p-2 sm:p-2.5">
-                                <span class="font-black ${winRate >= 50 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">${winRate}%</span>
+                                <span class="font-black ${winRateColor}">${winRateStr}</span>
                             </td>
                             <td class="p-2 sm:p-2.5 font-bold ${volColor} text-[10px]">${volTier}</td>
                             <td class="p-2 sm:p-2.5 text-neutral-300 text-[10px] max-w-[200px] truncate" title="${escapeHtml(a.passive || '')}">${escapeHtml(a.passive || 'Standard Colosseum Duelist')}</td>
@@ -3656,13 +3691,14 @@
             // TAB 3: WEAPON ARSENAL META
             const weaponsGrid = document.getElementById('analyticsWeaponsGrid');
             if (weaponsGrid) {
-                const totalWpnPicks = Math.max(1, Object.values(playerStats.weaponPicks).reduce((a, b) => a + b, 0));
+                const totalWpnPicks = Object.values(playerStats.weaponPicks).reduce((a, b) => a + b, 0);
                 weaponsGrid.innerHTML = Object.keys(WEAPON_REGISTRY).map(wKey => {
                     const w = WEAPON_REGISTRY[wKey];
                     const pCount = playerStats.weaponPicks[wKey] || 0;
                     const wCount = playerStats.weaponWins[wKey] || 0;
-                    const sharePct = Math.round((pCount / totalWpnPicks) * 100);
-                    const winPct = pCount > 0 ? Math.round((wCount / pCount) * 100) : 65;
+                    const sharePct = totalWpnPicks > 0 ? Math.round((pCount / totalWpnPicks) * 100) : 0;
+                    const winPctStr = pCount > 0 ? `${Math.round((wCount / pCount) * 100)}% (${wCount}W)` : '— (0 Duels)';
+                    const winColor = pCount > 0 ? ((wCount / pCount) >= 0.5 ? 'text-[#00FF88]' : 'text-[#FF3366]') : 'text-neutral-500';
 
                     return `
                         <div class="p-3 rounded-xl bg-black/80 border-2 border-white/15 flex flex-col justify-between gap-2">
@@ -3675,7 +3711,7 @@
                             </div>
                             <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono-num">
                                 <span class="text-neutral-400">Combat Win Rate:</span>
-                                <span class="font-black text-[#00FF88] text-xs">${winPct}% (${wCount}W)</span>
+                                <span class="font-black ${winColor} text-xs">${winPctStr}</span>
                             </div>
                         </div>
                     `;
@@ -3687,8 +3723,8 @@
             const historyCount = document.getElementById('historySummaryCount');
             if (historyBody) {
                 if (historyCount) historyCount.innerText = `${playerStats.history.length} Recorded Duels`;
-                if (playerStats.history.length === 0) {
-                    historyBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-neutral-400 font-bold">No personal duels logged yet. Enter the Colosseum to start logging!</td></tr>`;
+                if (!playerStats.history || playerStats.history.length === 0) {
+                    historyBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-neutral-400 font-bold"><div class="text-2xl mb-1">📜</div><div>No personal duels logged yet.</div><div class="text-xs text-neutral-500 font-normal mt-1">Fight matches in the arena to record your real-time performance and P&L history!</div></td></tr>`;
                 } else {
                     historyBody.innerHTML = playerStats.history.map(h => {
                         const isWin = h.won;
@@ -3789,8 +3825,8 @@
 
             const rInfo = typeof getRaiderLevelInfo === 'function' ? getRaiderLevelInfo() : { level: 1, rankTitle: 'Rookie Raider' };
             const totalDuels = playerStats.wins + playerStats.losses;
-            const pWinRate = totalDuels > 0 ? Math.round((playerStats.wins / totalDuels) * 100) : 65;
-            const favAsset = Object.entries(playerStats.assetWins).sort((a,b) => b[1] - a[1])[0]?.[0] || 'BTC';
+            const pWinRate = totalDuels > 0 ? Math.round((playerStats.wins / totalDuels) * 100) : 0;
+            const favAsset = Object.entries(playerStats.assetWins).sort((a,b) => b[1] - a[1])[0]?.[0] || '';
 
             const localPlayer = {
                 nickname: playerNickname || "You",
@@ -3799,15 +3835,15 @@
                 balance: userBalance,
                 streak: winStreak,
                 winRate: pWinRate,
-                duels: Math.max(1, totalDuels),
+                duels: totalDuels,
                 profit: playerStats.netPnL,
-                favoriteAsset: `$${favAsset}`,
+                favoriteAsset: favAsset ? `$${favAsset}` : '—',
                 weapon: WEAPON_REGISTRY[currentWeaponA]?.name || 'Titan Katana',
                 portrait: 'assets/vibers/viber1.webp',
                 isLocal: true
             };
 
-            const merged = [localPlayer, ...cachedCloudPlayers, ...DEFAULT_COMMUNITY_RAIDERS];
+            const merged = [localPlayer, ...cachedCloudPlayers, ...COMMUNITY_GLADIATORS];
             const uniqueMap = new Map();
             merged.forEach(p => {
                 if (!p.nickname) return;
