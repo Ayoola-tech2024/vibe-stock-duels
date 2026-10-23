@@ -402,6 +402,9 @@
                     <span class="px-1.5 sm:px-2 py-0.5 rounded bg-[#111] text-[#00F0FF] font-extrabold text-[9px] sm:text-xs uppercase tracking-wider shrink-0">
                         CORNER A
                     </span>
+                    <span id="cornerStrikerBadgeA" class="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-emerald-400 text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-sm truncate animate-pulse">
+                        ⭐ YOUR STRIKER
+                    </span>
                     <span id="oracleBadgeA" class="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded bg-neutral-200 text-neutral-800 truncate">
                         LIVE
                     </span>
@@ -549,19 +552,29 @@
                         </div>
                     </div>
 
-                    <!-- 3D Floating Nameplate A -->
+                    <!-- 3D Floating Nameplate A (High-Visibility Striker HUD) -->
                     <div id="label3dA" class="fighter-3d-label">
-                        <div class="px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg bg-[#111]/90 border-2 border-[#00F0FF] text-white text-[9px] sm:text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1">
-                            <span id="labelTickerA" class="text-[#00F0FF]">$BTC</span>
-                            <span id="labelDeltaA" class="font-mono-num text-[9px] sm:text-[10px] text-emerald-400">+0.00%</span>
+                        <div id="labelCardA" class="px-2 py-1 rounded-lg bg-[#111] border-2 border-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.6)] text-white text-[9px] sm:text-xs font-black whitespace-nowrap flex flex-col items-center gap-0.5 scale-105 transition-all">
+                            <div id="strikerTagA" class="px-1.5 py-0.2 rounded-full bg-gradient-to-r from-[#FFD700] to-[#00FF88] text-black font-black text-[8px] sm:text-[9px] tracking-wider border border-black shadow-[0_0_12px_#FFD700] flex items-center gap-0.5 animate-pulse">
+                                <span>⭐</span> <span>YOU (STRIKER)</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span id="labelTickerA" class="text-[#00F0FF] font-black">$BTC</span>
+                                <span id="labelDeltaA" class="font-mono-num text-[9px] sm:text-[10px] text-emerald-400">+0.00%</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 3D Floating Nameplate B -->
+                    <!-- 3D Floating Nameplate B (High-Visibility Striker HUD) -->
                     <div id="label3dB" class="fighter-3d-label">
-                        <div class="px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg bg-[#111]/90 border-2 border-[#FF3366] text-white text-[9px] sm:text-xs font-extrabold whitespace-nowrap shadow-lg flex items-center gap-1">
-                            <span id="labelTickerB" class="text-[#FF3366]">$SOL</span>
-                            <span id="labelDeltaB" class="font-mono-num text-[9px] sm:text-[10px] text-emerald-400">+0.00%</span>
+                        <div id="labelCardB" class="px-1.5 py-0.5 rounded-md bg-[#111]/85 border border-[#FF3366]/50 text-white text-[9px] sm:text-[11px] font-extrabold whitespace-nowrap opacity-75 flex flex-col items-center gap-0.5 transition-all">
+                            <div id="strikerTagB" class="px-1.5 py-0.2 rounded-full bg-neutral-900 text-rose-300 font-extrabold text-[8px] tracking-wider border border-rose-500/30">
+                                RIVAL
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span id="labelTickerB" class="text-[#FF3366] font-black">$SOL</span>
+                                <span id="labelDeltaB" class="font-mono-num text-[9px] sm:text-[10px] text-emerald-400">+0.00%</span>
+                            </div>
                         </div>
                     </div>
 
@@ -632,6 +645,9 @@
                 <div class="flex items-center justify-between gap-1">
                     <span class="px-1.5 sm:px-2 py-0.5 rounded bg-[#111] text-[#FF3366] font-extrabold text-[9px] sm:text-xs uppercase tracking-wider shrink-0">
                         CORNER B
+                    </span>
+                    <span id="cornerStrikerBadgeB" class="hidden px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-rose-400 text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-sm truncate animate-pulse">
+                        ⭐ YOUR STRIKER
                     </span>
                     <span id="oracleBadgeB" class="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded bg-neutral-200 text-neutral-800 truncate">
                         LIVE
@@ -1682,6 +1698,86 @@
         }
         buildCyberColosseum();
 
+        // Dedicated 3D Striker Indicators: Ground Pedestal Halo & Overhead 3D Beacon
+        let playerGroundPedestal = null;
+        let playerOverheadBeacon = null;
+
+        function buildPlayerStrikerIndicators() {
+            // 1. Ground Pedestal (Under Fighter's feet on arena floor)
+            playerGroundPedestal = new THREE.Group();
+
+            // Outer Glowing Ring with Gold & Cyan Trim
+            const outerGeo = new THREE.RingGeometry(1.35, 1.62, 36);
+            const outerMat = new THREE.MeshBasicMaterial({
+                color: 0xFFD700,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.95
+            });
+            const outerRing = new THREE.Mesh(outerGeo, outerMat);
+            outerRing.rotation.x = -Math.PI / 2;
+            playerGroundPedestal.add(outerRing);
+
+            // Inner Rotating Reticle with 4 Corner Chevrons/Ticks
+            const reticleGroup = new THREE.Group();
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2;
+                const tickGeo = new THREE.BoxGeometry(0.12, 0.02, 0.45);
+                const tickMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF });
+                const tick = new THREE.Mesh(tickGeo, tickMat);
+                tick.position.set(Math.cos(angle) * 1.05, 0.005, Math.sin(angle) * 1.05);
+                tick.rotation.y = -angle;
+                reticleGroup.add(tick);
+            }
+            playerGroundPedestal.add(reticleGroup);
+
+            // Glowing Inner Spotlight Disc
+            const discGeo = new THREE.CircleGeometry(1.32, 32);
+            const discMat = new THREE.MeshBasicMaterial({
+                color: 0xFFD700,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.25
+            });
+            const innerDisc = new THREE.Mesh(discGeo, discMat);
+            innerDisc.rotation.x = -Math.PI / 2;
+            innerDisc.position.y = 0.002;
+            playerGroundPedestal.add(innerDisc);
+
+            playerGroundPedestal.userData = { outerRing, reticleGroup, innerDisc, outerMat, discMat };
+            scene.add(playerGroundPedestal);
+
+            // 2. Overhead Floating 3D Beacon (Hovering above the striker's head)
+            playerOverheadBeacon = new THREE.Group();
+            const beaconGeo = new THREE.OctahedronGeometry(0.36, 0);
+            const beaconMat = new THREE.MeshStandardMaterial({
+                color: 0xFFD700,
+                emissive: 0xFFD700,
+                emissiveIntensity: 0.85,
+                roughness: 0.2,
+                metalness: 0.8
+            });
+            const beaconMesh = new THREE.Mesh(beaconGeo, beaconMat);
+            beaconMesh.castShadow = true;
+
+            // Neubrutalist black cartoon edge outline on beacon
+            const edges = new THREE.EdgesGeometry(beaconGeo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 2 }));
+            beaconMesh.add(line);
+
+            // Downward pointing neon arrow cone
+            const coneGeo = new THREE.ConeGeometry(0.2, 0.38, 4);
+            const coneMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF });
+            const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+            coneMesh.rotation.x = Math.PI; // Point down
+            coneMesh.position.y = -0.38;
+            playerOverheadBeacon.add(beaconMesh, coneMesh);
+
+            playerOverheadBeacon.userData = { beaconMesh, coneMesh, beaconMat, coneMat };
+            scene.add(playerOverheadBeacon);
+        }
+        buildPlayerStrikerIndicators();
+
         // Helper: Add Thick Black Cartoon/Voxel Outline to any Box Mesh
         function createVoxelBox(w, h, d, hexColor, emissiveHex = 0x000000, opacity = 1.0) {
             const geo = new THREE.BoxGeometry(w, h, d);
@@ -2551,17 +2647,17 @@
         function update3DNameplates() {
             if (!fighterMeshA || !fighterMeshB) return;
             const pairs = [
-                { mesh: fighterMeshA, el: document.getElementById('label3dA') },
-                { mesh: fighterMeshB, el: document.getElementById('label3dB') }
+                { mesh: fighterMeshA, el: document.getElementById('label3dA'), side: 'A' },
+                { mesh: fighterMeshB, el: document.getElementById('label3dB'), side: 'B' }
             ];
             const width = mountEl.clientWidth;
             const height = mountEl.clientHeight;
 
-            pairs.forEach(({ mesh, el }) => {
+            pairs.forEach(({ mesh, el, side }) => {
                 if (!el) return;
                 const pos = new THREE.Vector3();
                 mesh.getWorldPosition(pos);
-                pos.y += 3.35; // Above antenna
+                pos.y += (side === selectedTeam ? 4.05 : 3.35); // Above antenna and striker beacon
                 pos.project(camera);
                 const x = (pos.x * 0.5 + 0.5) * width;
                 const y = (-(pos.y * 0.5) + 0.5) * height;
@@ -2934,6 +3030,35 @@
                     scene.remove(pt.mesh);
                     voxelParticles.splice(i, 1);
                 }
+            }
+
+            // 5. Update Striker Identifiers: Ground Spotlight Pedestal & Overhead 3D Beacon
+            const myFighter = selectedTeam === 'B' ? fighterMeshB : fighterMeshA;
+            if (myFighter && playerGroundPedestal && playerOverheadBeacon) {
+                playerGroundPedestal.visible = true;
+                playerOverheadBeacon.visible = true;
+
+                // Smoothly track active striker's position
+                playerGroundPedestal.position.x = THREE.MathUtils.lerp(playerGroundPedestal.position.x, myFighter.position.x, dt * 14);
+                playerGroundPedestal.position.z = THREE.MathUtils.lerp(playerGroundPedestal.position.z, myFighter.position.z, dt * 14);
+                playerGroundPedestal.position.y = 0.04;
+
+                // Rotate outer glowing ring & counter-rotate inner crosshairs
+                if (playerGroundPedestal.userData.outerRing) {
+                    playerGroundPedestal.userData.outerRing.rotation.z += dt * 2.2;
+                }
+                if (playerGroundPedestal.userData.reticleGroup) {
+                    playerGroundPedestal.userData.reticleGroup.rotation.y -= dt * 2.8;
+                }
+                const pulseScale = 1.0 + Math.sin(t * 6.0) * 0.08;
+                playerGroundPedestal.scale.set(pulseScale, pulseScale, 1.0);
+
+                // Overhead 3D Diamond Beacon hovering right above head
+                playerOverheadBeacon.position.x = myFighter.position.x;
+                playerOverheadBeacon.position.z = myFighter.position.z;
+                playerOverheadBeacon.position.y = myFighter.position.y + 3.85 + Math.sin(t * 6.5) * 0.16;
+                playerOverheadBeacon.rotation.y += dt * 3.6;
+                playerOverheadBeacon.rotation.x = Math.sin(t * 4.0) * 0.12;
             }
 
             controls.update();
@@ -3370,6 +3495,7 @@
             }
 
             spawnFightersIn3D(selectA.value, selectB.value, wA, wB);
+            updateStrikerVisualMarkers();
             drawTelemetryChart();
 
             if (selectedTeam) {
@@ -3425,6 +3551,56 @@
             selectTeam('B');
         });
 
+        function updateStrikerVisualMarkers() {
+            const isA = selectedTeam === 'A';
+            const colorHex = isA ? 0xFFD700 : 0xFF3366;
+            const accentHex = isA ? 0x00F0FF : 0xFFD700;
+
+            if (playerGroundPedestal && playerGroundPedestal.userData) {
+                if (playerGroundPedestal.userData.outerMat) playerGroundPedestal.userData.outerMat.color.setHex(colorHex);
+                if (playerGroundPedestal.userData.discMat) playerGroundPedestal.userData.discMat.color.setHex(colorHex);
+            }
+            if (playerOverheadBeacon && playerOverheadBeacon.userData) {
+                if (playerOverheadBeacon.userData.beaconMat) {
+                    playerOverheadBeacon.userData.beaconMat.color.setHex(colorHex);
+                    playerOverheadBeacon.userData.beaconMat.emissive.setHex(colorHex);
+                }
+                if (playerOverheadBeacon.userData.coneMat) {
+                    playerOverheadBeacon.userData.coneMat.color.setHex(accentHex);
+                }
+            }
+
+            const badgeA = document.getElementById('cornerStrikerBadgeA');
+            const badgeB = document.getElementById('cornerStrikerBadgeB');
+            if (badgeA) badgeA.classList.toggle('hidden', !isA);
+            if (badgeB) badgeB.classList.toggle('hidden', isA);
+
+            const tagA = document.getElementById('strikerTagA');
+            const tagB = document.getElementById('strikerTagB');
+            const cardA = document.getElementById('labelCardA');
+            const cardB = document.getElementById('labelCardB');
+
+            if (tagA && tagB && cardA && cardB) {
+                if (isA) {
+                    tagA.className = "px-1.5 py-0.2 rounded-full bg-gradient-to-r from-[#FFD700] to-[#00FF88] text-black font-black text-[8px] sm:text-[9px] tracking-wider border border-black shadow-[0_0_12px_#FFD700] flex items-center gap-0.5 animate-pulse";
+                    tagA.innerHTML = "<span>⭐</span> <span>YOU (STRIKER)</span>";
+                    cardA.className = "px-2 py-1 rounded-lg bg-[#111] border-2 border-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.6)] text-white text-[9px] sm:text-xs font-black whitespace-nowrap flex flex-col items-center gap-0.5 scale-105 transition-all";
+
+                    tagB.className = "px-1.5 py-0.2 rounded-full bg-neutral-900 text-rose-300 font-extrabold text-[8px] tracking-wider border border-rose-500/30";
+                    tagB.innerHTML = "RIVAL";
+                    cardB.className = "px-1.5 py-0.5 rounded-md bg-[#111]/85 border border-[#FF3366]/50 text-white text-[9px] sm:text-[11px] font-extrabold whitespace-nowrap opacity-75 flex flex-col items-center gap-0.5 transition-all";
+                } else {
+                    tagB.className = "px-1.5 py-0.2 rounded-full bg-gradient-to-r from-[#FF3366] via-[#FFD700] to-[#00FF88] text-black font-black text-[8px] sm:text-[9px] tracking-wider border border-black shadow-[0_0_12px_#FF3366] flex items-center gap-0.5 animate-pulse";
+                    tagB.innerHTML = "<span>⭐</span> <span>YOU (STRIKER)</span>";
+                    cardB.className = "px-2 py-1 rounded-lg bg-[#111] border-2 border-[#FF3366] shadow-[0_0_20px_rgba(255,51,102,0.6)] text-white text-[9px] sm:text-xs font-black whitespace-nowrap flex flex-col items-center gap-0.5 scale-105 transition-all";
+
+                    tagA.className = "px-1.5 py-0.2 rounded-full bg-neutral-900 text-cyan-300 font-extrabold text-[8px] tracking-wider border border-cyan-500/30";
+                    tagA.innerHTML = "RIVAL";
+                    cardA.className = "px-1.5 py-0.5 rounded-md bg-[#111]/85 border border-[#00F0FF]/50 text-white text-[9px] sm:text-[11px] font-extrabold whitespace-nowrap opacity-75 flex flex-col items-center gap-0.5 transition-all";
+                }
+            }
+        }
+
         function selectTeam(team) {
             if (roundLocked) return;
             if (isMultiplayer) {
@@ -3441,6 +3617,8 @@
                 teamBCard.classList.add('selected-b');
                 teamACard.classList.remove('selected-a');
             }
+
+            updateStrikerVisualMarkers();
 
             betInput.disabled = false;
             placeBetBtn.disabled = false;
