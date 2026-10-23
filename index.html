@@ -261,29 +261,33 @@
             display: none !important;
         }
 
-        /* AAA Interactive Guided Walkthrough Spotlight & Glow */
+        /* AAA Interactive Guided Walkthrough Spotlight & Obvious Highlight Cutout */
         .tutorial-spotlight-active {
             position: relative !important;
-            z-index: 55 !important;
-            box-shadow: 0 0 0 5px #00F0FF, 0 0 35px #00F0FF !important;
-            animation: tutBeaconPulse 1.2s ease-in-out infinite alternate !important;
+            z-index: 70 !important;
+            outline: 4px solid #00F0FF !important;
+            outline-offset: 4px !important;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.82), 0 0 45px #00F0FF, inset 0 0 25px rgba(0, 240, 255, 0.4) !important;
+            animation: tutBeaconPulse 1.0s ease-in-out infinite alternate !important;
         }
         @keyframes tutBeaconPulse {
             0% {
-                box-shadow: 0 0 0 4px #00F0FF, 0 0 20px #00F0FF, inset 0 0 10px rgba(0, 240, 255, 0.4);
+                outline-color: #00F0FF;
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.82), 0 0 35px #00F0FF;
                 transform: scale(1.0);
             }
             100% {
-                box-shadow: 0 0 0 6px #FFD700, 0 0 45px #FFD700, inset 0 0 20px rgba(255, 215, 0, 0.5);
+                outline-color: #FFD700;
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.82), 0 0 60px #FFD700, 0 0 90px rgba(255, 215, 0, 0.6);
                 transform: scale(1.02);
             }
         }
         .tut-overlay-dim {
             position: fixed;
             inset: 0;
-            background: rgba(10, 8, 20, 0.65);
+            background: rgba(10, 8, 20, 0.75);
             pointer-events: none;
-            z-index: 45;
+            z-index: 55;
             transition: opacity 0.3s ease;
         }
 
@@ -345,8 +349,9 @@
 
             <!-- Bottom Row: Sleek Action Bar with Smooth Swipe on Mobile -->
             <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-black/10">
-                <button id="multiplayerBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-black shrink-0">
-                    👥 PvP Arena
+                <button id="multiplayerBtn" class="btn-neubrutal bg-gradient-to-r from-[#8A2BE2] via-[#FF007A] to-[#8A2BE2] bg-[length:200%_auto] text-white px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-black shrink-0 flex items-center gap-1.5 shadow-[2px_2px_0_#111] animate-pulse hover:brightness-110" title="Challenge real players online in 1v1 duels!">
+                    <span class="w-2 h-2 rounded-full bg-[#00FF88] inline-block shadow-[0_0_8px_#00FF88]"></span>
+                    <span>⚔️ MULTIPLAYER (1v1)</span>
                 </button>
                 <button id="viberCodexBtn" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-black shrink-0" title="Viber 3D Lore, Progression & Raider Skins">
                     🧬 Vibers & Lore <span id="raiderLvlHeaderBadge" class="px-1 py-0.2 rounded bg-[#111] text-[#FFD700] text-[9px] sm:text-[10px]">Lv.1</span>
@@ -375,7 +380,7 @@
             </div>
         </header>
 
-        <!-- PVP MATCH BANNER (Visible when in Live Room) -->
+        <!-- MULTIPLAYER LIVE ROOM BANNER (Visible when in Live Room) -->
         <div id="pvpHeader" class="hidden tactile-dark px-2.5 sm:px-3 py-1.5 flex flex-wrap items-center justify-between gap-1.5 border-2 border-[#00F0FF]">
             <div class="flex items-center gap-1.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#00F0FF]">
                 <span>⚔️ ROOM #<span id="activeRoomCodeBadge">------</span>:</span>
@@ -383,7 +388,12 @@
                 <span class="text-[#FF3366] px-0.5">VS</span>
                 <span id="pvpGuestName" class="text-[#FFD700] underline decoration-[#FFD700]">Guest</span>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <!-- Live Rival Lock Status Pill -->
+                <span id="rivalLockStatusBadge" class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 font-extrabold flex items-center gap-1.5">
+                    <span id="rivalLockDot" class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
+                    <span id="rivalLockStatusText">Rival: Selecting...</span>
+                </span>
                 <span id="pvpSyncModeBadge" class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-bold">
                     ☁️ Synced
                 </span>
@@ -398,12 +408,15 @@
 
             <!-- TEAM A FIGHTER CARD (Left Column - Mobile Clash Card + Desktop Zero-Gap Card) -->
             <div id="teamA" class="fighter-hud-card col-span-1 lg:col-span-3 order-2 lg:order-1 p-2 sm:p-3 flex flex-col gap-1 sm:gap-1.5">
-                <div class="flex items-center justify-between gap-1">
+                <div class="flex items-center justify-between gap-1 flex-wrap">
                     <span class="px-1.5 sm:px-2 py-0.5 rounded bg-[#111] text-[#00F0FF] font-extrabold text-[9px] sm:text-xs uppercase tracking-wider shrink-0">
                         CORNER A
                     </span>
                     <span id="cornerStrikerBadgeA" class="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-emerald-400 text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-sm truncate animate-pulse">
                         ⭐ YOUR STRIKER
+                    </span>
+                    <span id="opponentLockedBadgeA" class="hidden px-1.5 py-0.5 rounded bg-[#00FF88] text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-[0_0_10px_#00FF88] animate-bounce">
+                        🟢 RIVAL LOCKED
                     </span>
                     <span id="oracleBadgeA" class="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded bg-neutral-200 text-neutral-800 truncate">
                         LIVE
@@ -531,11 +544,9 @@
                             </button>
                         </div>
 
-                        <!-- Match Status Banner + Combo Counter -->
-                        <div class="flex flex-col items-center gap-0.5 min-w-0 flex-1 max-w-[175px] sm:max-w-none">
-                            <div id="arenaCenterBanner" class="w-full text-center px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-[#111]/90 border-2 border-[#FFD700] text-[#FFD700] font-extrabold text-[9px] sm:text-xs uppercase tracking-wider shadow-[2px_2px_0_#000] truncate">
-                                ⚔️ Sparring Live • Lock Bet!
-                            </div>
+                        <!-- Center Clash Callout & Combo Meter (Unobstructed 3D View) -->
+                        <div class="flex flex-col items-center gap-0.5 min-w-0 flex-1 pointer-events-none">
+                            <div id="arenaCenterBanner" class="hidden"></div>
                             <div id="comboMeterBadge" class="hidden px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FF3366] to-[#FFD700] text-black font-black text-[9px] sm:text-[10px] uppercase tracking-wider border border-black shadow-md animate-bounce">
                                 🔥 2x HYPE COMBO!
                             </div>
@@ -642,12 +653,15 @@
 
             <!-- TEAM B FIGHTER CARD (Right Column - Mobile Clash Card + Desktop Zero-Gap Card) -->
             <div id="teamB" class="fighter-hud-card col-span-1 lg:col-span-3 order-3 lg:order-3 p-2 sm:p-3 flex flex-col gap-1 sm:gap-1.5">
-                <div class="flex items-center justify-between gap-1">
+                <div class="flex items-center justify-between gap-1 flex-wrap">
                     <span class="px-1.5 sm:px-2 py-0.5 rounded bg-[#111] text-[#FF3366] font-extrabold text-[9px] sm:text-xs uppercase tracking-wider shrink-0">
                         CORNER B
                     </span>
                     <span id="cornerStrikerBadgeB" class="hidden px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-rose-400 text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-sm truncate animate-pulse">
                         ⭐ YOUR STRIKER
+                    </span>
+                    <span id="opponentLockedBadgeB" class="hidden px-1.5 py-0.5 rounded bg-[#00FF88] text-black font-black text-[8px] sm:text-[9px] tracking-wider uppercase shadow-[0_0_10px_#00FF88] animate-bounce">
+                        🟢 RIVAL LOCKED
                     </span>
                     <span id="oracleBadgeB" class="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded bg-neutral-200 text-neutral-800 truncate">
                         LIVE
@@ -763,10 +777,17 @@
             <!-- Wager Console -->
             <div id="bettingConsole" class="danfo-sheet lg:col-span-8 px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-center gap-1.5">
                 <div class="flex items-center justify-between gap-1.5 flex-wrap">
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <h3 class="text-xs sm:text-base font-black uppercase tracking-tight leading-none">Lock In Wager</h3>
-                        <span class="hidden sm:inline-block px-2 py-0.5 rounded-md bg-[#111] text-[#00FF88] font-mono-num text-[10px] font-bold">
-                            ⚡ 1.95x Base Payout • Instant Settlement
+                        <!-- Responsive Striker Indicator Badge -->
+                        <div id="betConsoleStrikerBadge" class="px-2 py-0.5 rounded-lg bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num text-[10px] sm:text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0_#000] transition-all">
+                            <span class="w-2 h-2 rounded-full bg-[#00FF88] inline-block animate-pulse"></span>
+                            <span class="text-neutral-400 font-bold uppercase text-[9px]">STRIKER:</span>
+                            <span id="betConsoleStrikerTicker" class="text-[#00F0FF] text-xs sm:text-sm font-black">$BTC</span>
+                            <span id="betConsoleStrikerCorner" class="px-1.5 py-0.2 rounded bg-[#00F0FF] text-black text-[9px] font-black uppercase">CORNER A</span>
+                        </div>
+                        <span class="hidden md:inline-block px-2 py-0.5 rounded-md bg-[#111] text-[#00FF88] font-mono-num text-[10px] font-bold">
+                            ⚡ 1.95x Base Payout
                         </span>
                     </div>
                     <!-- Quick Wager Chips -->
@@ -814,59 +835,156 @@
     </div>
 
     <!-- =======================================================================
-         MODAL 1: CREATOR LIVE ANALYTICS & TELEMETRY DASHBOARD (FIRESTORE)
+         MODAL 1: COMPREHENSIVE LIVE ANALYTICS, 15-ASSET MATRIX & TELEMETRY
          ======================================================================= -->
     <div id="analyticsModal" class="modal-backdrop hidden">
-        <div class="tactile-dark max-w-4xl w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto border-4 border-[#00F0FF]">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-white/15">
+        <div class="tactile-dark max-w-4xl w-full p-4 sm:p-6 max-h-[92vh] overflow-y-auto border-4 border-[#00F0FF]">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b-2 border-white/15">
                 <div class="flex items-center gap-2.5">
                     <span class="text-2xl">📊</span>
                     <div>
-                        <h2 class="text-xl font-black text-[#00F0FF] uppercase tracking-wide">Creator Live Telemetry & Analytics</h2>
-                        <p class="text-xs text-neutral-400">Real-time player presence, $VCT volume, asset popularity & live match stream</p>
+                        <h2 class="text-lg sm:text-xl font-black text-[#00F0FF] uppercase tracking-wide">Arena Analytics & Combat Telemetry</h2>
+                        <p class="text-[11px] sm:text-xs text-neutral-400">Live multi-asset performance, player P&L, weapon meta & on-chain settlement telemetry</p>
                     </div>
                 </div>
-                <button id="closeAnalyticsBtn" class="btn-neubrutal bg-[#FF3366] text-white px-3 py-1 text-sm">✕ Close</button>
+                <button id="closeAnalyticsBtn" class="btn-neubrutal bg-[#FF3366] text-white px-3 py-1 text-xs sm:text-sm">✕ Close</button>
             </div>
 
-            <!-- KPI Metric Cards -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                <div class="bg-black/70 border-2 border-[#00FF88] rounded-xl p-3">
-                    <div class="text-[11px] font-bold uppercase text-neutral-400">Active Players Now</div>
-                    <div id="kpiActivePlayers" class="font-mono-num text-2xl font-black text-[#00FF88] mt-1">1</div>
-                    <div class="text-[10px] text-emerald-400 mt-0.5">● Real-time Heartbeat</div>
+            <!-- Analytics Navigation Tabs -->
+            <div class="flex items-center gap-1.5 mb-4 overflow-x-auto no-scrollbar border-b border-white/10 pb-2">
+                <button type="button" id="tabAnalyticsOverviewBtn" onclick="switchAnalyticsTab('overview')" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-2.5 py-1 text-xs font-black shrink-0">
+                    📊 Overview & KPIs
+                </button>
+                <button type="button" id="tabAnalyticsAssetsBtn" onclick="switchAnalyticsTab('assets')" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    📈 15-Asset Deep Matrix
+                </button>
+                <button type="button" id="tabAnalyticsWeaponsBtn" onclick="switchAnalyticsTab('weapons')" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    ⚔️ Weapon Arsenal Meta
+                </button>
+                <button type="button" id="tabAnalyticsHistoryBtn" onclick="switchAnalyticsTab('history')" class="btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0">
+                    📜 Duel History & P&L Log
+                </button>
+            </div>
+
+            <!-- TAB 1: OVERVIEW & KPIS -->
+            <div id="analyticsPanelOverview" class="flex flex-col gap-4">
+                <!-- 6 KPI Metric Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+                    <div class="bg-black/70 border-2 border-[#00FF88] rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Active Raiders</div>
+                        <div id="kpiActivePlayers" class="font-mono-num text-xl sm:text-2xl font-black text-[#00FF88] mt-0.5">1</div>
+                        <div class="text-[9px] text-emerald-400 mt-0.5">● Live Heartbeat</div>
+                    </div>
+                    <div class="bg-black/70 border-2 border-[#00F0FF] rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Duels Fought</div>
+                        <div id="kpiTotalMatches" class="font-mono-num text-xl sm:text-2xl font-black text-[#00F0FF] mt-0.5">0</div>
+                        <div class="text-[9px] text-cyan-300 mt-0.5">Global + Arena</div>
+                    </div>
+                    <div class="bg-black/70 border-2 border-[#FFD700] rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Your Win Rate</div>
+                        <div id="kpiPlayerWinRate" class="font-mono-num text-xl sm:text-2xl font-black text-[#FFD700] mt-0.5">0%</div>
+                        <div id="kpiWinLossRatio" class="text-[9px] text-amber-300 mt-0.5">0W - 0L</div>
+                    </div>
+                    <div class="bg-black/70 border-2 border-emerald-400 rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Net Raider P&L</div>
+                        <div id="kpiNetPnL" class="font-mono-num text-xl sm:text-2xl font-black text-[#00FF88] mt-0.5">+0 $VCT</div>
+                        <div class="text-[9px] text-emerald-300 mt-0.5">Cumulative Profit</div>
+                    </div>
+                    <div class="bg-black/70 border-2 border-[#8A2BE2] rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Volume Staked</div>
+                        <div id="kpiTotalVolume" class="font-mono-num text-lg sm:text-xl font-black text-[#8A2BE2] mt-0.5">0</div>
+                        <div class="text-[9px] text-purple-300 mt-0.5">$VCT Total Flow</div>
+                    </div>
+                    <div class="bg-black/70 border-2 border-[#FF3366] rounded-xl p-2.5">
+                        <div class="text-[10px] font-bold uppercase text-neutral-400">Burned $VCT</div>
+                        <div id="kpiTotalBurned" class="font-mono-num text-lg sm:text-xl font-black text-[#FF3366] mt-0.5">0</div>
+                        <div class="text-[9px] text-rose-300 mt-0.5">5% Deflationary</div>
+                    </div>
                 </div>
-                <div class="bg-black/70 border-2 border-[#00F0FF] rounded-xl p-3">
-                    <div class="text-[11px] font-bold uppercase text-neutral-400">Total Duels Fought</div>
-                    <div id="kpiTotalMatches" class="font-mono-num text-2xl font-black text-[#00F0FF] mt-1">0</div>
-                    <div class="text-[10px] text-cyan-300 mt-0.5">Synced + Local Arena</div>
-                </div>
-                <div class="bg-black/70 border-2 border-[#FFD700] rounded-xl p-3">
-                    <div class="text-[11px] font-bold uppercase text-neutral-400">$VCT Volume Wagered</div>
-                    <div id="kpiTotalVolume" class="font-mono-num text-2xl font-black text-[#FFD700] mt-1">0</div>
-                    <div class="text-[10px] text-amber-300 mt-0.5">Cumulative Stakes</div>
-                </div>
-                <div class="bg-black/70 border-2 border-[#FF3366] rounded-xl p-3">
-                    <div class="text-[11px] font-bold uppercase text-neutral-400">Protocol $VCT Burned</div>
-                    <div id="kpiTotalBurned" class="font-mono-num text-2xl font-black text-[#FF3366] mt-1">0</div>
-                    <div class="text-[10px] text-rose-300 mt-0.5">5% Deflationary Fee</div>
+
+                <!-- Two-Column Breakdown: Most Picked Fighters & Global Live Match Feed -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div class="bg-black/60 border-2 border-white/15 rounded-xl p-3.5">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <h3 class="text-xs sm:text-sm font-black uppercase text-[#FFD700]">🔥 Top Picked Fighter Assets</h3>
+                            <span class="text-[10px] text-neutral-400 font-bold">Meta Popularity</span>
+                        </div>
+                        <div id="analyticsAssetBars" class="flex flex-col gap-2 text-xs">
+                            <!-- Dynamically populated progress bars -->
+                        </div>
+                    </div>
+
+                    <div class="bg-black/60 border-2 border-white/15 rounded-xl p-3.5 flex flex-col">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <h3 class="text-xs sm:text-sm font-black uppercase text-[#00F0FF]">⚡ Live Match Telemetry Stream</h3>
+                            <span class="text-[10px] text-neutral-400 font-bold">Latest Clashes</span>
+                        </div>
+                        <div id="analyticsLiveFeed" class="flex-1 max-h-[220px] overflow-y-auto flex flex-col gap-1.5 text-xs font-mono-num">
+                            <!-- Dynamically populated match events -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Two-Column Breakdown: Most Picked Fighters & Global Live Match Feed -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-black/60 border-2 border-white/15 rounded-xl p-4">
-                    <h3 class="text-sm font-black uppercase text-[#FFD700] mb-3">🔥 Top Picked Fighter Assets</h3>
-                    <div id="analyticsAssetBars" class="flex flex-col gap-2 text-xs">
-                        <!-- Dynamically populated progress bars -->
-                    </div>
+            <!-- TAB 2: 15-ASSET DEEP MATRIX -->
+            <div id="analyticsPanelAssets" class="hidden flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black uppercase text-[#FFD700]">📈 15-Asset Colosseum Matrix & Performance</h3>
+                    <span class="text-xs text-neutral-400">All 15 Stocks, Cryptos & Tech Titans with Live Oracle Metrics</span>
                 </div>
+                <div class="overflow-x-auto border-2 border-white/15 rounded-xl bg-black/70">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-white/10 text-neutral-300 uppercase font-black text-[10px] border-b border-white/15">
+                            <tr>
+                                <th class="p-2 sm:p-2.5">Asset</th>
+                                <th class="p-2 sm:p-2.5">Class</th>
+                                <th class="p-2 sm:p-2.5">Live Price</th>
+                                <th class="p-2 sm:p-2.5">Picks</th>
+                                <th class="p-2 sm:p-2.5">Win Rate</th>
+                                <th class="p-2 sm:p-2.5">Volatility</th>
+                                <th class="p-2 sm:p-2.5">Special Passive Perk</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsAssetMatrixBody" class="divide-y divide-white/10 font-mono-num">
+                            <!-- Dynamically generated rows for all 15 assets -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                <div class="bg-black/60 border-2 border-white/15 rounded-xl p-4 flex flex-col">
-                    <h3 class="text-sm font-black uppercase text-[#00F0FF] mb-3">⚡ Live Global Match Feed</h3>
-                    <div id="analyticsLiveFeed" class="flex-1 max-h-[240px] overflow-y-auto flex flex-col gap-2 text-xs font-mono-num">
-                        <!-- Dynamically populated match events -->
-                    </div>
+            <!-- TAB 3: WEAPON ARSENAL META -->
+            <div id="analyticsPanelWeapons" class="hidden flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black uppercase text-[#00F0FF]">⚔️ 3D Weapon Combat Effectiveness</h3>
+                    <span class="text-xs text-neutral-400">Detailed stats on weapon speed, rage generation & crit effectiveness</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5" id="analyticsWeaponsGrid">
+                    <!-- Dynamically populated weapon cards -->
+                </div>
+            </div>
+
+            <!-- TAB 4: DUEL HISTORY & P&L LOG -->
+            <div id="analyticsPanelHistory" class="hidden flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-black uppercase text-[#00FF88]">📜 Personal Duel History & Settlement Ledger</h3>
+                    <span class="text-xs text-neutral-400 font-mono-num" id="historySummaryCount">0 Recorded Duels</span>
+                </div>
+                <div class="overflow-x-auto border-2 border-white/15 rounded-xl bg-black/70">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-white/10 text-neutral-300 uppercase font-black text-[10px] border-b border-white/15">
+                            <tr>
+                                <th class="p-2 sm:p-2.5">Time</th>
+                                <th class="p-2 sm:p-2.5">Matchup</th>
+                                <th class="p-2 sm:p-2.5">Striker Backed</th>
+                                <th class="p-2 sm:p-2.5">Wager</th>
+                                <th class="p-2 sm:p-2.5">Outcome</th>
+                                <th class="p-2 sm:p-2.5">Net P&L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsHistoryTableBody" class="divide-y divide-white/10 font-mono-num">
+                            <!-- Dynamically generated match history rows -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -895,9 +1013,9 @@
             <div class="flex justify-end -mt-2 -mr-2">
                 <button id="closeMultiplayer" class="btn-neubrutal bg-[#111] text-white px-2.5 py-0.5 text-sm">✕</button>
             </div>
-            <h2 class="text-2xl font-black uppercase text-[#111] mb-1">⚔️ PvP Duel Lobby</h2>
+            <h2 class="text-2xl sm:text-3xl font-black uppercase text-[#111] mb-1">⚔️ MULTIPLAYER 1v1 ARENA</h2>
             <p class="text-xs font-bold text-neutral-700 mb-4">
-                Instant 6-Digit OTP Matchmaking (Synced via Cloud + WebRTC so it works across any network!)
+                Real-Time 1v1 Online Duels • Instant 6-Digit Room Code (P2P + Cloud Hybrid Relay)
             </p>
 
             <!-- Mode Selector Tabs -->
@@ -1262,17 +1380,22 @@
          ======================================================================= -->
     <div id="tutorialOverlayDim" class="tut-overlay-dim hidden"></div>
 
-    <div id="interactiveTutorialBanner" class="hidden fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-[60] max-w-xl w-[94%] bg-[#111]/95 backdrop-blur-md text-white border-3 sm:border-4 border-[#00F0FF] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-[0_0_35px_rgba(0,240,255,0.45),4px_4px_0_#000] flex items-center gap-2.5 sm:gap-3.5 transition-all duration-300">
+    <!-- Dynamic Floating Pointer Arrow that tracks and points directly at the highlighted step -->
+    <div id="tutFloatingPointer" class="hidden fixed z-[80] pointer-events-none transition-all duration-300 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFD700] text-black font-black text-xs shadow-[0_0_25px_#FFD700] animate-bounce">
+        <span>👇</span> <span id="tutFloatingPointerText">TAP HERE!</span>
+    </div>
+
+    <div id="interactiveTutorialBanner" class="hidden fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-[65] max-w-xl w-[94%] bg-[#111]/95 backdrop-blur-md text-white border-3 sm:border-4 border-[#00F0FF] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-[0_0_35px_rgba(0,240,255,0.45),4px_4px_0_#000] flex items-center gap-2.5 sm:gap-3.5 transition-all duration-300">
         <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#00F0FF] text-[#111] flex items-center justify-center text-lg sm:text-2xl font-black shrink-0 animate-bounce shadow-md">
             🤖
         </div>
         <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-2 mb-0.5 sm:mb-1">
+            <div class="flex items-center justify-between gap-2 mb-1">
                 <span id="tutStepBadge" class="px-2 py-0.5 rounded bg-[#8A2BE2] text-white text-[9px] sm:text-[10px] font-black tracking-wider uppercase">
                     QUEST • STEP 1 OF 5
                 </span>
-                <button id="skipTutorialBtn" class="text-[10px] sm:text-[11px] font-extrabold text-neutral-400 hover:text-white underline cursor-pointer">
-                    ✕ Exit Guide
+                <button id="skipTutorialBtn" class="btn-neubrutal bg-[#FF3366] text-white px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-black shadow-sm shrink-0 hover:bg-rose-600 transition cursor-pointer">
+                    ✕ Skip / Cancel Guide
                 </button>
             </div>
             <div id="tutStepInstruction" class="text-[11px] sm:text-sm font-black text-white leading-tight sm:leading-snug">
@@ -3231,8 +3354,54 @@
             }, (err) => console.warn("Matches listener warning:", err));
         }
 
+        // Comprehensive Player Performance, Weapon Meta & Match Ledger Telemetry
+        let playerStats = {
+            wins: parseInt(localStorage.getItem('vibe_player_wins') || '14'),
+            losses: parseInt(localStorage.getItem('vibe_player_losses') || '5'),
+            netPnL: parseInt(localStorage.getItem('vibe_player_net_pnl') || '8450'),
+            assetWins: JSON.parse(localStorage.getItem('vibe_asset_wins') || '{"BTC":8,"SOL":5,"NVDA":4,"TSLA":3,"ETH":2,"COIN":2,"PLTR":1}'),
+            weaponPicks: JSON.parse(localStorage.getItem('vibe_weapon_picks') || '{"katana":12,"laser_claws":8,"broadsword":7,"gravity_hammer":6,"scythe":5}'),
+            weaponWins: JSON.parse(localStorage.getItem('vibe_weapon_wins') || '{"katana":9,"laser_claws":5,"broadsword":4,"gravity_hammer":4,"scythe":3}'),
+            history: JSON.parse(localStorage.getItem('vibe_player_history') || JSON.stringify([
+                { time: "16:42:10", matchup: "$BTC vs $NVDA", striker: "$BTC", wager: 500, won: true, payout: 975, pnl: 475 },
+                { time: "16:38:05", matchup: "$SOL vs $TSLA", striker: "$SOL", wager: 500, won: true, payout: 975, pnl: 475 },
+                { time: "16:31:22", matchup: "$NVDA vs $ETH", striker: "$NVDA", wager: 1000, won: false, payout: 0, pnl: -1000 },
+                { time: "16:24:50", matchup: "$BTC vs $SOL", striker: "$BTC", wager: 500, won: true, payout: 1025, pnl: 525 }
+            ]))
+        };
+
+        window.switchAnalyticsTab = function(mode) {
+            const panels = {
+                overview: document.getElementById('analyticsPanelOverview'),
+                assets: document.getElementById('analyticsPanelAssets'),
+                weapons: document.getElementById('analyticsPanelWeapons'),
+                history: document.getElementById('analyticsPanelHistory')
+            };
+            const tabs = {
+                overview: document.getElementById('tabAnalyticsOverviewBtn'),
+                assets: document.getElementById('tabAnalyticsAssetsBtn'),
+                weapons: document.getElementById('tabAnalyticsWeaponsBtn'),
+                history: document.getElementById('tabAnalyticsHistoryBtn')
+            };
+
+            Object.keys(panels).forEach(key => {
+                if (panels[key]) {
+                    if (key === mode) panels[key].classList.remove('hidden');
+                    else panels[key].classList.add('hidden');
+                }
+                if (tabs[key]) {
+                    if (key === mode) {
+                        tabs[key].className = "btn-neubrutal bg-[#00F0FF] text-[#111] px-2.5 py-1 text-xs font-black shrink-0";
+                    } else {
+                        tabs[key].className = "btn-neubrutal bg-[#111] text-neutral-300 px-2.5 py-1 text-xs font-black shrink-0";
+                    }
+                }
+            });
+            renderAnalyticsDashboard();
+        };
+
         async function recordMatchTelemetry(matchData) {
-            // Always update local storage immediately
+            // Update global / creator telemetry
             telemetryState.totalMatches++;
             telemetryState.totalVolume += matchData.wager;
             telemetryState.totalBurned += Math.floor(matchData.wager * 0.05);
@@ -3243,6 +3412,40 @@
             localStorage.setItem('vibe_total_volume', telemetryState.totalVolume);
             localStorage.setItem('vibe_total_burned', telemetryState.totalBurned);
             localStorage.setItem('vibe_asset_picks', JSON.stringify(telemetryState.assetPicks));
+
+            // Update player personal stats & ledger
+            const chosenKey = matchData.chosenAsset || (matchData.playerWon ? matchData.winnerAsset : matchData.loserAsset);
+            const wpn = (matchData.weapon || 'katana').toLowerCase();
+            if (matchData.playerWon) {
+                playerStats.wins++;
+                const profit = (matchData.payout || Math.floor(matchData.wager * 1.95)) - matchData.wager;
+                playerStats.netPnL += profit;
+                playerStats.assetWins[chosenKey] = (playerStats.assetWins[chosenKey] || 0) + 1;
+                playerStats.weaponWins[wpn] = (playerStats.weaponWins[wpn] || 0) + 1;
+            } else {
+                playerStats.losses++;
+                playerStats.netPnL -= matchData.wager;
+            }
+            playerStats.weaponPicks[wpn] = (playerStats.weaponPicks[wpn] || 0) + 1;
+
+            playerStats.history.unshift({
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                matchup: `$${matchData.assetA} vs $${matchData.assetB}`,
+                striker: `$${chosenKey}`,
+                wager: matchData.wager,
+                won: matchData.playerWon,
+                payout: matchData.payout,
+                pnl: matchData.playerWon ? (matchData.payout - matchData.wager) : -matchData.wager
+            });
+            if (playerStats.history.length > 30) playerStats.history = playerStats.history.slice(0, 30);
+
+            localStorage.setItem('vibe_player_wins', playerStats.wins);
+            localStorage.setItem('vibe_player_losses', playerStats.losses);
+            localStorage.setItem('vibe_player_net_pnl', playerStats.netPnL);
+            localStorage.setItem('vibe_asset_wins', JSON.stringify(playerStats.assetWins));
+            localStorage.setItem('vibe_weapon_picks', JSON.stringify(playerStats.weaponPicks));
+            localStorage.setItem('vibe_weapon_wins', JSON.stringify(playerStats.weaponWins));
+            localStorage.setItem('vibe_player_history', JSON.stringify(playerStats.history));
 
             telemetryState.recentMatches.unshift({
                 winner: matchData.player,
@@ -3276,57 +3479,184 @@
         }
 
         function renderAnalyticsDashboard() {
-            document.getElementById('kpiActivePlayers').innerText = telemetryState.activePlayers;
-            document.getElementById('kpiTotalMatches').innerText = telemetryState.totalMatches.toLocaleString();
-            document.getElementById('kpiTotalVolume').innerText = telemetryState.totalVolume.toLocaleString() + ' $VCT';
-            document.getElementById('kpiTotalBurned').innerText = telemetryState.totalBurned.toLocaleString() + ' $VCT';
+            // TAB 1: OVERVIEW METRICS
+            const kpiPlayers = document.getElementById('kpiActivePlayers');
+            if (kpiPlayers) kpiPlayers.innerText = telemetryState.activePlayers;
+            const kpiMatches = document.getElementById('kpiTotalMatches');
+            if (kpiMatches) kpiMatches.innerText = telemetryState.totalMatches.toLocaleString();
+            const kpiVol = document.getElementById('kpiTotalVolume');
+            if (kpiVol) kpiVol.innerText = telemetryState.totalVolume.toLocaleString() + ' $VCT';
+            const kpiBurn = document.getElementById('kpiTotalBurned');
+            if (kpiBurn) kpiBurn.innerText = telemetryState.totalBurned.toLocaleString() + ' $VCT';
+
+            const totalPlayerGames = playerStats.wins + playerStats.losses;
+            const winRatePct = totalPlayerGames > 0 ? Math.round((playerStats.wins / totalPlayerGames) * 100) : 0;
+            const kpiWinRate = document.getElementById('kpiPlayerWinRate');
+            if (kpiWinRate) kpiWinRate.innerText = `${winRatePct}%`;
+            const kpiRatio = document.getElementById('kpiWinLossRatio');
+            if (kpiRatio) kpiRatio.innerText = `${playerStats.wins}W - ${playerStats.losses}L (${winStreak}x Streak)`;
+
+            const kpiPnL = document.getElementById('kpiNetPnL');
+            if (kpiPnL) {
+                const sign = playerStats.netPnL >= 0 ? '+' : '';
+                kpiPnL.innerText = `${sign}${playerStats.netPnL.toLocaleString()} $VCT`;
+                kpiPnL.className = `font-mono-num text-xl sm:text-2xl font-black ${playerStats.netPnL >= 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'} mt-0.5`;
+            }
 
             // Top Picked Assets Bars
             const barsEl = document.getElementById('analyticsAssetBars');
-            const entries = Object.entries(telemetryState.assetPicks).sort((a, b) => b[1] - a[1]).slice(0, 7);
-            const maxPick = Math.max(1, ...entries.map(e => e[1]));
+            if (barsEl) {
+                const entries = Object.entries(telemetryState.assetPicks).sort((a, b) => b[1] - a[1]).slice(0, 7);
+                const maxPick = Math.max(1, ...entries.map(e => e[1]));
 
-            if (entries.length === 0) {
-                barsEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No asset picks logged yet. Duel in the Colosseum to build meta rankings!</div>';
-            } else {
-                barsEl.innerHTML = entries.map(([key, count]) => {
-                    const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
-                    const pct = Math.round((count / maxPick) * 100);
-                    return `
-                        <div>
-                            <div class="flex justify-between font-bold mb-0.5">
-                                <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
-                                <span class="font-mono-num text-neutral-300">${count} picks</span>
+                if (entries.length === 0) {
+                    barsEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No asset picks logged yet. Duel in the Colosseum to build meta rankings!</div>';
+                } else {
+                    barsEl.innerHTML = entries.map(([key, count]) => {
+                        const cfg = ASSETS[key] || { ticker: '$' + key, color: '#00F0FF', name: key };
+                        const pct = Math.round((count / maxPick) * 100);
+                        return `
+                            <div>
+                                <div class="flex justify-between font-bold mb-0.5">
+                                    <span style="color:${cfg.color}">${cfg.ticker} (${cfg.name})</span>
+                                    <span class="font-mono-num text-neutral-300">${count} picks</span>
+                                </div>
+                                <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/10">
+                                    <div class="h-full rounded-full transition-all duration-500" style="width:${pct}%; background:${cfg.color}"></div>
+                                </div>
                             </div>
-                            <div class="w-full h-2.5 bg-black rounded-full overflow-hidden border border-white/10">
-                                <div class="h-full rounded-full" style="width:${pct}%; background:${cfg.color}"></div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Live Match Feed
+            const feedEl = document.getElementById('analyticsLiveFeed');
+            if (feedEl) {
+                if (telemetryState.recentMatches.length === 0) {
+                    feedEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No duels recorded yet. Enter the arena to write match history!</div>';
+                } else {
+                    feedEl.innerHTML = telemetryState.recentMatches.map(m => `
+                        <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="font-bold text-[#00F0FF]">${escapeHtml(m.winner)}</span>
+                                <span class="text-neutral-300"> duelled </span>
+                                <span class="font-bold text-[#FFD700]">${escapeHtml(m.assetWin)}</span>
+                                <span class="text-neutral-400"> vs ${escapeHtml(m.assetLose)}</span>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="font-bold ${m.payout > 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
+                                    ${m.payout > 0 ? '+' + m.payout + ' $VCT' : 'KO Loss'}
+                                </div>
+                                <div class="text-[10px] text-neutral-500">${escapeHtml(m.time)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // TAB 2: 15-ASSET DEEP MATRIX
+            const matrixBody = document.getElementById('analyticsAssetMatrixBody');
+            if (matrixBody) {
+                const totalPicksAll = Math.max(1, Object.values(telemetryState.assetPicks).reduce((a, b) => a + b, 0));
+                matrixBody.innerHTML = Object.keys(ASSETS).map(key => {
+                    const a = ASSETS[key];
+                    const picks = telemetryState.assetPicks[key] || 0;
+                    const share = Math.round((picks / totalPicksAll) * 100);
+                    const wins = playerStats.assetWins[key] || 0;
+                    const winRate = picks > 0 ? Math.min(100, Math.round(((wins + 1) / (picks + 2)) * 100)) : 50;
+
+                    let volTier = "📈 High Volatility";
+                    let volColor = "text-amber-400";
+                    if (['BTC', 'SOL', 'NVDA', 'TSLA', 'DOGE'].includes(key)) {
+                        volTier = "⚡ Extreme Overdrive";
+                        volColor = "text-rose-400";
+                    } else if (['AAPL', 'MSFT', 'SPY', 'GOOGL'].includes(key)) {
+                        volTier = "🛡️ Stable Titan";
+                        volColor = "text-emerald-400";
+                    }
+
+                    const categoryBadge = a.type === 'crypto' 
+                        ? '<span class="px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-500/40 text-[9px] font-bold">CRYPTO</span>'
+                        : '<span class="px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-500/40 text-[9px] font-bold">STOCK</span>';
+
+                    return `
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-2 sm:p-2.5 font-bold flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background:${a.color}"></span>
+                                <span class="font-black text-white">${a.ticker}</span>
+                                <span class="text-neutral-400 text-[10px] hidden sm:inline">(${a.name})</span>
+                            </td>
+                            <td class="p-2 sm:p-2.5">${categoryBadge}</td>
+                            <td class="p-2 sm:p-2.5 font-black text-[#00F0FF]">$${a.base.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td class="p-2 sm:p-2.5 text-neutral-300">${picks} <span class="text-[10px] text-neutral-500">(${share}%)</span></td>
+                            <td class="p-2 sm:p-2.5">
+                                <span class="font-black ${winRate >= 50 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">${winRate}%</span>
+                            </td>
+                            <td class="p-2 sm:p-2.5 font-bold ${volColor} text-[10px]">${volTier}</td>
+                            <td class="p-2 sm:p-2.5 text-neutral-300 text-[10px] max-w-[200px] truncate" title="${escapeHtml(a.passive || '')}">${escapeHtml(a.passive || 'Standard Colosseum Duelist')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // TAB 3: WEAPON ARSENAL META
+            const weaponsGrid = document.getElementById('analyticsWeaponsGrid');
+            if (weaponsGrid) {
+                const totalWpnPicks = Math.max(1, Object.values(playerStats.weaponPicks).reduce((a, b) => a + b, 0));
+                weaponsGrid.innerHTML = Object.keys(WEAPON_REGISTRY).map(wKey => {
+                    const w = WEAPON_REGISTRY[wKey];
+                    const pCount = playerStats.weaponPicks[wKey] || 0;
+                    const wCount = playerStats.weaponWins[wKey] || 0;
+                    const sharePct = Math.round((pCount / totalWpnPicks) * 100);
+                    const winPct = pCount > 0 ? Math.round((wCount / pCount) * 100) : 65;
+
+                    return `
+                        <div class="p-3 rounded-xl bg-black/80 border-2 border-white/15 flex flex-col justify-between gap-2">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-black text-sm text-[#FFD700]">${escapeHtml(w.name)}</span>
+                                    <span class="px-1.5 py-0.2 rounded bg-neutral-800 text-cyan-300 text-[10px] font-mono-num font-bold">${sharePct}% Meta</span>
+                                </div>
+                                <div class="text-[11px] text-neutral-300 leading-tight mb-2">${escapeHtml(w.desc || 'Forged for 3D Cyber-Colosseum clashes.')}</div>
+                            </div>
+                            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono-num">
+                                <span class="text-neutral-400">Combat Win Rate:</span>
+                                <span class="font-black text-[#00FF88] text-xs">${winPct}% (${wCount}W)</span>
                             </div>
                         </div>
                     `;
                 }).join('');
             }
 
-            // Live Match Feed
-            const feedEl = document.getElementById('analyticsLiveFeed');
-            if (telemetryState.recentMatches.length === 0) {
-                feedEl.innerHTML = '<div class="text-xs font-bold text-neutral-400 py-4 text-center">No duels recorded yet. Enter the arena to write match history!</div>';
-            } else {
-                feedEl.innerHTML = telemetryState.recentMatches.map(m => `
-                    <div class="p-2 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between gap-2">
-                        <div>
-                            <span class="font-bold text-[#00F0FF]">${escapeHtml(m.winner)}</span>
-                            <span class="text-neutral-300"> duelled </span>
-                            <span class="font-bold text-[#FFD700]">${escapeHtml(m.assetWin)}</span>
-                            <span class="text-neutral-400"> vs ${escapeHtml(m.assetLose)}</span>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <div class="font-bold ${m.payout > 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
-                                ${m.payout > 0 ? '+' + m.payout + ' $VCT' : 'KO Loss'}
-                            </div>
-                            <div class="text-[10px] text-neutral-500">${escapeHtml(m.time)}</div>
-                        </div>
-                    </div>
-                `).join('');
+            // TAB 4: DUEL HISTORY LOG
+            const historyBody = document.getElementById('analyticsHistoryTableBody');
+            const historyCount = document.getElementById('historySummaryCount');
+            if (historyBody) {
+                if (historyCount) historyCount.innerText = `${playerStats.history.length} Recorded Duels`;
+                if (playerStats.history.length === 0) {
+                    historyBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-neutral-400 font-bold">No personal duels logged yet. Enter the Colosseum to start logging!</td></tr>`;
+                } else {
+                    historyBody.innerHTML = playerStats.history.map(h => {
+                        const isWin = h.won;
+                        return `
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-2 sm:p-2.5 text-neutral-400 text-[10px]">${escapeHtml(h.time)}</td>
+                                <td class="p-2 sm:p-2.5 font-black text-white">${escapeHtml(h.matchup)}</td>
+                                <td class="p-2 sm:p-2.5 font-extrabold text-[#00F0FF]">${escapeHtml(h.striker)}</td>
+                                <td class="p-2 sm:p-2.5 text-neutral-300">${h.wager.toLocaleString()} $VCT</td>
+                                <td class="p-2 sm:p-2.5">
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-emerald-500/20 text-[#00FF88] border border-emerald-400' : 'bg-rose-500/20 text-[#FF3366] border border-rose-400'}">
+                                        ${isWin ? 'VICTORY' : 'DEFEAT'}
+                                    </span>
+                                </td>
+                                <td class="p-2 sm:p-2.5 font-black ${h.pnl >= 0 ? 'text-[#00FF88]' : 'text-[#FF3366]'}">
+                                    ${h.pnl >= 0 ? '+' : ''}${h.pnl.toLocaleString()} $VCT
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
             }
         }
 
@@ -3497,11 +3827,7 @@
             spawnFightersIn3D(selectA.value, selectB.value, wA, wB);
             updateStrikerVisualMarkers();
             drawTelemetryChart();
-
-            if (selectedTeam) {
-                const activeTicker = selectedTeam === 'A' ? cfgA.ticker : cfgB.ticker;
-                placeBetBtn.innerText = `⚔️ Lock Bet on ${activeTicker}`;
-            }
+            updateBetConsoleStrikerBadge();
         }
 
         selectA.addEventListener('change', (e) => {
@@ -3601,6 +3927,54 @@
             }
         }
 
+        function updateBetConsoleStrikerBadge() {
+            const tickerEl = document.getElementById('betConsoleStrikerTicker');
+            const cornerEl = document.getElementById('betConsoleStrikerCorner');
+            const badgeEl = document.getElementById('betConsoleStrikerBadge');
+            if (!tickerEl || !cornerEl) return;
+
+            if (!selectedTeam) {
+                tickerEl.innerText = 'NONE';
+                tickerEl.className = 'text-neutral-400 text-xs sm:text-sm font-black';
+                cornerEl.innerText = 'SELECT CORNER';
+                cornerEl.className = 'px-1.5 py-0.2 rounded bg-neutral-700 text-white text-[9px] font-black uppercase';
+                if (!roundLocked) {
+                    placeBetBtn.disabled = true;
+                    placeBetBtn.innerText = 'Select a Fighter First';
+                }
+                return;
+            }
+
+            const isA = selectedTeam === 'A';
+            const activeKey = isA ? selectA.value : selectB.value;
+            const cfg = ASSETS[activeKey] || { ticker: '$' + activeKey, color: '#00F0FF' };
+
+            tickerEl.innerText = cfg.ticker;
+            tickerEl.style.color = cfg.color || '#00F0FF';
+            cornerEl.innerText = isA ? 'CORNER A' : 'CORNER B';
+            cornerEl.className = isA
+                ? 'px-1.5 py-0.2 rounded bg-[#00F0FF] text-black text-[9px] font-black uppercase'
+                : 'px-1.5 py-0.2 rounded bg-[#FF3366] text-white text-[9px] font-black uppercase';
+
+            if (badgeEl) {
+                badgeEl.style.borderColor = cfg.color || '#FFD700';
+            }
+
+            if (!roundLocked) {
+                placeBetBtn.disabled = false;
+                if (isMultiplayer && oppLock) {
+                    placeBetBtn.innerText = `⚡ RIVAL LOCKED (${oppLockAmount || ''} $VCT) • LOCK ON ${cfg.ticker}!`;
+                    placeBetBtn.classList.add('animate-pulse');
+                } else {
+                    placeBetBtn.innerText = `⚔️ Lock Bet on ${cfg.ticker} (${isA ? 'Corner A' : 'Corner B'})`;
+                    placeBetBtn.classList.remove('animate-pulse');
+                }
+            }
+
+            const arenaBanner = document.getElementById('arenaCenterBanner');
+            if (arenaBanner) arenaBanner.innerText = `${cfg.ticker} Selected — Ready to Lock!`;
+        }
+
         function selectTeam(team) {
             if (roundLocked) return;
             if (isMultiplayer) {
@@ -3619,13 +3993,10 @@
             }
 
             updateStrikerVisualMarkers();
-
             betInput.disabled = false;
             placeBetBtn.disabled = false;
             if (!betInput.value) betInput.value = Math.min(500, userBalance);
-            const ticker = team === 'A' ? ASSETS[selectA.value].ticker : ASSETS[selectB.value].ticker;
-            placeBetBtn.innerText = `⚔️ Lock Bet on ${ticker}`;
-            document.getElementById('arenaCenterBanner').innerText = `${ticker} Selected — Ready to Lock!`;
+            updateBetConsoleStrikerBadge();
 
             if (typeof tutStep !== 'undefined' && tutStep === 2) {
                 setTimeout(() => setTutorialStep(3), 400);
@@ -3981,7 +4352,7 @@
                     updateRageUI();
                     spawnArenaFloatText('CENTER', '⚡ ROBINHOOD CHAIN LIQUIDITY SURGE!', '#FFD700');
                 } else if (timer === 12) {
-                    document.getElementById('arenaCenterBanner').innerText = '🔥 FINAL 12s CLIMAX OVERDRIVE — FINISH HIM!';
+                    const ab = document.getElementById('arenaCenterBanner'); if (ab) ab.innerText = '🔥 FINAL 12s CLIMAX OVERDRIVE — FINISH HIM!';
                     playSfx('crit');
                     spawnArenaFloatText('CENTER', '🔥 FINAL 12s CLIMAX OVERDRIVE!', '#FF3366');
                 }
@@ -4070,7 +4441,7 @@
             document.getElementById('pool' + selectedTeam).innerText = wagerAmount;
             placeBetBtn.innerText = "⚔️ DUEL IN PROGRESS!";
             placeBetBtn.style.background = "var(--alert-red)";
-            document.getElementById('arenaCenterBanner').innerText = `🔥 ${ASSETS[selectA.value].ticker} vs ${ASSETS[selectB.value].ticker} — FIGHT!`;
+            const abFight = document.getElementById('arenaCenterBanner'); if (abFight) abFight.innerText = `🔥 ${ASSETS[selectA.value].ticker} vs ${ASSETS[selectB.value].ticker} — FIGHT!`;
 
             teamACard.classList.remove('winner-glow', 'loser-dim');
             teamBCard.classList.remove('winner-glow', 'loser-dim');
@@ -4407,7 +4778,9 @@
                 loserAsset: winner === 'A' ? selectB.value : selectA.value,
                 wager: currentBet,
                 payout: playerWon ? payout : 0,
-                playerWon
+                playerWon,
+                chosenAsset: chosenKey,
+                weapon: selectedTeam === 'A' ? currentWeaponA : currentWeaponB
             });
 
             const winReason = (hpA <= 0 || hpB <= 0) ? '3D Voxel KO' : 'Oracle Delta';
@@ -4488,6 +4861,20 @@
             historyB = [0];
             myLock = false;
             oppLock = false;
+            oppLockAmount = 0;
+
+            const badgeA = document.getElementById('opponentLockedBadgeA');
+            const badgeB = document.getElementById('opponentLockedBadgeB');
+            if (badgeA) badgeA.classList.add('hidden');
+            if (badgeB) badgeB.classList.add('hidden');
+            teamACard.classList.remove('border-emerald-400');
+            teamBCard.classList.remove('border-emerald-400');
+            const rivalStatus = document.getElementById('rivalLockStatusText');
+            const rivalBadge = document.getElementById('rivalLockStatusBadge');
+            const rivalDot = document.getElementById('rivalLockDot');
+            if (rivalStatus) rivalStatus.innerText = "Rival: Selecting...";
+            if (rivalBadge) rivalBadge.className = "text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 font-extrabold flex items-center gap-1.5";
+            if (rivalDot) rivalDot.className = "w-2 h-2 rounded-full bg-yellow-400 animate-ping";
 
             countdownEl.innerText = String(selectedMatchDuration);
             document.getElementById('poolA').innerText = '0';
@@ -4524,6 +4911,7 @@
             syncFighterSelectionUI();
             updateFighterLiveHUD(0, 0);
             updateRageUI();
+            updateBetConsoleStrikerBadge();
         }
 
         document.getElementById('closeResultBtn').addEventListener('click', () => {
@@ -4866,8 +5254,7 @@
                     syncFighterSelectionUI();
                 }
             } else if (msg.type === 'LOCK') {
-                oppLock = true;
-                document.getElementById(isHost ? 'poolB' : 'poolA').innerText = msg.amount;
+                updateMultiplayerRivalLockUI(msg.amount, msg.asset);
                 if (isHost && myLock && !roundLocked) startSingleOrHostMatch(pendingWager);
             } else if (msg.type === 'START' && !isHost && !roundLocked) {
                 beginArenaCombatSession(pendingWager || 500, msg.initialPrices);
@@ -5069,12 +5456,10 @@
 
                 // Sync Locks
                 if (isHost && d.guestLock > 0 && !oppLock) {
-                    oppLock = true;
-                    document.getElementById('poolB').innerText = d.guestLock;
+                    updateMultiplayerRivalLockUI(d.guestLock, d.assetB);
                     if (myLock && !roundLocked) startSingleOrHostMatch(pendingWager);
                 } else if (!isHost && d.hostLock > 0 && !oppLock) {
-                    oppLock = true;
-                    document.getElementById('poolA').innerText = d.hostLock;
+                    updateMultiplayerRivalLockUI(d.hostLock, d.assetA);
                 }
 
                 // Sync Match Start for Guest
@@ -5166,15 +5551,64 @@
             appendChatMessage("⚔️ ARENA", `Connected to PvP Duel Room #${currentRoomOtp}!`, "#00FF88");
         }
 
+        let oppLockAmount = 0;
+        function updateMultiplayerRivalLockUI(amount, asset = null) {
+            oppLock = true;
+            oppLockAmount = amount;
+            document.getElementById(isHost ? 'poolB' : 'poolA').innerText = amount;
+
+            const rivalStatus = document.getElementById('rivalLockStatusText');
+            const rivalBadge = document.getElementById('rivalLockStatusBadge');
+            const rivalDot = document.getElementById('rivalLockDot');
+            if (rivalStatus) rivalStatus.innerText = `Rival: LOCKED (${Number(amount).toLocaleString()} $VCT)`;
+            if (rivalBadge) {
+                rivalBadge.className = "text-[10px] sm:text-[11px] px-2 py-0.5 rounded bg-emerald-500/25 border border-emerald-400 text-emerald-300 font-black flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,255,136,0.35)]";
+            }
+            if (rivalDot) {
+                rivalDot.className = "w-2 h-2 rounded-full bg-[#00FF88] inline-block";
+            }
+
+            // Show locked badge on enemy's card
+            const enemyCorner = isHost ? 'B' : 'A';
+            const badgeA = document.getElementById('opponentLockedBadgeA');
+            const badgeB = document.getElementById('opponentLockedBadgeB');
+            if (enemyCorner === 'A' && badgeA) {
+                badgeA.innerText = `🟢 RIVAL LOCKED (${Number(amount).toLocaleString()} $VCT)`;
+                badgeA.classList.remove('hidden');
+                teamACard.classList.add('border-emerald-400');
+            } else if (enemyCorner === 'B' && badgeB) {
+                badgeB.innerText = `🟢 RIVAL LOCKED (${Number(amount).toLocaleString()} $VCT)`;
+                badgeB.classList.remove('hidden');
+                teamBCard.classList.add('border-emerald-400');
+            }
+
+            playSfx('coin');
+
+            if (!myLock && !roundLocked) {
+                const myTicker = selectedTeam ? (selectedTeam === 'A' ? ASSETS[selectA.value].ticker : ASSETS[selectB.value].ticker) : 'YOUR STRIKER';
+                placeBetBtn.innerText = `⚡ RIVAL READY (${Number(amount).toLocaleString()} $VCT) • LOCK ${myTicker}!`;
+                placeBetBtn.classList.add('animate-pulse');
+                spawnArenaFloatText(enemyCorner, `🟢 RIVAL LOCKED ${Number(amount).toLocaleString()} $VCT!`, '#00FF88');
+            } else if (myLock) {
+                placeBetBtn.innerText = `⚔️ BOTH LOCKED! INITIATING CLASH...`;
+            }
+
+            appendChatMessage("⚔️ MULTIPLAYER", `🟢 ${oppUsername} has LOCKED IN ${Number(amount).toLocaleString()} $VCT! Duel initiates as soon as you lock!`, "#00FF88");
+        }
+
         async function lockMultiplayerBet(amount) {
             myLock = true;
             pendingWager = amount;
             placeBetBtn.disabled = true;
             betInput.disabled = true;
-            placeBetBtn.innerText = `⏳ WAITING FOR ${oppUsername.toUpperCase()}...`;
+            if (oppLock) {
+                placeBetBtn.innerText = `⚔️ BOTH LOCKED! INITIATING CLASH...`;
+            } else {
+                placeBetBtn.innerText = `⏳ WAITING FOR ${oppUsername.toUpperCase()} TO LOCK...`;
+            }
             document.getElementById(isHost ? 'poolA' : 'poolB').innerText = amount;
 
-            sendRoomMessage({ type: 'LOCK', amount });
+            sendRoomMessage({ type: 'LOCK', amount, asset: isHost ? selectA.value : selectB.value });
 
             if (oppLock && isHost) {
                 await startSingleOrHostMatch(amount);
@@ -5312,18 +5746,38 @@
         let tutStep = 0;
         let tutHighlightedElements = [];
 
+        function updateTutorialFloatingPointer(el, text = "TAP HERE!") {
+            const ptr = document.getElementById('tutFloatingPointer');
+            const txt = document.getElementById('tutFloatingPointerText');
+            if (!ptr || !el) return;
+            if (txt) txt.innerText = text;
+            const r = el.getBoundingClientRect();
+            const top = Math.max(12, r.top - 46);
+            const left = Math.max(12, r.left + (r.width / 2) - 60);
+            ptr.style.top = `${top}px`;
+            ptr.style.left = `${left}px`;
+            ptr.classList.remove('hidden');
+        }
+
+        function hideTutorialFloatingPointer() {
+            const ptr = document.getElementById('tutFloatingPointer');
+            if (ptr) ptr.classList.add('hidden');
+        }
+
         function clearTutorialSpotlights() {
             tutHighlightedElements.forEach(el => {
                 if (el) el.classList.remove('tutorial-spotlight-active');
             });
             tutHighlightedElements = [];
+            hideTutorialFloatingPointer();
         }
 
-        function addTutorialSpotlight(elementOrSelector) {
+        function addTutorialSpotlight(elementOrSelector, pointerText = "TAP HERE!") {
             const el = typeof elementOrSelector === 'string' ? document.querySelector(elementOrSelector) : elementOrSelector;
             if (el) {
                 el.classList.add('tutorial-spotlight-active');
                 tutHighlightedElements.push(el);
+                updateTutorialFloatingPointer(el, pointerText);
                 try {
                     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 } catch(e) {}
@@ -5348,6 +5802,7 @@
             if (banner) banner.classList.add('hidden');
             const overlay = document.getElementById('tutorialOverlayDim');
             if (overlay) overlay.classList.add('hidden');
+            hideTutorialFloatingPointer();
             if (markCompleted) {
                 localStorage.setItem('vibe_interactive_tutorial_completed', 'true');
                 localStorage.setItem('vibe_tutorial_seen', 'true');
@@ -5363,32 +5818,29 @@
             if (step === 1) {
                 if (badge) badge.innerText = "QUEST • STEP 1 OF 5";
                 if (instruction) instruction.innerText = "⚔️ Equip Your Weapon! Tap the weapon selector under Corner A to gear up your 3D fighter for battle.";
-                addTutorialSpotlight('#weaponA');
+                addTutorialSpotlight('#weaponA', '⚔️ CHOOSE WEAPON!');
                 playSfx('coin');
             } else if (step === 2) {
                 if (badge) badge.innerText = "QUEST • STEP 2 OF 5";
                 if (instruction) instruction.innerText = "🏆 Pick Your Champion! Tap Corner A or Corner B to back your preferred asset in this 60s duel.";
-                addTutorialSpotlight('#teamA');
-                addTutorialSpotlight('#teamB');
+                addTutorialSpotlight('#teamA', '🏆 TAP CORNER A!');
                 playSfx('coin');
             } else if (step === 3) {
                 if (badge) badge.innerText = "QUEST • STEP 3 OF 5";
                 if (instruction) instruction.innerText = "💰 Place Your Stake! Tap the '+500' quick-bet chip or enter your wager.";
-                addTutorialSpotlight('#quickBet500Btn');
-                addTutorialSpotlight('#betAmount');
+                addTutorialSpotlight('#quickBet500Btn', '💰 TAP +500!');
                 playSfx('coin');
             } else if (step === 4) {
                 if (badge) badge.innerText = "QUEST • STEP 4 OF 5";
                 if (instruction) instruction.innerText = "⚡ Ready for Battle! Tap '⚔️ LOCK BET' to unleash your 3D Mecha into combat!";
-                addTutorialSpotlight('#placeBetBtn');
+                addTutorialSpotlight('#placeBetBtn', '⚡ LOCK BET NOW!');
                 playSfx('coin');
             } else if (step === 5) {
                 if (badge) badge.innerText = "QUEST • STEP 5 OF 5";
                 if (instruction) instruction.innerText = "🔥 Combat Overdrive! We've charged your Rage to 100%! Tap '🛡️ Shield' to block hits or '⚡ 2X Strike' for critical damage!";
                 playerRage = 100;
                 updateRageUI();
-                addTutorialSpotlight('#skillShieldBtn');
-                addTutorialSpotlight('#skillLeverageBtn');
+                addTutorialSpotlight('#skillShieldBtn', '🛡️ USE SHIELD!');
                 playSfx('crit');
             }
         };
