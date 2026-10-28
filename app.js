@@ -238,68 +238,90 @@ loginBtn.addEventListener('click', () => {
 closePrivy.addEventListener('click', () => privyModal.classList.add('hidden'));
 
 let isSimulated = false;
+let privyClient = null;
+let privySigner = null;
 let vctContract = null;
 const VCT_ADDRESS = "0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697";
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 const ERC20_ABI = [
     "function balanceOf(address owner) view returns (uint256)",
-    "function transfer(address to, uint amount) returns (bool)",
+    "function transfer(address to, uint256 amount) returns (bool)",
     "function decimals() view returns (uint8)"
 ];
 
-function simulatePrivyLogin(method) {
-    const btns = document.querySelectorAll('.privy-btn');
-    btns[0].innerHTML = "⏳ Authenticating securely...";
-    
-    setTimeout(() => {
-        isSimulated = true;
-        userWallet = "0x" + Math.random().toString(16).slice(2, 8) + "..." + Math.random().toString(16).slice(2, 6);
-        userBalance = 5000;
-        
-        privyModal.classList.add('hidden');
-        loginBtn.innerHTML = `🟢 ${userWallet}`;
-        loginBtn.style.background = "var(--vibe-cyan)";
-        loginBtn.style.color = "var(--charcoal-ink)";
-        
-        balancePill.innerText = `${userBalance} $VCT`;
-        balancePill.classList.remove('hidden');
-    }, 500);
+// Initialize Privy SDK Client
+function getPrivyClient() {
+    if (!privyClient && window.Privy) {
+        privyClient = new window.Privy.PrivyClient({
+            appId: localStorage.getItem('vibe_privy_app_id') || 'clxxxxxxxxxxxxxxxxx',
+            config: {
+                loginMethods: ['google', 'discord', 'email', 'wallet'],
+                embeddedWallets: {
+                    createOnLogin: 'users-without-wallets'
+                }
+            }
+        });
+    }
+    return privyClient;
 }
 
-async function initWeb3Real() {
-    if (window.ethereum == null) {
-        alert("⚠️ Please install MetaMask or use the Email/Google login!");
+// Connect Privy Provider to Ethers.js v6 for actual $VCT Token interactions
+async function loginWithPrivy() {
+    const privy = getPrivyClient();
+    if (!privy) {
+        alert("Privy SDK loading... Please try again in a moment.");
         return;
     }
 
     try {
-        const btn = document.querySelector('.privy-btn-outline');
-        btn.innerHTML = "⏳ Connecting...";
+        const user = await privy.login();
+        const activeWallet = privy.wallets.find(w => w.walletClientType === 'privy') || privy.wallets[0];
+        if (!activeWallet) throw new Error("No wallet associated with user.");
+
+        userWallet = activeWallet.address;
+        const eip1193Provider = await activeWallet.getEthereumProvider();
+        const provider = new ethers.BrowserProvider(eip1193Provider);
+        privySigner = await provider.getSigner();
         
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = await provider.getSigner();
-        userWallet = await signer.getAddress();
-        
-        vctContract = new ethers.Contract(VCT_ADDRESS, ERC20_ABI, signer);
-        
-        const balWei = await vctContract.balanceOf(userWallet);
-        userBalance = parseFloat(ethers.formatUnits(balWei, 18)).toFixed(2);
-        
+        vctContract = new ethers.Contract(VCT_ADDRESS, ERC20_ABI, privySigner);
+
+        await refreshActualVctBalance();
+
         isSimulated = false;
-        privyModal.classList.add('hidden');
-        loginBtn.innerHTML = `🟢 ${userWallet.substring(0,6)}...${userWallet.substring(userWallet.length-4)}`;
-        loginBtn.style.background = "var(--vibe-cyan)";
-        loginBtn.style.color = "var(--charcoal-ink)";
-        
-        balancePill.innerText = `${userBalance} $VCT`;
-        balancePill.classList.remove('hidden');
-        btn.innerHTML = "🦊 Connect MetaMask";
+        if (loginBtn) {
+            loginBtn.innerHTML = `🟢 ${userWallet.substring(0, 6)}...${userWallet.substring(userWallet.length - 4)}`;
+            loginBtn.style.background = "var(--vibe-cyan)";
+            loginBtn.style.color = "var(--charcoal-ink)";
+        }
+        if (privyModal) privyModal.classList.add('hidden');
     } catch (err) {
-        console.error(err);
-        alert("❌ Failed to connect wallet.");
-        document.querySelector('.privy-btn-outline').innerHTML = "🦊 Connect MetaMask";
+        console.error("Privy login error:", err);
     }
+}
+
+async function refreshActualVctBalance() {
+    if (!vctContract || !userWallet) return;
+    try {
+        const decimals = await vctContract.decimals();
+        const balWei = await vctContract.balanceOf(userWallet);
+        const formatted = ethers.formatUnits(balWei, decimals);
+        userBalance = parseFloat(formatted);
+
+        if (balancePill) {
+            balancePill.innerText = `${userBalance.toLocaleString()} $VCT`;
+            balancePill.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.warn("Error fetching $VCT token balance:", e);
+    }
+}
+
+function simulatePrivyLogin(method) {
+    loginWithPrivy();
+}
+
+async function initWeb3Real() {
+    loginWithPrivy();
 }
 
 // Team Selection Logic

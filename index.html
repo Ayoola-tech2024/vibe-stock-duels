@@ -11,7 +11,8 @@
     <!-- Three.js & OrbitControls for Full 3D Voxel Arena -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <!-- Ethers.js v6 & PeerJS -->
+    <!-- Privy JS SDK & Ethers.js v6 & PeerJS -->
+    <script src="https://unpkg.com/@privy-io/js-sdk@latest/dist/index.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 
@@ -331,12 +332,17 @@
                 <!-- Right Top Essentials: Balance, Auto-Wallet, Sound -->
                 <div class="flex items-center gap-1 sm:gap-2 shrink-0">
                     <!-- $VCT Balance Pill -->
-                    <div id="balancePill" class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num font-extrabold text-[11px] sm:text-sm shadow-[2px_2px_0_#111] whitespace-nowrap">
-                        5,000 $VCT
+                    <div id="balancePill" class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#111] text-[#FFD700] border-2 border-[#FFD700] font-mono-num font-extrabold text-[11px] sm:text-sm shadow-[2px_2px_0_#111] whitespace-nowrap" title="Actual On-Chain $VCT Token Balance">
+                        0 $VCT
                     </div>
 
-                    <!-- Auto-Generated Testnet Wallet Badge -->
-                    <div id="walletBadge" class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#111] text-[#00F0FF] border-2 border-black font-mono-num font-extrabold text-[9px] sm:text-xs shadow-[2px_2px_0_#111] flex items-center gap-1" title="Testnet Auto-Wallet">
+                    <!-- Privy Connect / Web3 Wallet Badge -->
+                    <button id="privyAuthBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs shrink-0 flex items-center gap-1" title="Connect Wallet via Privy (Google, Email, Discord, MetaMask)">
+                        🔐 <span id="privyAuthBtnText">Login with Privy</span>
+                    </button>
+
+                    <!-- Wallet Badge -->
+                    <div id="walletBadge" class="hidden px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#111] text-[#00F0FF] border-2 border-black font-mono-num font-extrabold text-[9px] sm:text-xs shadow-[2px_2px_0_#111] flex items-center gap-1" title="Connected EVM Wallet">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#00FF88] inline-block animate-pulse shrink-0"></span>
                         <span id="walletAddressDisplay" class="max-w-[58px] sm:max-w-none truncate">0x...</span>
                     </div>
@@ -6155,6 +6161,79 @@
                 }, 400);
             }
         });
+
+        // Privy Authentication & Web3 Ethers.js Token Connector
+        let privyClient = null;
+        let privySigner = null;
+
+        function getPrivyClientInstance() {
+            if (!privyClient && window.Privy) {
+                privyClient = new window.Privy.PrivyClient({
+                    appId: localStorage.getItem('vibe_privy_app_id') || 'clxxxxxxxxxxxxxxxxx',
+                    config: {
+                        loginMethods: ['google', 'discord', 'email', 'wallet'],
+                        embeddedWallets: {
+                            createOnLogin: 'users-without-wallets'
+                        }
+                    }
+                });
+            }
+            return privyClient;
+        }
+
+        async function loginWithPrivy() {
+            const privy = getPrivyClientInstance();
+            if (!privy) {
+                spawnArenaFloatText('CENTER', '⚠️ Privy SDK Loading...', '#FFD700');
+                return;
+            }
+
+            try {
+                const user = await privy.login();
+                const activeWallet = privy.wallets.find(w => w.walletClientType === 'privy') || privy.wallets[0];
+                if (!activeWallet) throw new Error("No wallet connected.");
+
+                userWallet = activeWallet.address;
+                const eip1193Provider = await activeWallet.getEthereumProvider();
+                const provider = new ethers.BrowserProvider(eip1193Provider);
+                privySigner = await provider.getSigner();
+
+                vctContract = new ethers.Contract('0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697', [
+                    "function balanceOf(address owner) view returns (uint256)",
+                    "function transfer(address to, uint256 amount) returns (bool)",
+                    "function decimals() view returns (uint8)"
+                ], privySigner);
+
+                await refreshOnChainVctBalance();
+
+                const btnText = document.getElementById('privyAuthBtnText');
+                if (btnText) btnText.innerText = `${userWallet.slice(0, 6)}...${userWallet.slice(-4)}`;
+                const wBadge = document.getElementById('walletBadge');
+                if (wBadge) wBadge.classList.remove('hidden');
+                savePlayerState();
+                spawnArenaFloatText('CENTER', `🔐 PRIVY CONNECTED: ${userWallet.slice(0, 6)}...`, '#00FF88');
+            } catch (err) {
+                console.error("Privy authentication error:", err);
+            }
+        }
+
+        async function refreshOnChainVctBalance() {
+            if (!vctContract || !userWallet) return;
+            try {
+                const decimals = await vctContract.decimals();
+                const balWei = await vctContract.balanceOf(userWallet);
+                const formatted = ethers.formatUnits(balWei, decimals);
+                userBalance = parseFloat(formatted);
+                savePlayerState();
+            } catch (e) {
+                console.warn("Error reading $VCT token balance from contract:", e);
+            }
+        }
+
+        const privyAuthBtn = document.getElementById('privyAuthBtn');
+        if (privyAuthBtn) {
+            privyAuthBtn.addEventListener('click', loginWithPrivy);
+        }
 
         // Auto-Generated Testnet Web3 Wallet Sync + Interactive Web3 Connect & $VCT Faucet
         const walletDisplay = document.getElementById('walletAddressDisplay');
