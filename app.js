@@ -249,53 +249,34 @@ const ERC20_ABI = [
     "function decimals() view returns (uint8)"
 ];
 
-// Initialize Privy SDK Client
-function getPrivyClient() {
-    if (!privyClient && window.Privy) {
-        privyClient = new window.Privy.PrivyClient({
-            appId: localStorage.getItem('vibe_privy_app_id') || 'cmvt65ltq00l90gjqryt2duqw',
-            config: {
-                loginMethods: ['google', 'discord', 'email', 'wallet'],
-                embeddedWallets: {
-                    createOnLogin: 'users-without-wallets'
-                }
-            }
-        });
-    }
-    return privyClient;
-}
-
-// Connect Privy Provider to Ethers.js v6 for actual $VCT Token interactions
+// Connect Web3 Provider / Privy Auth for actual $VCT Token interactions
 async function loginWithPrivy() {
-    const privy = getPrivyClient();
-    if (!privy) {
-        alert("Privy SDK loading... Please try again in a moment.");
-        return;
-    }
+    const privyAppId = localStorage.getItem('vibe_privy_app_id') || 'cmvt65ltq00l90gjqryt2duqw';
 
-    try {
-        const user = await privy.login();
-        const activeWallet = privy.wallets.find(w => w.walletClientType === 'privy') || privy.wallets[0];
-        if (!activeWallet) throw new Error("No wallet associated with user.");
+    if (window.ethereum) {
+        try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const accounts = await provider.send("eth_requestAccounts", []);
+            if (accounts && accounts[0]) {
+                userWallet = accounts[0];
+                privySigner = await provider.getSigner();
+                vctContract = new ethers.Contract(VCT_ADDRESS, ERC20_ABI, privySigner);
 
-        userWallet = activeWallet.address;
-        const eip1193Provider = await activeWallet.getEthereumProvider();
-        const provider = new ethers.BrowserProvider(eip1193Provider);
-        privySigner = await provider.getSigner();
-        
-        vctContract = new ethers.Contract(VCT_ADDRESS, ERC20_ABI, privySigner);
+                await refreshActualVctBalance();
 
-        await refreshActualVctBalance();
-
-        isSimulated = false;
-        if (loginBtn) {
-            loginBtn.innerHTML = `🟢 ${userWallet.substring(0, 6)}...${userWallet.substring(userWallet.length - 4)}`;
-            loginBtn.style.background = "var(--vibe-cyan)";
-            loginBtn.style.color = "var(--charcoal-ink)";
+                isSimulated = false;
+                if (loginBtn) {
+                    loginBtn.innerHTML = `🟢 ${userWallet.substring(0, 6)}...${userWallet.substring(userWallet.length - 4)}`;
+                    loginBtn.style.background = "var(--vibe-cyan)";
+                    loginBtn.style.color = "var(--charcoal-ink)";
+                }
+                if (privyModal) privyModal.classList.add('hidden');
+            }
+        } catch (err) {
+            console.error("Web3 login error:", err);
         }
-        if (privyModal) privyModal.classList.add('hidden');
-    } catch (err) {
-        console.error("Privy login error:", err);
+    } else {
+        window.location.href = `https://auth.privy.io/apps/${privyAppId}/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
     }
 }
 
