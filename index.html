@@ -6163,13 +6163,10 @@
         });
 
         // Privy Authentication & Web3 Ethers.js Token Connector
-        let privyClient = null;
-        let privySigner = null;
-
         function getPrivyClientInstance() {
-            if (!privyClient && window.Privy) {
-                privyClient = new window.Privy.PrivyClient({
-                    appId: localStorage.getItem('vibe_privy_app_id') || 'clxxxxxxxxxxxxxxxxx',
+            if (!window._privyClientInstance && window.Privy) {
+                window._privyClientInstance = new window.Privy.PrivyClient({
+                    appId: localStorage.getItem('vibe_privy_app_id') || 'cmvt65ltq00l90gjqryt2duqw',
                     config: {
                         loginMethods: ['google', 'discord', 'email', 'wallet'],
                         embeddedWallets: {
@@ -6178,7 +6175,7 @@
                     }
                 });
             }
-            return privyClient;
+            return window._privyClientInstance;
         }
 
         async function loginWithPrivy() {
@@ -6196,13 +6193,13 @@
                 userWallet = activeWallet.address;
                 const eip1193Provider = await activeWallet.getEthereumProvider();
                 const provider = new ethers.BrowserProvider(eip1193Provider);
-                privySigner = await provider.getSigner();
+                window._privySigner = await provider.getSigner();
 
                 vctContract = new ethers.Contract('0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697', [
                     "function balanceOf(address owner) view returns (uint256)",
                     "function transfer(address to, uint256 amount) returns (bool)",
                     "function decimals() view returns (uint8)"
-                ], privySigner);
+                ], window._privySigner);
 
                 await refreshOnChainVctBalance();
 

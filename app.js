@@ -253,7 +253,7 @@ const ERC20_ABI = [
 function getPrivyClient() {
     if (!privyClient && window.Privy) {
         privyClient = new window.Privy.PrivyClient({
-            appId: localStorage.getItem('vibe_privy_app_id') || 'clxxxxxxxxxxxxxxxxx',
+            appId: localStorage.getItem('vibe_privy_app_id') || 'cmvt65ltq00l90gjqryt2duqw',
             config: {
                 loginMethods: ['google', 'discord', 'email', 'wallet'],
                 embeddedWallets: {
