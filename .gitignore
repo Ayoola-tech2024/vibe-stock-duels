@@ -1,1 +1,4 @@
 .vercel
+server/vibe-server.exe
+server/vibe.db
+server/vibe.db-*

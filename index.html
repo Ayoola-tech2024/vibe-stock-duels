@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vibe Stock Duels 3D — Cyber-Colosseum Brawler</title>
+    <!-- WebAPK / PWA Manifest & Mobile Meta -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#111111">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vibe Duels">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png">
     <!-- Tailwind CSS for responsive layout & telemetry grids -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Space Grotesk & JetBrains Mono Fonts -->
@@ -316,6 +325,7 @@
                         <div class="text-xs sm:text-lg font-black tracking-tight uppercase leading-none flex items-center gap-1 sm:gap-1.5">
                             <span class="truncate">VIBE DUELS</span>
                             <span class="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 bg-[#8A2BE2] text-white rounded border border-black shrink-0">3D</span>
+                            <span class="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-[#FF3366] text-white rounded border border-black shrink-0 hidden sm:inline">🎄 HOLIDAY</span>
                         </div>
                         <div class="text-[9px] sm:text-[10px] font-bold text-neutral-600 flex items-center gap-1.5 mt-0.5 leading-none">
                             <span class="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
@@ -338,6 +348,11 @@
                     <!-- Privy Connect / Web3 Wallet Badge -->
                     <button id="privyAuthBtn" class="btn-neubrutal bg-[#8A2BE2] text-white px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs shrink-0 flex items-center gap-1" title="Connect Wallet via Privy (Google, Email, Discord, MetaMask)">
                         🔐 <span id="privyAuthBtnText">Login with Privy</span>
+                    </button>
+
+                    <!-- WebAPK Install Button (Shown when installable on Android/Desktop) -->
+                    <button id="installWebApkBtn" class="hidden btn-neubrutal bg-[#00FF88] text-[#111] px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs shrink-0 flex items-center gap-1" title="Install Vibe Duels as WebAPK / App">
+                        📲 <span class="hidden sm:inline">Install</span>
                     </button>
 
                     <!-- Wallet Badge -->
@@ -648,7 +663,7 @@
                     <div class="flex items-center justify-between text-[9px] sm:text-[11px] font-bold">
                         <span class="uppercase tracking-wider text-[#00F0FF] flex items-center gap-1 truncate">
                             <span class="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse shrink-0"></span>
-                            RELATIVE PERFORMANCE (% DELTA)
+                            GOAL: KO RIVAL OR LEAD IN HP AT 0s • JAB TO BUILD RAGE & UNLEASH SKILLS
                         </span>
                         <span id="tickCounterText" class="font-mono-num text-neutral-400 shrink-0">Tick 0 / 40</span>
                     </div>
@@ -839,6 +854,74 @@
         </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- MODAL 8: PRIVY AUTHENTICATION & EMBEDDED WALLET MODAL               -->
+    <!-- =================================================================== -->
+    <div id="privyAuthModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-5 relative">
+            <div class="flex items-center justify-between border-b-3 border-black pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight leading-none">PRIVY RAIDER AUTH</h2>
+                        <p class="text-[11px] font-bold text-neutral-600">Sign in with Google, Email, or Web3 Wallet</p>
+                    </div>
+                </div>
+                <button id="closePrivyModalBtn" type="button" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1 text-xs font-black">✕</button>
+            </div>
+
+            <div id="privyStatusMsg" class="hidden mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold"></div>
+
+            <!-- Logged Out View -->
+            <div id="privyLoginOptions" class="space-y-3">
+                <button id="privyGoogleBtn" type="button" class="btn-neubrutal w-full bg-white text-[#111] py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2 hover:bg-neutral-100">
+                    <span>🌐</span> <span>Continue with Google</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EMAIL OTP</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <input id="privyEmailInput" type="email" placeholder="raider@example.com" class="flex-1 px-3 py-2 bg-white text-[#111] border-2 border-black rounded-lg text-xs font-bold focus:outline-none">
+                        <button id="privySendOtpBtn" type="button" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-3 py-2 text-xs font-black shrink-0">Send Code</button>
+                    </div>
+                    <div id="privyOtpGroup" class="hidden flex gap-2">
+                        <input id="privyOtpInput" type="text" maxlength="6" placeholder="6-digit OTP" class="flex-1 px-3 py-2 bg-[#111] text-[#00FF88] border-2 border-black rounded-lg font-mono-num text-xs font-bold tracking-widest focus:outline-none">
+                        <button id="privyVerifyOtpBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">Verify</button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EXTERNAL WALLET</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <button id="privyWalletBtn" type="button" class="btn-neubrutal w-full bg-[#8A2BE2] text-white py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2">
+                    <span>🦊</span> <span>Connect MetaMask / Rabby</span>
+                </button>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="privyConnectedPanel" class="hidden space-y-3">
+                <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#00FF88]">
+                    <div class="text-[10px] font-black uppercase text-[#00FF88] mb-1">✅ AUTHENTICATED VIA PRIVY</div>
+                    <div id="privyUserIdentity" class="text-xs font-bold text-neutral-200 mb-2 break-all">Raider Account</div>
+                    <div class="text-[10px] font-bold uppercase text-neutral-400">Embedded / Active EVM Wallet</div>
+                    <div id="privyWalletFull" class="font-mono-num text-xs font-black text-[#00F0FF] break-all mt-0.5">0x...</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="privyCopyWalletBtn" type="button" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-2 text-xs font-black">📋 Copy Wallet</button>
+                    <button id="privyLogoutBtn" type="button" class="btn-neubrutal flex-1 bg-[#FF3366] text-white py-2 text-xs font-black">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- =======================================================================
          MODAL 1: COMPREHENSIVE LIVE ANALYTICS, 15-ASSET MATRIX & TELEMETRY
          ======================================================================= -->
@@ -990,6 +1073,74 @@
                             <!-- Dynamically generated match history rows -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 8: PRIVY AUTHENTICATION & EMBEDDED WALLET MODAL               -->
+    <!-- =================================================================== -->
+    <div id="privyAuthModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-5 relative">
+            <div class="flex items-center justify-between border-b-3 border-black pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight leading-none">PRIVY RAIDER AUTH</h2>
+                        <p class="text-[11px] font-bold text-neutral-600">Sign in with Google, Email, or Web3 Wallet</p>
+                    </div>
+                </div>
+                <button id="closePrivyModalBtn" type="button" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1 text-xs font-black">✕</button>
+            </div>
+
+            <div id="privyStatusMsg" class="hidden mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold"></div>
+
+            <!-- Logged Out View -->
+            <div id="privyLoginOptions" class="space-y-3">
+                <button id="privyGoogleBtn" type="button" class="btn-neubrutal w-full bg-white text-[#111] py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2 hover:bg-neutral-100">
+                    <span>🌐</span> <span>Continue with Google</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EMAIL OTP</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <input id="privyEmailInput" type="email" placeholder="raider@example.com" class="flex-1 px-3 py-2 bg-white text-[#111] border-2 border-black rounded-lg text-xs font-bold focus:outline-none">
+                        <button id="privySendOtpBtn" type="button" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-3 py-2 text-xs font-black shrink-0">Send Code</button>
+                    </div>
+                    <div id="privyOtpGroup" class="hidden flex gap-2">
+                        <input id="privyOtpInput" type="text" maxlength="6" placeholder="6-digit OTP" class="flex-1 px-3 py-2 bg-[#111] text-[#00FF88] border-2 border-black rounded-lg font-mono-num text-xs font-bold tracking-widest focus:outline-none">
+                        <button id="privyVerifyOtpBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">Verify</button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EXTERNAL WALLET</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <button id="privyWalletBtn" type="button" class="btn-neubrutal w-full bg-[#8A2BE2] text-white py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2">
+                    <span>🦊</span> <span>Connect MetaMask / Rabby</span>
+                </button>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="privyConnectedPanel" class="hidden space-y-3">
+                <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#00FF88]">
+                    <div class="text-[10px] font-black uppercase text-[#00FF88] mb-1">✅ AUTHENTICATED VIA PRIVY</div>
+                    <div id="privyUserIdentity" class="text-xs font-bold text-neutral-200 mb-2 break-all">Raider Account</div>
+                    <div class="text-[10px] font-bold uppercase text-neutral-400">Embedded / Active EVM Wallet</div>
+                    <div id="privyWalletFull" class="font-mono-num text-xs font-black text-[#00F0FF] break-all mt-0.5">0x...</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="privyCopyWalletBtn" type="button" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-2 text-xs font-black">📋 Copy Wallet</button>
+                    <button id="privyLogoutBtn" type="button" class="btn-neubrutal flex-1 bg-[#FF3366] text-white py-2 text-xs font-black">🚪 Logout</button>
                 </div>
             </div>
         </div>
@@ -1166,6 +1317,74 @@
         </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- MODAL 8: PRIVY AUTHENTICATION & EMBEDDED WALLET MODAL               -->
+    <!-- =================================================================== -->
+    <div id="privyAuthModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-5 relative">
+            <div class="flex items-center justify-between border-b-3 border-black pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight leading-none">PRIVY RAIDER AUTH</h2>
+                        <p class="text-[11px] font-bold text-neutral-600">Sign in with Google, Email, or Web3 Wallet</p>
+                    </div>
+                </div>
+                <button id="closePrivyModalBtn" type="button" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1 text-xs font-black">✕</button>
+            </div>
+
+            <div id="privyStatusMsg" class="hidden mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold"></div>
+
+            <!-- Logged Out View -->
+            <div id="privyLoginOptions" class="space-y-3">
+                <button id="privyGoogleBtn" type="button" class="btn-neubrutal w-full bg-white text-[#111] py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2 hover:bg-neutral-100">
+                    <span>🌐</span> <span>Continue with Google</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EMAIL OTP</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <input id="privyEmailInput" type="email" placeholder="raider@example.com" class="flex-1 px-3 py-2 bg-white text-[#111] border-2 border-black rounded-lg text-xs font-bold focus:outline-none">
+                        <button id="privySendOtpBtn" type="button" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-3 py-2 text-xs font-black shrink-0">Send Code</button>
+                    </div>
+                    <div id="privyOtpGroup" class="hidden flex gap-2">
+                        <input id="privyOtpInput" type="text" maxlength="6" placeholder="6-digit OTP" class="flex-1 px-3 py-2 bg-[#111] text-[#00FF88] border-2 border-black rounded-lg font-mono-num text-xs font-bold tracking-widest focus:outline-none">
+                        <button id="privyVerifyOtpBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">Verify</button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EXTERNAL WALLET</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <button id="privyWalletBtn" type="button" class="btn-neubrutal w-full bg-[#8A2BE2] text-white py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2">
+                    <span>🦊</span> <span>Connect MetaMask / Rabby</span>
+                </button>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="privyConnectedPanel" class="hidden space-y-3">
+                <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#00FF88]">
+                    <div class="text-[10px] font-black uppercase text-[#00FF88] mb-1">✅ AUTHENTICATED VIA PRIVY</div>
+                    <div id="privyUserIdentity" class="text-xs font-bold text-neutral-200 mb-2 break-all">Raider Account</div>
+                    <div class="text-[10px] font-bold uppercase text-neutral-400">Embedded / Active EVM Wallet</div>
+                    <div id="privyWalletFull" class="font-mono-num text-xs font-black text-[#00F0FF] break-all mt-0.5">0x...</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="privyCopyWalletBtn" type="button" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-2 text-xs font-black">📋 Copy Wallet</button>
+                    <button id="privyLogoutBtn" type="button" class="btn-neubrutal flex-1 bg-[#FF3366] text-white py-2 text-xs font-black">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- =======================================================================
          MODAL 5: NICKNAME & TUTORIAL ONBOARDING MODALS
          ======================================================================= -->
@@ -1326,6 +1545,74 @@
         </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- MODAL 8: PRIVY AUTHENTICATION & EMBEDDED WALLET MODAL               -->
+    <!-- =================================================================== -->
+    <div id="privyAuthModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-5 relative">
+            <div class="flex items-center justify-between border-b-3 border-black pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight leading-none">PRIVY RAIDER AUTH</h2>
+                        <p class="text-[11px] font-bold text-neutral-600">Sign in with Google, Email, or Web3 Wallet</p>
+                    </div>
+                </div>
+                <button id="closePrivyModalBtn" type="button" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1 text-xs font-black">✕</button>
+            </div>
+
+            <div id="privyStatusMsg" class="hidden mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold"></div>
+
+            <!-- Logged Out View -->
+            <div id="privyLoginOptions" class="space-y-3">
+                <button id="privyGoogleBtn" type="button" class="btn-neubrutal w-full bg-white text-[#111] py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2 hover:bg-neutral-100">
+                    <span>🌐</span> <span>Continue with Google</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EMAIL OTP</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <input id="privyEmailInput" type="email" placeholder="raider@example.com" class="flex-1 px-3 py-2 bg-white text-[#111] border-2 border-black rounded-lg text-xs font-bold focus:outline-none">
+                        <button id="privySendOtpBtn" type="button" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-3 py-2 text-xs font-black shrink-0">Send Code</button>
+                    </div>
+                    <div id="privyOtpGroup" class="hidden flex gap-2">
+                        <input id="privyOtpInput" type="text" maxlength="6" placeholder="6-digit OTP" class="flex-1 px-3 py-2 bg-[#111] text-[#00FF88] border-2 border-black rounded-lg font-mono-num text-xs font-bold tracking-widest focus:outline-none">
+                        <button id="privyVerifyOtpBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">Verify</button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EXTERNAL WALLET</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <button id="privyWalletBtn" type="button" class="btn-neubrutal w-full bg-[#8A2BE2] text-white py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2">
+                    <span>🦊</span> <span>Connect MetaMask / Rabby</span>
+                </button>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="privyConnectedPanel" class="hidden space-y-3">
+                <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#00FF88]">
+                    <div class="text-[10px] font-black uppercase text-[#00FF88] mb-1">✅ AUTHENTICATED VIA PRIVY</div>
+                    <div id="privyUserIdentity" class="text-xs font-bold text-neutral-200 mb-2 break-all">Raider Account</div>
+                    <div class="text-[10px] font-bold uppercase text-neutral-400">Embedded / Active EVM Wallet</div>
+                    <div id="privyWalletFull" class="font-mono-num text-xs font-black text-[#00F0FF] break-all mt-0.5">0x...</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="privyCopyWalletBtn" type="button" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-2 text-xs font-black">📋 Copy Wallet</button>
+                    <button id="privyLogoutBtn" type="button" class="btn-neubrutal flex-1 bg-[#FF3366] text-white py-2 text-xs font-black">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- =======================================================================
          MODAL 7: RAIDER GROWTH & REFERRAL FLYWHEEL HUB + LIVE $VCT TOKEN
          ======================================================================= -->
@@ -1428,6 +1715,74 @@
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 8: PRIVY AUTHENTICATION & EMBEDDED WALLET MODAL               -->
+    <!-- =================================================================== -->
+    <div id="privyAuthModal" class="modal-backdrop hidden">
+        <div class="danfo-sheet max-w-md w-full p-5 relative">
+            <div class="flex items-center justify-between border-b-3 border-black pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h2 class="text-lg font-black uppercase tracking-tight leading-none">PRIVY RAIDER AUTH</h2>
+                        <p class="text-[11px] font-bold text-neutral-600">Sign in with Google, Email, or Web3 Wallet</p>
+                    </div>
+                </div>
+                <button id="closePrivyModalBtn" type="button" class="btn-neubrutal bg-[#111] text-white px-2.5 py-1 text-xs font-black">✕</button>
+            </div>
+
+            <div id="privyStatusMsg" class="hidden mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold"></div>
+
+            <!-- Logged Out View -->
+            <div id="privyLoginOptions" class="space-y-3">
+                <button id="privyGoogleBtn" type="button" class="btn-neubrutal w-full bg-white text-[#111] py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2 hover:bg-neutral-100">
+                    <span>🌐</span> <span>Continue with Google</span>
+                </button>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EMAIL OTP</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <input id="privyEmailInput" type="email" placeholder="raider@example.com" class="flex-1 px-3 py-2 bg-white text-[#111] border-2 border-black rounded-lg text-xs font-bold focus:outline-none">
+                        <button id="privySendOtpBtn" type="button" class="btn-neubrutal bg-[#00F0FF] text-[#111] px-3 py-2 text-xs font-black shrink-0">Send Code</button>
+                    </div>
+                    <div id="privyOtpGroup" class="hidden flex gap-2">
+                        <input id="privyOtpInput" type="text" maxlength="6" placeholder="6-digit OTP" class="flex-1 px-3 py-2 bg-[#111] text-[#00FF88] border-2 border-black rounded-lg font-mono-num text-xs font-bold tracking-widest focus:outline-none">
+                        <button id="privyVerifyOtpBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-3 py-2 text-xs font-black shrink-0">Verify</button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-black uppercase text-neutral-500">OR EXTERNAL WALLET</span>
+                    <div class="flex-grow border-t-2 border-black/20"></div>
+                </div>
+
+                <button id="privyWalletBtn" type="button" class="btn-neubrutal w-full bg-[#8A2BE2] text-white py-2.5 px-4 text-sm font-black flex items-center justify-center gap-2">
+                    <span>🦊</span> <span>Connect MetaMask / Rabby</span>
+                </button>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="privyConnectedPanel" class="hidden space-y-3">
+                <div class="bg-[#111] text-white border-3 border-black rounded-xl p-3.5 shadow-[3px_4px_0_#00FF88]">
+                    <div class="text-[10px] font-black uppercase text-[#00FF88] mb-1">✅ AUTHENTICATED VIA PRIVY</div>
+                    <div id="privyUserIdentity" class="text-xs font-bold text-neutral-200 mb-2 break-all">Raider Account</div>
+                    <div class="text-[10px] font-bold uppercase text-neutral-400">Embedded / Active EVM Wallet</div>
+                    <div id="privyWalletFull" class="font-mono-num text-xs font-black text-[#00F0FF] break-all mt-0.5">0x...</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="privyCopyWalletBtn" type="button" class="btn-neubrutal flex-1 bg-[#FFD700] text-[#111] py-2 text-xs font-black">📋 Copy Wallet</button>
+                    <button id="privyLogoutBtn" type="button" class="btn-neubrutal flex-1 bg-[#FF3366] text-white py-2 text-xs font-black">🚪 Logout</button>
                 </div>
             </div>
         </div>
@@ -1876,8 +2231,132 @@
 
                 arenaGroup.add(pil);
             }
+
+            // Christmas Season 3D Decorations: Tree, Gifts, Snowman & Snowfall
+            const buildGiftBox = (x, z, size, boxHex, ribbonHex) => {
+                const g = new THREE.Group();
+                const box = new THREE.Mesh(
+                    new THREE.BoxGeometry(size, size, size),
+                    new THREE.MeshStandardMaterial({ color: boxHex, roughness: 0.45 })
+                );
+                box.position.y = size / 2;
+                box.castShadow = true;
+                const rib1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(size + 0.04, size + 0.04, size * 0.22),
+                    new THREE.MeshStandardMaterial({ color: ribbonHex, emissive: ribbonHex, emissiveIntensity: 0.25 })
+                );
+                rib1.position.y = size / 2;
+                const rib2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(size * 0.22, size + 0.04, size + 0.04),
+                    new THREE.MeshStandardMaterial({ color: ribbonHex, emissive: ribbonHex, emissiveIntensity: 0.25 })
+                );
+                rib2.position.y = size / 2;
+                g.position.set(x, 0, z);
+                g.add(box, rib1, rib2);
+                arenaGroup.add(g);
+            };
+
+            // 1. Cyber-Christmas Tree (Back-Left Ringside)
+            const treeGroup = new THREE.Group();
+            treeGroup.position.set(-4.35, 0, -2.9);
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.18, 0.22, 0.6, 8),
+                new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.9 })
+            );
+            trunk.position.y = 0.3;
+            treeGroup.add(trunk);
+            const tierColors = [0x0f766e, 0x15803d, 0x16a34a];
+            [
+                { r: 1.05, h: 1.35, y: 1.15, c: tierColors[0] },
+                { r: 0.80, h: 1.15, y: 1.95, c: tierColors[1] },
+                { r: 0.52, h: 0.95, y: 2.65, c: tierColors[2] }
+            ].forEach(t => {
+                const cone = new THREE.Mesh(
+                    new THREE.ConeGeometry(t.r, t.h, 8),
+                    new THREE.MeshStandardMaterial({ color: t.c, roughness: 0.55 })
+                );
+                cone.position.y = t.y;
+                cone.castShadow = true;
+                treeGroup.add(cone);
+            });
+            const star = new THREE.Mesh(
+                new THREE.OctahedronGeometry(0.24, 0),
+                new THREE.MeshStandardMaterial({ color: 0xFFD700, emissive: 0xFFD700, emissiveIntensity: 0.9 })
+            );
+            star.position.y = 3.3;
+            treeGroup.add(star);
+            const ornamentColors = [0xFF3366, 0x00F0FF, 0xFFD700, 0x00FF88];
+            for (let i = 0; i < 8; i++) {
+                const ang = (i / 8) * Math.PI * 2;
+                const tierR = i % 2 === 0 ? 0.78 : 0.54;
+                const tierY = i % 2 === 0 ? 1.15 : 1.95;
+                const orb = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.09, 8, 8),
+                    new THREE.MeshStandardMaterial({
+                        color: ornamentColors[i % ornamentColors.length],
+                        emissive: ornamentColors[i % ornamentColors.length],
+                        emissiveIntensity: 0.75
+                    })
+                );
+                orb.position.set(Math.cos(ang) * tierR, tierY, Math.sin(ang) * tierR);
+                treeGroup.add(orb);
+            }
+            arenaGroup.add(treeGroup);
+
+            // 2. Stacked Holiday Gift Boxes
+            buildGiftBox(-3.55, -2.55, 0.48, 0xFF3366, 0xFFD700);
+            buildGiftBox(-4.85, -2.15, 0.38, 0x00F0FF, 0xFFFFFF);
+            buildGiftBox(3.75, -2.65, 0.44, 0x16a34a, 0xFF3366);
+
+            // 3. Ringside Voxel Snowman (Back-Right)
+            const snowman = new THREE.Group();
+            snowman.position.set(4.35, 0, -2.85);
+            snowman.rotation.y = -0.45;
+            const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 });
+            const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.65, 0.75), snowMat);
+            b1.position.y = 0.325;
+            const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.52, 0.56), snowMat);
+            b2.position.y = 0.9;
+            const b3 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), snowMat);
+            b3.position.y = 1.36;
+            const nose = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.08, 0.24),
+                new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xf97316, emissiveIntensity: 0.3 })
+            );
+            nose.position.set(0, 1.36, 0.26);
+            const scarf = new THREE.Mesh(
+                new THREE.BoxGeometry(0.60, 0.12, 0.60),
+                new THREE.MeshStandardMaterial({ color: 0xFF3366 })
+            );
+            scarf.position.y = 1.13;
+            const hatBrim = new THREE.Mesh(
+                new THREE.BoxGeometry(0.56, 0.07, 0.56),
+                new THREE.MeshStandardMaterial({ color: 0x111111 })
+            );
+            hatBrim.position.y = 1.59;
+            const hatTop = new THREE.Mesh(
+                new THREE.BoxGeometry(0.36, 0.32, 0.36),
+                new THREE.MeshStandardMaterial({ color: 0x111111 })
+            );
+            hatTop.position.y = 1.78;
+            snowman.add(b1, b2, b3, nose, scarf, hatBrim, hatTop);
+            arenaGroup.add(snowman);
         }
         buildCyberColosseum();
+
+        // 4. 3D Falling Snow Particle System
+        const snowCount = 220;
+        const snowGeo = new THREE.BufferGeometry();
+        const snowPositions = new Float32Array(snowCount * 3);
+        for (let i = 0; i < snowCount; i++) {
+            snowPositions[i * 3] = (Math.random() - 0.5) * 16;
+            snowPositions[i * 3 + 1] = Math.random() * 9 + 0.5;
+            snowPositions[i * 3 + 2] = (Math.random() - 0.5) * 14;
+        }
+        snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPositions, 3));
+        const snowMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.11, transparent: true, opacity: 0.85 });
+        const snowPoints = new THREE.Points(snowGeo, snowMat);
+        scene.add(snowPoints);
 
         // Dedicated 3D Striker Indicators: Ground Pedestal Halo & Overhead 3D Beacon
         let playerGroundPedestal = null;
@@ -2519,6 +2998,19 @@
             root.position.set(homeX, 0, startZ);
             root.rotation.y = isLeftCorner ? Math.PI / 2 : -Math.PI / 2;
 
+            // Festive Holiday Santa Hat on every 3D Fighter
+            const santaBrim = createVoxelBox(1.36, 0.20, 1.18, 0xf8fafc, 0x334155);
+            santaBrim.position.set(0, 0.56, 0);
+            const santaCone = new THREE.Mesh(
+                new THREE.ConeGeometry(0.48, 0.78, 8),
+                new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.55 })
+            );
+            santaCone.position.set(-0.08, 0.96, -0.06);
+            santaCone.rotation.z = 0.22;
+            const santaPom = createVoxelBox(0.22, 0.22, 0.22, 0xffffff, 0x94a3b8);
+            santaPom.position.set(-0.22, 1.32, -0.08);
+            headGroup.add(santaBrim, santaCone, santaPom);
+
             root.userData = {
                 assetKey,
                 isLeftCorner,
@@ -3020,6 +3512,20 @@
                 ud.auraRing.material.opacity = hasLeverage ? (0.8 + Math.sin(t * 10) * 0.2) : 0;
                 ud.auraRing.scale.setScalar(hasLeverage ? (1 + Math.sin(t * 12) * 0.1) : 1);
             });
+
+            // Animate Christmas Snowfall
+            if (typeof snowPoints !== 'undefined' && snowPoints.geometry) {
+                const posArr = snowPoints.geometry.attributes.position.array;
+                for (let i = 0; i < snowCount; i++) {
+                    posArr[i * 3 + 1] -= dt * 1.15;
+                    posArr[i * 3] += Math.sin(t + i) * dt * 0.18;
+                    if (posArr[i * 3 + 1] < 0) {
+                        posArr[i * 3 + 1] = 9.2;
+                        posArr[i * 3] = (Math.random() - 0.5) * 16;
+                    }
+                }
+                snowPoints.geometry.attributes.position.needsUpdate = true;
+            }
 
             // 2. Step Active 3D Dash, Multi-Style Weapon Slash, Defender Evasion & Ultimate Meteor Animation
             if (active3DStrike) {
@@ -3540,6 +4046,28 @@
                 "#FFD700"
             );
 
+            // Persist to Go SQLite Backend (Phase 1 Global Analytics & Ledger)
+            try {
+                const headers = await getBackendHeaders();
+                fetch('/api/matches', {
+                    method: 'POST',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        player: matchData.player,
+                        wallet: privyFullWalletAddress || userWallet || '',
+                        assetA: matchData.assetA,
+                        assetB: matchData.assetB,
+                        winnerAsset: matchData.winnerAsset,
+                        loserAsset: matchData.loserAsset,
+                        winReason: matchData.winReason || 'HP Decision',
+                        wager: matchData.wager,
+                        payout: matchData.payout,
+                        playerWon: !!matchData.playerWon,
+                        weapon: matchData.weapon || 'broadsword'
+                    })
+                }).catch(() => {});
+            } catch (e) {}
+
             // Persist to Cloud Firestore if connected
             if (db && currentUser) {
                 try {
@@ -3553,7 +4081,68 @@
             }
         }
 
-        function renderAnalyticsDashboard() {
+        async function getBackendHeaders() {
+            let guestId = localStorage.getItem('vibe_guest_id');
+            if (!guestId) {
+                guestId = 'g-' + Math.random().toString(36).slice(2, 10);
+                localStorage.setItem('vibe_guest_id', guestId);
+            }
+            const headers = {
+                'X-Guest-Id': guestId,
+                'X-Nickname': playerNickname || 'Raider',
+                'X-Wallet-Address': privyFullWalletAddress || userWallet || ''
+            };
+            try {
+                if (typeof privyInstance !== 'undefined' && privyInstance) {
+                    const tok = await privyInstance.getAccessToken();
+                    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+                }
+            } catch (e) {}
+            return headers;
+        }
+
+        async function syncPlayerFromServer() {
+            try {
+                const headers = await getBackendHeaders();
+                const res = await fetch('/api/me', { headers });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data?.player) {
+                    if (typeof data.player.balance === 'number') {
+                        userBalance = data.player.balance;
+                    }
+                    if (typeof data.player.winStreak === 'number') {
+                        winStreak = data.player.winStreak;
+                    }
+                    savePlayerState();
+                }
+            } catch (e) {}
+        }
+
+        async function renderAnalyticsDashboard() {
+            // Hydrate global totals & recent matches from Go SQLite backend if available
+            try {
+                const res = await fetch('/api/analytics');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (typeof data.totalMatches === 'number' && data.totalMatches > 0) {
+                        telemetryState.totalMatches = Math.max(telemetryState.totalMatches, data.totalMatches);
+                        telemetryState.totalVolume = Math.max(telemetryState.totalVolume, data.totalVolume || 0);
+                        telemetryState.totalBurned = Math.max(telemetryState.totalBurned, data.totalBurned || 0);
+                        telemetryState.activePlayers = Math.max(telemetryState.activePlayers, data.totalPlayers || 1);
+                        if (Array.isArray(data.recentMatches) && data.recentMatches.length > 0) {
+                            telemetryState.recentMatches = data.recentMatches.map(m => ({
+                                winner: m.player,
+                                assetWin: `$${m.winnerAsset}`,
+                                assetLose: `$${m.loserAsset}`,
+                                payout: m.payout,
+                                won: m.playerWon,
+                                time: m.playedAt ? new Date(m.playedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
+                            }));
+                        }
+                    }
+                }
+            } catch (e) {}
             // TAB 1: OVERVIEW METRICS
             const kpiPlayers = document.getElementById('kpiActivePlayers');
             if (kpiPlayers) kpiPlayers.innerText = telemetryState.activePlayers;
@@ -4387,7 +4976,9 @@
             if (roundLocked) {
                 // Active chip damage during locked duel (respects Last-Stand buffer until final 12s)
                 const minFloor = timer > 12 ? 8 : 0;
-                const chip = playerComboCount >= 5 ? 1.15 : 0.75;
+                const myLev = side === 'A' ? leverageTicksA : leverageTicksB;
+                const baseChip = playerComboCount >= 5 ? 1.15 : 0.75;
+                const chip = myLev > 0 ? +(baseChip * 1.75).toFixed(2) : baseChip;
                 if (side === 'A') {
                     hpB = Math.max(minFloor, hpB - chip);
                 } else {
@@ -4924,6 +5515,8 @@
                 winner = 'B';
             } else if (hpB <= 0 && hpA > 0) {
                 winner = 'A';
+            } else if (Math.abs(hpA - hpB) >= 0.05) {
+                winner = hpA > hpB ? 'A' : 'B';
             } else {
                 winner = changeA >= changeB ? 'A' : 'B';
             }
@@ -5006,7 +5599,9 @@
                 weapon: selectedTeam === 'A' ? currentWeaponA : currentWeaponB
             });
 
-            const winReason = (hpA <= 0 || hpB <= 0) ? '3D Voxel KO' : 'Oracle Delta';
+            const winReason = (hpA <= 0 || hpB <= 0)
+                ? '3D Voxel KO'
+                : (Math.abs(hpA - hpB) >= 0.05 ? `HP Decision (${Math.round(hpA)} vs ${Math.round(hpB)} HP)` : 'Oracle Tiebreak');
             const wonCfg = winner === 'A' ? cfgA : cfgB;
             const lostCfg = winner === 'A' ? cfgB : cfgA;
             const wonWeap = winner === 'A' ? weapNameA : weapNameB;
@@ -5031,14 +5626,14 @@
                             <div class="font-black text-sm">${cfgA.ticker}</div>
                             <div class="text-[10px] text-neutral-300 truncate">${weapNameA}</div>
                             <div class="text-[11px] font-bold mt-1">$${currentPriceA.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-                            <div class="text-[11px] font-extrabold ${changeA >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}%</div>
+                            <div class="text-[11px] font-extrabold ${changeA >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeA >= 0 ? '+' : ''}${changeA.toFixed(2)}% • ❤️ ${Math.round(hpA)} HP</div>
                         </div>
                         <div style="color:${cfgB.color}" class="text-right">
                             <div class="text-[10px] text-neutral-400 font-bold">CORNER B</div>
                             <div class="font-black text-sm">${cfgB.ticker}</div>
                             <div class="text-[10px] text-neutral-300 truncate">${weapNameB}</div>
                             <div class="text-[11px] font-bold mt-1">$${currentPriceB.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-                            <div class="text-[11px] font-extrabold ${changeB >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}%</div>
+                            <div class="text-[11px] font-extrabold ${changeB >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${changeB >= 0 ? '+' : ''}${changeB.toFixed(2)}% • ❤️ ${Math.round(hpB)} HP</div>
                         </div>
                     </div>
                     <div class="p-2 rounded-lg bg-[#18181b] border border-amber-400/30 flex items-center justify-between">
@@ -5535,12 +6130,79 @@
         document.getElementById('tabHostBtn').addEventListener('click', () => switchMultiplayerTab('host'));
         document.getElementById('tabJoinBtn').addEventListener('click', () => switchMultiplayerTab('join'));
 
-        // Host Creates 6-Digit OTP Room (Registered in Relay, Firestore & PeerJS)
+        // Host Creates 6-Digit OTP Room (Authoritative Go WebSocket + PeerJS/Firestore Fallback)
+        let authRoomWs = null;
+        async function connectAuthoritativeRoomWS(otp) {
+            try {
+                const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                let tok = '';
+                try {
+                    if (typeof privyInstance !== 'undefined' && privyInstance) {
+                        tok = (await privyInstance.getAccessToken()) || '';
+                    }
+                } catch (e) {}
+                let guestId = localStorage.getItem('vibe_guest_id') || 'g-anon';
+                const qs = new URLSearchParams({
+                    token: tok,
+                    guest: guestId,
+                    name: playerNickname || 'Raider'
+                });
+                const ws = new WebSocket(`${proto}//${window.location.host}/ws/rooms/${otp}?${qs.toString()}`);
+                ws.onopen = () => {
+                    authRoomWs = ws;
+                    const waitingText = document.getElementById('waitingText');
+                    if (waitingText) {
+                        waitingText.innerText = "🟢 Authoritative Go Room Connected! Waiting for rival...";
+                    }
+                };
+                ws.onmessage = (ev) => {
+                    try {
+                        const msg = JSON.parse(ev.data);
+                        const p = msg.payload || {};
+                        if (msg.type === 'ROOM_STATE' && p.playerA && p.playerB) {
+                            activatePvPArenaUI(p.playerA.nickname || 'Host', p.playerB.nickname || 'Guest');
+                        } else if (msg.type === 'MATCH_START') {
+                            if (!roundLocked) {
+                                beginArenaCombatSession(pendingWager || 100, { a: p.startPriceA, b: p.startPriceB });
+                            }
+                        } else if (msg.type === 'COMBAT_TICK') {
+                            if (roundLocked) {
+                                timer = p.timer;
+                                countdownEl.innerText = timer;
+                                hpA = p.hpA;
+                                hpB = p.hpB;
+                                processCombatTickData(p);
+                            }
+                        } else if (msg.type === 'SKILL_EFFECT') {
+                            if (p.skill === 'EMOTE') {
+                                spawnArenaFloatText(p.side, p.text, '#00FF88');
+                            } else if (p.skill === 'ULTIMATE') {
+                                trigger3DCombatClash(p.side, true, 14, false, true);
+                            }
+                        } else if (msg.type === 'MATCH_END') {
+                            finishAndResolveDuel(p.priceA, p.priceB, p.winner, p.hpA, p.hpB);
+                        }
+                    } catch (e) {}
+                };
+                ws.onclose = () => {
+                    if (authRoomWs === ws) authRoomWs = null;
+                };
+            } catch (e) {}
+        }
+
         document.getElementById('createRoomBtn').addEventListener('click', async () => {
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            let otp = Math.floor(100000 + Math.random() * 900000).toString();
+            try {
+                const res = await fetch('/api/rooms', { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data?.otp) otp = data.otp;
+                }
+            } catch (e) {}
             currentRoomOtp = otp;
             isHost = true;
             cleanupP2P(true);
+            connectAuthoritativeRoomWS(otp);
 
             document.getElementById('hostPreGenerate').classList.add('hidden');
             document.getElementById('hostCodeDisplay').classList.remove('hidden');
@@ -5606,6 +6268,7 @@
             statusEl.className = "mt-2.5 text-xs font-bold text-cyan-700 animate-pulse";
 
             cleanupP2P(true);
+            connectAuthoritativeRoomWS(otp);
 
             // 1. Connect to Instant Cloud WebSocket Relay
             connectToRelayRoom(otp);
@@ -5832,6 +6495,10 @@
             document.getElementById(isHost ? 'poolA' : 'poolB').innerText = amount;
 
             sendRoomMessage({ type: 'LOCK', amount, asset: isHost ? selectA.value : selectB.value });
+            if (typeof authRoomWs !== 'undefined' && authRoomWs && authRoomWs.readyState === WebSocket.OPEN) {
+                authRoomWs.send(JSON.stringify({ type: 'SELECT_ASSET', payload: { asset: isHost ? selectA.value : selectB.value } }));
+                authRoomWs.send(JSON.stringify({ type: 'LOCK_WAGER', payload: { amount } }));
+            }
 
             if (oppLock && isHost) {
                 await startSingleOrHostMatch(amount);
@@ -5864,6 +6531,13 @@
         function broadcastMultiplayerSkill(skill, side, emoteText = '') {
             if (!isMultiplayer) return;
             sendRoomMessage({ type: 'SKILL', skill, side, emoteText });
+            if (typeof authRoomWs !== 'undefined' && authRoomWs && authRoomWs.readyState === WebSocket.OPEN) {
+                if (skill === 'EMOTE') {
+                    authRoomWs.send(JSON.stringify({ type: 'EMOTE', payload: { text: emoteText } }));
+                } else {
+                    authRoomWs.send(JSON.stringify({ type: 'USE_SKILL', payload: { skill } }));
+                }
+            }
         }
 
         function broadcastMultiplayerNextRound() {
@@ -6162,14 +6836,275 @@
         });
 
         // Privy Authentication & Web3 Ethers.js Token Connector
+        const PRIVY_APP_ID = localStorage.getItem('vibe_privy_app_id') || 'cmwl1e3nz00ma0hjv6ane856f';
+        const VCT_CONTRACT_ADDR = '0x46aE7fe808648c7d9AD3a33E63b88B21F3A4c697';
+        const VCT_ERC20_ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function transfer(address to, uint256 amount) returns (bool)",
+            "function decimals() view returns (uint8)"
+        ];
+
+        let privySdkModule = null;
+        let privyInstance = null;
+        let privyAuthenticatedUser = null;
+        let privyFullWalletAddress = localStorage.getItem('vibe_privy_full_wallet') || '';
+
+        async function getPrivyClient() {
+            if (privyInstance) return privyInstance;
+            if (!privySdkModule) {
+                privySdkModule = await import('https://esm.sh/@privy-io/js-sdk-core@0.79.5');
+            }
+            const Privy = privySdkModule.default;
+            const { LocalStorage } = privySdkModule;
+            privyInstance = new Privy({
+                appId: PRIVY_APP_ID,
+                storage: new LocalStorage()
+            });
+            return privyInstance;
+        }
+
+        function showPrivyStatus(msg, isError = false) {
+            const el = document.getElementById('privyStatusMsg');
+            if (!el) return;
+            el.innerText = msg;
+            el.className = `mb-3 p-2.5 rounded-lg border-2 border-black text-xs font-bold ${isError ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-900'}`;
+            el.classList.remove('hidden');
+        }
+
+        function updatePrivyModalUI() {
+            const loginOpts = document.getElementById('privyLoginOptions');
+            const connPanel = document.getElementById('privyConnectedPanel');
+            const identityEl = document.getElementById('privyUserIdentity');
+            const walletFullEl = document.getElementById('privyWalletFull');
+            const btnText = document.getElementById('privyAuthBtnText');
+
+            if (privyAuthenticatedUser || privyFullWalletAddress) {
+                if (loginOpts) loginOpts.classList.add('hidden');
+                if (connPanel) connPanel.classList.remove('hidden');
+
+                let label = 'Privy Raider';
+                if (privyAuthenticatedUser?.linked_accounts) {
+                    const googleAcc = privyAuthenticatedUser.linked_accounts.find(a => a.type === 'google_oauth');
+                    const emailAcc = privyAuthenticatedUser.linked_accounts.find(a => a.type === 'email');
+                    if (googleAcc?.email) label = `Google: ${googleAcc.email}`;
+                    else if (emailAcc?.address) label = `Email: ${emailAcc.address}`;
+                }
+                if (identityEl) identityEl.innerText = label;
+                if (walletFullEl) walletFullEl.innerText = privyFullWalletAddress || userWallet;
+                if (btnText && privyFullWalletAddress) {
+                    btnText.innerText = `${privyFullWalletAddress.slice(0, 6)}...${privyFullWalletAddress.slice(-4)}`;
+                }
+            } else {
+                if (loginOpts) loginOpts.classList.remove('hidden');
+                if (connPanel) connPanel.classList.add('hidden');
+                if (btnText) btnText.innerText = 'Login with Privy';
+            }
+        }
+
+        async function finalizePrivySession(user) {
+            privyAuthenticatedUser = user;
+            const privy = await getPrivyClient();
+            const { getUserEmbeddedWallet } = privySdkModule;
+            let embedded = getUserEmbeddedWallet(user);
+
+            if (!embedded && privy.embeddedWallet?.create) {
+                try {
+                    const created = await privy.embeddedWallet.create();
+                    embedded = created?.user ? getUserEmbeddedWallet(created.user) : created;
+                } catch (e) {
+                    console.warn('Embedded wallet creation notice:', e);
+                }
+            }
+
+            const walletAcc = embedded || user?.linked_accounts?.find(a => a.type === 'wallet');
+            if (walletAcc?.address) {
+                privyFullWalletAddress = walletAcc.address;
+                localStorage.setItem('vibe_privy_full_wallet', privyFullWalletAddress);
+                userWallet = `${privyFullWalletAddress.slice(0, 6)}...${privyFullWalletAddress.slice(-4)}`;
+                localStorage.setItem('vibe_wallet_addr', userWallet);
+                const wBadge = document.getElementById('walletBadge');
+                if (wBadge) wBadge.classList.remove('hidden');
+                savePlayerState();
+            }
+
+            updatePrivyModalUI();
+            spawnArenaFloatText('CENTER', `🔐 PRIVY CONNECTED: ${userWallet}`, '#00FF88');
+        }
+
+        window.loginWithPrivy = function() {
+            const modal = document.getElementById('privyAuthModal');
+            if (modal) {
+                updatePrivyModalUI();
+                modal.classList.remove('hidden');
+            }
+        };
+
         const privyAuthBtn = document.getElementById('privyAuthBtn');
         if (privyAuthBtn) {
-            privyAuthBtn.addEventListener('click', () => {
-                if (typeof window.loginWithPrivy === 'function') {
-                    window.loginWithPrivy();
+            privyAuthBtn.addEventListener('click', () => window.loginWithPrivy());
+        }
+
+        const closePrivyModalBtn = document.getElementById('closePrivyModalBtn');
+        if (closePrivyModalBtn) {
+            closePrivyModalBtn.addEventListener('click', () => {
+                document.getElementById('privyAuthModal')?.classList.add('hidden');
+            });
+        }
+
+        const privyGoogleBtn = document.getElementById('privyGoogleBtn');
+        if (privyGoogleBtn) {
+            privyGoogleBtn.addEventListener('click', async () => {
+                try {
+                    showPrivyStatus('Redirecting to Google via Privy...');
+                    const privy = await getPrivyClient();
+                    const redirectUri = `${window.location.origin}${window.location.pathname}`;
+                    const { url } = await privy.auth.oauth.generateURL('google', redirectUri);
+                    window.location.href = url;
+                } catch (err) {
+                    console.error('Privy Google OAuth error:', err);
+                    showPrivyStatus(`Google login error: ${err?.message || err}`, true);
                 }
             });
         }
+
+        const privySendOtpBtn = document.getElementById('privySendOtpBtn');
+        if (privySendOtpBtn) {
+            privySendOtpBtn.addEventListener('click', async () => {
+                const email = document.getElementById('privyEmailInput')?.value.trim();
+                if (!email) return showPrivyStatus('Enter your email address first.', true);
+                try {
+                    showPrivyStatus('Sending OTP code to your email...');
+                    const privy = await getPrivyClient();
+                    await privy.auth.email.sendCode(email);
+                    document.getElementById('privyOtpGroup')?.classList.remove('hidden');
+                    showPrivyStatus(`OTP sent to ${email}. Enter the 6-digit code below.`);
+                } catch (err) {
+                    console.error('Privy email OTP error:', err);
+                    showPrivyStatus(`Email OTP error: ${err?.message || err}`, true);
+                }
+            });
+        }
+
+        const privyVerifyOtpBtn = document.getElementById('privyVerifyOtpBtn');
+        if (privyVerifyOtpBtn) {
+            privyVerifyOtpBtn.addEventListener('click', async () => {
+                const email = document.getElementById('privyEmailInput')?.value.trim();
+                const code = document.getElementById('privyOtpInput')?.value.trim();
+                if (!email || !code) return showPrivyStatus('Enter both email and OTP code.', true);
+                try {
+                    showPrivyStatus('Verifying OTP...');
+                    const privy = await getPrivyClient();
+                    const { user } = await privy.auth.email.loginWithCode(email, code);
+                    await finalizePrivySession(user);
+                    showPrivyStatus('Signed in with Email!');
+                } catch (err) {
+                    console.error('Privy OTP verify error:', err);
+                    showPrivyStatus(`Invalid code: ${err?.message || err}`, true);
+                }
+            });
+        }
+
+        const privyWalletBtn = document.getElementById('privyWalletBtn');
+        if (privyWalletBtn) {
+            privyWalletBtn.addEventListener('click', async () => {
+                if (!window.ethereum) {
+                    return showPrivyStatus('No browser wallet (MetaMask/Rabby) detected. Use Google or Email above!', true);
+                }
+                try {
+                    showPrivyStatus('Connecting Web3 wallet...');
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    if (accounts && accounts[0]) {
+                        privyFullWalletAddress = accounts[0];
+                        localStorage.setItem('vibe_privy_full_wallet', privyFullWalletAddress);
+                        userWallet = `${privyFullWalletAddress.slice(0, 6)}...${privyFullWalletAddress.slice(-4)}`;
+                        localStorage.setItem('vibe_wallet_addr', userWallet);
+                        savePlayerState();
+                        updatePrivyModalUI();
+                        showPrivyStatus(`Connected ${userWallet}!`);
+                        spawnArenaFloatText('CENTER', `🦊 WEB3 CONNECTED: ${userWallet}`, '#00FF88');
+                    }
+                } catch (err) {
+                    showPrivyStatus(`Wallet error: ${err?.message || err}`, true);
+                }
+            });
+        }
+
+        const privyCopyWalletBtn = document.getElementById('privyCopyWalletBtn');
+        if (privyCopyWalletBtn) {
+            privyCopyWalletBtn.addEventListener('click', () => {
+                if (privyFullWalletAddress) {
+                    navigator.clipboard?.writeText(privyFullWalletAddress);
+                    showPrivyStatus('Wallet address copied to clipboard!');
+                }
+            });
+        }
+
+        const privyLogoutBtn = document.getElementById('privyLogoutBtn');
+        if (privyLogoutBtn) {
+            privyLogoutBtn.addEventListener('click', async () => {
+                try {
+                    const privy = await getPrivyClient();
+                    await privy.auth.logout();
+                } catch (e) {}
+                privyAuthenticatedUser = null;
+                privyFullWalletAddress = '';
+                localStorage.removeItem('vibe_privy_full_wallet');
+                updatePrivyModalUI();
+                showPrivyStatus('Logged out of Privy.');
+            });
+        }
+
+        // Handle Privy OAuth callback or restore active session on load
+        (async function initPrivySessionOnLoad() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const oauthCode = params.get('privy_oauth_code');
+                const oauthState = params.get('privy_oauth_state');
+                if (oauthCode && oauthState) {
+                    const privy = await getPrivyClient();
+                    const { user } = await privy.auth.oauth.loginWithCode(oauthCode, oauthState, 'google');
+                    window.history.replaceState({}, '', window.location.pathname);
+                    await finalizePrivySession(user);
+                    return;
+                }
+                if (localStorage.getItem('vibe_privy_full_wallet')) {
+                    updatePrivyModalUI();
+                }
+                syncPlayerFromServer();
+            } catch (err) {
+                console.warn('Privy session init notice:', err);
+            }
+        })();
+
+        // WebAPK / PWA Service Worker Registration & Install Prompt
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch((err) => {
+                    console.warn('Service worker registration notice:', err);
+                });
+            });
+        }
+
+        let deferredInstallPrompt = null;
+        const installWebApkBtn = document.getElementById('installWebApkBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (installWebApkBtn) installWebApkBtn.classList.remove('hidden');
+        });
+        if (installWebApkBtn) {
+            installWebApkBtn.addEventListener('click', async () => {
+                if (!deferredInstallPrompt) return;
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                installWebApkBtn.classList.add('hidden');
+            });
+        }
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            if (installWebApkBtn) installWebApkBtn.classList.add('hidden');
+        });
 
         // Auto-Generated Testnet Web3 Wallet Sync + Interactive Web3 Connect & $VCT Faucet
         const walletDisplay = document.getElementById('walletAddressDisplay');

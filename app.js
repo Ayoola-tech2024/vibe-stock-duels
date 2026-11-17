@@ -251,7 +251,7 @@ const ERC20_ABI = [
 
 // Connect Web3 Provider / Privy Auth for actual $VCT Token interactions
 async function loginWithPrivy() {
-    const privyAppId = localStorage.getItem('vibe_privy_app_id') || 'cmvt65ltq00l90gjqryt2duqw';
+    const privyAppId = localStorage.getItem('vibe_privy_app_id') || 'cmwl1e3nz00ma0hjv6ane856f';
 
     if (window.ethereum) {
         try {
