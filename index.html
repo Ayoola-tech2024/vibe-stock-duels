@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vibe Stock Duels 3D — Cyber-Colosseum Brawler</title>
     <!-- WebAPK / PWA Manifest & Mobile Meta -->
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="manifest" href="./manifest.webmanifest">
     <meta name="theme-color" content="#111111">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vibe Duels">
-    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png">
     <!-- Tailwind CSS for responsive layout & telemetry grids -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Space Grotesk & JetBrains Mono Fonts -->
@@ -4049,7 +4049,7 @@
             // Persist to Go SQLite Backend (Phase 1 Global Analytics & Ledger)
             try {
                 const headers = await getBackendHeaders();
-                fetch('/api/matches', {
+                fetch(`${BACKEND_HTTP_BASE}/api/matches`, {
                     method: 'POST',
                     headers: { ...headers, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -4081,6 +4081,13 @@
             }
         }
 
+        const BACKEND_HTTP_BASE = window.location.hostname.endsWith('github.io')
+            ? 'https://vibe-stock-duels.onrender.com'
+            : '';
+        const BACKEND_WS_BASE = window.location.hostname.endsWith('github.io')
+            ? 'wss://vibe-stock-duels.onrender.com'
+            : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+
         async function getBackendHeaders() {
             let guestId = localStorage.getItem('vibe_guest_id');
             if (!guestId) {
@@ -4104,7 +4111,7 @@
         async function syncPlayerFromServer() {
             try {
                 const headers = await getBackendHeaders();
-                const res = await fetch('/api/me', { headers });
+                const res = await fetch(`${BACKEND_HTTP_BASE}/api/me`, { headers });
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data?.player) {
@@ -4122,7 +4129,7 @@
         async function renderAnalyticsDashboard() {
             // Hydrate global totals & recent matches from Go SQLite backend if available
             try {
-                const res = await fetch('/api/analytics');
+                const res = await fetch(`${BACKEND_HTTP_BASE}/api/analytics`);
                 if (res.ok) {
                     const data = await res.json();
                     if (typeof data.totalMatches === 'number' && data.totalMatches > 0) {
@@ -6147,7 +6154,7 @@
                     guest: guestId,
                     name: playerNickname || 'Raider'
                 });
-                const ws = new WebSocket(`${proto}//${window.location.host}/ws/rooms/${otp}?${qs.toString()}`);
+                const ws = new WebSocket(`${BACKEND_WS_BASE}/ws/rooms/${otp}?${qs.toString()}`);
                 ws.onopen = () => {
                     authRoomWs = ws;
                     const waitingText = document.getElementById('waitingText');
@@ -6193,7 +6200,7 @@
         document.getElementById('createRoomBtn').addEventListener('click', async () => {
             let otp = Math.floor(100000 + Math.random() * 900000).toString();
             try {
-                const res = await fetch('/api/rooms', { method: 'POST' });
+                const res = await fetch(`${BACKEND_HTTP_BASE}/api/rooms`, { method: 'POST' });
                 if (res.ok) {
                     const data = await res.json();
                     if (data?.otp) otp = data.otp;
@@ -7079,7 +7086,7 @@
         // WebAPK / PWA Service Worker Registration & Install Prompt
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch((err) => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
                     console.warn('Service worker registration notice:', err);
                 });
             });

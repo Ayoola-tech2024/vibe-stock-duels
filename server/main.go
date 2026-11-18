@@ -141,5 +141,22 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir(absStatic)))
 
 	log.Printf("Vibe Stock Duels server listening on %s (static=%s, db=%s)", *addr, absStatic, *dbPath)
-	log.Fatal(http.ListenAndServe(*addr, mux))
+	log.Fatal(http.ListenAndServe(*addr, withCORS(mux)))
+}
+
+func withCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "https://ayoola-tech2024.github.io" || origin == "http://localhost:8080" || origin == "https://vibe-stock-duels.onrender.com" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+		}
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Guest-Id, X-Nickname, X-Wallet-Address")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

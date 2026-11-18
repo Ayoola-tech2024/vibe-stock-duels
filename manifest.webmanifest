@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "Vibe Stock Duels 3D — Cyber-Colosseum Brawler",
   "short_name": "Vibe Duels",
   "description": "60-second BTC vs SOL & stock price duels with 3D voxel fighters, active skills, and Privy Web3 auth.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#111111",
@@ -12,25 +12,25 @@
   "categories": ["games", "entertainment"],
   "icons": [
     {
-      "src": "/assets/icons/icon-192.png",
+      "src": "./assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-192.png",
+      "src": "./assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/assets/icons/icon-512.png",
+      "src": "./assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-512.png",
+      "src": "./assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

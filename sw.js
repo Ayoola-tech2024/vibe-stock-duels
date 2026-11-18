@@ -1,10 +1,10 @@
-const CACHE_NAME = 'vibe-stock-duels-v1';
+const CACHE_NAME = 'vibe-stock-duels-v2';
 const SHELL_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/assets/icons/icon-192.png',
-  '/assets/icons/icon-512.png'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
