@@ -306,9 +306,119 @@
         ::-webkit-scrollbar-thumb { background: var(--vibe-cyan); border-radius: 4px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes splashBobLeft {
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        @keyframes splashBobRight {
+            0%, 100% { transform: translateY(0px) rotate(1deg); }
+            50% { transform: translateY(-8px) rotate(-2deg); }
+        }
+        @keyframes splashProgress {
+            0% { width: 4%; }
+            100% { width: 100%; }
+        }
     </style>
 </head>
 <body class="pb-2">
+
+    <!-- 3-SECOND VOXEL CLASH SPLASH SCREEN (Wakes Render Backend in Background) -->
+    <div id="vibeSplashOverlay" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-4 text-white transition-opacity duration-300" style="background: radial-gradient(circle at 50% 35%, #2a114d 0%, #0d0b14 68%, #070709 100%);">
+        <div class="text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] text-[#00FF88] mb-2">🎄 HOLIDAY COLOSSEUM EDITION</div>
+        <h1 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-center mb-6">
+            <span class="text-[#00F0FF]">VIBE STOCK</span> <span class="text-[#FFD700]">DUELS 3D</span>
+        </h1>
+
+        <!-- 2 Voxel Fighters Facing Each Other With 2 Different Weapons -->
+        <div class="flex items-center justify-center gap-4 sm:gap-10 mb-7">
+            <!-- Left Voxel Fighter: Cyber Greatsword -->
+            <div class="flex flex-col items-center" style="animation: splashBobLeft 1.2s ease-in-out infinite;">
+                <svg width="118" height="128" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Voxel Striker A">
+                    <!-- Santa Hat -->
+                    <polygon points="34,26 54,4 72,26" fill="#DC2626" stroke="#111" stroke-width="3"/>
+                    <rect x="28" y="24" width="48" height="9" rx="3" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
+                    <circle cx="54" cy="5" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2"/>
+                    <!-- Voxel Head -->
+                    <rect x="30" y="33" width="44" height="36" rx="4" fill="#F59E0B" stroke="#111" stroke-width="3"/>
+                    <!-- Visor -->
+                    <rect x="48" y="42" width="24" height="12" rx="2" fill="#00F0FF" stroke="#111" stroke-width="2.5"/>
+                    <!-- Torso -->
+                    <rect x="34" y="71" width="36" height="32" rx="4" fill="#18181B" stroke="#00F0FF" stroke-width="2.5"/>
+                    <!-- Legs -->
+                    <rect x="36" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
+                    <rect x="55" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
+                    <!-- Arm + Cyber Greatsword (Facing Right) -->
+                    <rect x="64" y="74" width="18" height="12" rx="2" fill="#F59E0B" stroke="#111" stroke-width="2.5"/>
+                    <g transform="translate(78,78) rotate(-32)">
+                        <rect x="0" y="-4" width="12" height="8" fill="#27272A" stroke="#111" stroke-width="2"/>
+                        <rect x="10" y="-10" width="6" height="20" fill="#FFD700" stroke="#111" stroke-width="2"/>
+                        <polygon points="16,-6 52,-4 58,0 52,4 16,6" fill="#00F0FF" stroke="#111" stroke-width="2"/>
+                    </g>
+                </svg>
+                <span class="mt-1 px-2 py-0.5 rounded bg-[#00F0FF]/20 border border-[#00F0FF] text-[#00F0FF] text-[10px] font-black uppercase">$BTC • Greatsword</span>
+            </div>
+
+            <!-- Center VS -->
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#FFD700] text-[#111] border-3 border-black shadow-[0_0_25px_#FFD700] flex items-center justify-center font-black text-lg sm:text-xl animate-pulse">
+                    VS
+                </div>
+            </div>
+
+            <!-- Right Voxel Fighter: Gravity Warhammer -->
+            <div class="flex flex-col items-center" style="animation: splashBobRight 1.2s ease-in-out infinite;">
+                <svg width="118" height="128" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Voxel Striker B">
+                    <!-- Santa Hat -->
+                    <polygon points="48,26 66,4 86,26" fill="#DC2626" stroke="#111" stroke-width="3"/>
+                    <rect x="44" y="24" width="48" height="9" rx="3" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
+                    <circle cx="66" cy="5" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2"/>
+                    <!-- Voxel Head -->
+                    <rect x="46" y="33" width="44" height="36" rx="4" fill="#8A2BE2" stroke="#111" stroke-width="3"/>
+                    <!-- Visor -->
+                    <rect x="48" y="42" width="24" height="12" rx="2" fill="#FF3366" stroke="#111" stroke-width="2.5"/>
+                    <!-- Torso -->
+                    <rect x="50" y="71" width="36" height="32" rx="4" fill="#18181B" stroke="#FF3366" stroke-width="2.5"/>
+                    <!-- Legs -->
+                    <rect x="52" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
+                    <rect x="71" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
+                    <!-- Arm + Gravity Warhammer (Facing Left) -->
+                    <rect x="38" y="74" width="18" height="12" rx="2" fill="#8A2BE2" stroke="#111" stroke-width="2.5"/>
+                    <g transform="translate(42,78) rotate(32)">
+                        <rect x="-46" y="-4" width="46" height="7" fill="#3F3F46" stroke="#111" stroke-width="2"/>
+                        <rect x="-56" y="-15" width="18" height="30" rx="2" fill="#FF3366" stroke="#111" stroke-width="2.5"/>
+                        <rect x="-52" y="-10" width="10" height="20" fill="#FFD700"/>
+                    </g>
+                </svg>
+                <span class="mt-1 px-2 py-0.5 rounded bg-[#FF3366]/20 border border-[#FF3366] text-[#FF3366] text-[10px] font-black uppercase">$SOL • Warhammer</span>
+            </div>
+        </div>
+
+        <!-- 3s Progress Bar -->
+        <div class="w-64 sm:w-80 bg-black border-2 border-[#00F0FF] rounded-full h-3.5 p-0.5 overflow-hidden shadow-[0_0_18px_rgba(0,240,255,0.35)] mb-2">
+            <div class="h-full rounded-full bg-gradient-to-r from-[#00F0FF] via-[#00FF88] to-[#FFD700]" style="animation: splashProgress 3s linear forwards;"></div>
+        </div>
+        <div class="flex items-center gap-3 text-[11px] font-bold text-neutral-300">
+            <span class="animate-pulse">⚡ Waking Oracle & 3D Arena...</span>
+            <button type="button" onclick="dismissVibeSplash()" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-black border border-white/20 cursor-pointer">Skip ➔</button>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const wakeUrl = window.location.hostname.endsWith('github.io')
+                ? 'https://vibe-stock-duels.onrender.com/api/health'
+                : './api/health';
+            try { fetch(wakeUrl, { mode: 'cors' }).catch(function(){}); } catch (e) {}
+            window.dismissVibeSplash = function() {
+                const el = document.getElementById('vibeSplashOverlay');
+                if (!el || el.dataset.closing) return;
+                el.dataset.closing = '1';
+                el.style.opacity = '0';
+                setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+            };
+            setTimeout(window.dismissVibeSplash, 3000);
+        })();
+    </script>
 
     <!-- MAIN CONTAINER (Zero-Scroll Desktop + Thumb-Ergonomic Mobile Dashboard) -->
     <div class="max-w-[1260px] mx-auto px-2 sm:px-4 pt-1.5 pb-1.5 flex flex-col gap-1.5 sm:gap-2 relative z-10">
