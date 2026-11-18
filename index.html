@@ -330,67 +330,46 @@
             <span class="text-[#00F0FF]">VIBE STOCK</span> <span class="text-[#FFD700]">DUELS 3D</span>
         </h1>
 
-        <!-- 2 Voxel Fighters Facing Each Other With 2 Different Weapons -->
+        <!-- 2 Random Roster Vibers Facing Each Other With 2 Different Weapons + Christmas Touch -->
         <div class="flex items-center justify-center gap-4 sm:gap-10 mb-7">
-            <!-- Left Voxel Fighter: Cyber Greatsword -->
+            <!-- Left Random Viber -->
             <div class="flex flex-col items-center" style="animation: splashBobLeft 1.2s ease-in-out infinite;">
-                <svg width="118" height="128" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Voxel Striker A">
-                    <!-- Santa Hat -->
-                    <polygon points="34,26 54,4 72,26" fill="#DC2626" stroke="#111" stroke-width="3"/>
-                    <rect x="28" y="24" width="48" height="9" rx="3" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
-                    <circle cx="54" cy="5" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2"/>
-                    <!-- Voxel Head -->
-                    <rect x="30" y="33" width="44" height="36" rx="4" fill="#F59E0B" stroke="#111" stroke-width="3"/>
-                    <!-- Visor -->
-                    <rect x="48" y="42" width="24" height="12" rx="2" fill="#00F0FF" stroke="#111" stroke-width="2.5"/>
-                    <!-- Torso -->
-                    <rect x="34" y="71" width="36" height="32" rx="4" fill="#18181B" stroke="#00F0FF" stroke-width="2.5"/>
-                    <!-- Legs -->
-                    <rect x="36" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
-                    <rect x="55" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
-                    <!-- Arm + Cyber Greatsword (Facing Right) -->
-                    <rect x="64" y="74" width="18" height="12" rx="2" fill="#F59E0B" stroke="#111" stroke-width="2.5"/>
-                    <g transform="translate(78,78) rotate(-32)">
-                        <rect x="0" y="-4" width="12" height="8" fill="#27272A" stroke="#111" stroke-width="2"/>
-                        <rect x="10" y="-10" width="6" height="20" fill="#FFD700" stroke="#111" stroke-width="2"/>
-                        <polygon points="16,-6 52,-4 58,0 52,4 16,6" fill="#00F0FF" stroke="#111" stroke-width="2"/>
-                    </g>
-                </svg>
-                <span class="mt-1 px-2 py-0.5 rounded bg-[#00F0FF]/20 border border-[#00F0FF] text-[#00F0FF] text-[10px] font-black uppercase">$BTC • Greatsword</span>
+                <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
+                    <!-- Santa Hat Overlay -->
+                    <svg class="absolute -top-5 left-1/2 -translate-x-1/2 z-20 w-14 h-11 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" viewBox="0 0 64 48" fill="none">
+                        <path d="M12 34 L34 6 L52 34 Z" fill="#DC2626" stroke="#111" stroke-width="3"/>
+                        <circle cx="34" cy="7" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2.5"/>
+                        <rect x="8" y="31" width="48" height="10" rx="5" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
+                    </svg>
+                    <img id="splashCharA" src="./assets/vibers/viber1.webp" alt="Fighter A" class="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-2xl border-3 border-[#00F0FF] bg-[#14141d]/90 p-1 shadow-[0_0_24px_rgba(0,240,255,0.45)]">
+                    <!-- Weapon A (Facing Right) -->
+                    <div id="splashWeaponA" class="absolute -right-6 bottom-2 z-20 drop-shadow-[0_0_8px_#00F0FF]"></div>
+                </div>
+                <span id="splashLabelA" class="mt-2 px-2 py-0.5 rounded bg-[#00F0FF]/20 border border-[#00F0FF] text-[#00F0FF] text-[10px] font-black uppercase">$BTC • Greatsword</span>
             </div>
 
             <!-- Center VS -->
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#FFD700] text-[#111] border-3 border-black shadow-[0_0_25px_#FFD700] flex items-center justify-center font-black text-lg sm:text-xl animate-pulse">
+            <div class="flex flex-col items-center z-10">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#FFD700] to-[#FF3366] text-[#111] border-3 border-black shadow-[0_0_25px_#FFD700] flex items-center justify-center font-black text-lg sm:text-xl animate-pulse">
                     VS
                 </div>
+                <span class="text-[9px] font-black text-emerald-300 mt-1">❄️ CLASH</span>
             </div>
 
-            <!-- Right Voxel Fighter: Gravity Warhammer -->
+            <!-- Right Random Viber (Mirrored to Face Left) -->
             <div class="flex flex-col items-center" style="animation: splashBobRight 1.2s ease-in-out infinite;">
-                <svg width="118" height="128" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Voxel Striker B">
-                    <!-- Santa Hat -->
-                    <polygon points="48,26 66,4 86,26" fill="#DC2626" stroke="#111" stroke-width="3"/>
-                    <rect x="44" y="24" width="48" height="9" rx="3" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
-                    <circle cx="66" cy="5" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2"/>
-                    <!-- Voxel Head -->
-                    <rect x="46" y="33" width="44" height="36" rx="4" fill="#8A2BE2" stroke="#111" stroke-width="3"/>
-                    <!-- Visor -->
-                    <rect x="48" y="42" width="24" height="12" rx="2" fill="#FF3366" stroke="#111" stroke-width="2.5"/>
-                    <!-- Torso -->
-                    <rect x="50" y="71" width="36" height="32" rx="4" fill="#18181B" stroke="#FF3366" stroke-width="2.5"/>
-                    <!-- Legs -->
-                    <rect x="52" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
-                    <rect x="71" y="103" width="13" height="20" rx="2" fill="#27272A" stroke="#111" stroke-width="2.5"/>
-                    <!-- Arm + Gravity Warhammer (Facing Left) -->
-                    <rect x="38" y="74" width="18" height="12" rx="2" fill="#8A2BE2" stroke="#111" stroke-width="2.5"/>
-                    <g transform="translate(42,78) rotate(32)">
-                        <rect x="-46" y="-4" width="46" height="7" fill="#3F3F46" stroke="#111" stroke-width="2"/>
-                        <rect x="-56" y="-15" width="18" height="30" rx="2" fill="#FF3366" stroke="#111" stroke-width="2.5"/>
-                        <rect x="-52" y="-10" width="10" height="20" fill="#FFD700"/>
-                    </g>
-                </svg>
-                <span class="mt-1 px-2 py-0.5 rounded bg-[#FF3366]/20 border border-[#FF3366] text-[#FF3366] text-[10px] font-black uppercase">$SOL • Warhammer</span>
+                <div class="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
+                    <!-- Santa Hat Overlay -->
+                    <svg class="absolute -top-5 left-1/2 -translate-x-1/2 z-20 w-14 h-11 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" viewBox="0 0 64 48" fill="none">
+                        <path d="M52 34 L30 6 L12 34 Z" fill="#DC2626" stroke="#111" stroke-width="3"/>
+                        <circle cx="30" cy="7" r="5" fill="#FFFFFF" stroke="#111" stroke-width="2.5"/>
+                        <rect x="8" y="31" width="48" height="10" rx="5" fill="#F8FAFC" stroke="#111" stroke-width="2.5"/>
+                    </svg>
+                    <img id="splashCharB" src="./assets/vibers/viber4.webp" alt="Fighter B" class="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-2xl border-3 border-[#FF3366] bg-[#14141d]/90 p-1 shadow-[0_0_24px_rgba(255,51,102,0.45)]" style="transform: scaleX(-1);">
+                    <!-- Weapon B (Facing Left) -->
+                    <div id="splashWeaponB" class="absolute -left-6 bottom-2 z-20 drop-shadow-[0_0_8px_#FF3366]" style="transform: scaleX(-1);"></div>
+                </div>
+                <span id="splashLabelB" class="mt-2 px-2 py-0.5 rounded bg-[#FF3366]/20 border border-[#FF3366] text-[#FF3366] text-[10px] font-black uppercase">$SOL • Warhammer</span>
             </div>
         </div>
 
@@ -405,6 +384,45 @@
     </div>
     <script>
         (function() {
+            const roster = [
+                { ticker: '$BTC', img: './assets/vibers/viber1.webp' },
+                { ticker: '$ETH', img: './assets/vibers/viber2.webp' },
+                { ticker: '$AMZN', img: './assets/vibers/viber3.webp' },
+                { ticker: '$SOL', img: './assets/vibers/viber4.webp' },
+                { ticker: '$NVDA', img: './assets/vibers/viber5.webp' },
+                { ticker: '$TSLA', img: './assets/vibers/viber6.webp' },
+                { ticker: '$AAPL', img: './assets/vibers/viber7.webp' },
+                { ticker: '$MSFT', img: './assets/vibers/viber8.webp' },
+                { ticker: '$BNB', img: './assets/vibers/viber9.webp' },
+                { ticker: '$DOGE', img: './assets/vibers/viber10.webp' },
+                { ticker: '$OPENAI', img: './assets/vibers/viber11.webp' },
+                { ticker: '$SPACEX', img: './assets/vibers/viber12.webp' },
+                { ticker: '$STRIPE', img: './assets/vibers/viber13.webp' },
+                { ticker: '$ANDURIL', img: './assets/vibers/viber14.webp' },
+                { ticker: '$DANGOTE', img: './assets/vibers/viber15.webp' }
+            ];
+            const weapons = [
+                { name: 'Greatsword', svg: '<svg width="52" height="52" viewBox="0 0 64 64"><g transform="rotate(-35 32 32)"><rect x="10" y="29" width="12" height="6" fill="#27272A" stroke="#111" stroke-width="2"/><rect x="20" y="21" width="6" height="22" fill="#FFD700" stroke="#111" stroke-width="2"/><polygon points="26,25 56,27 62,32 56,37 26,39" fill="#00F0FF" stroke="#111" stroke-width="2"/></g></svg>' },
+                { name: 'Warhammer', svg: '<svg width="52" height="52" viewBox="0 0 64 64"><g transform="rotate(-35 32 32)"><rect x="8" y="29" width="34" height="6" fill="#3F3F46" stroke="#111" stroke-width="2"/><rect x="38" y="16" width="16" height="32" rx="3" fill="#FF3366" stroke="#111" stroke-width="2.5"/><rect x="42" y="21" width="8" height="22" fill="#FFD700"/></g></svg>' },
+                { name: 'Cyber Katana', svg: '<svg width="52" height="52" viewBox="0 0 64 64"><g transform="rotate(-38 32 32)"><rect x="10" y="30" width="14" height="5" fill="#111" stroke="#00FF88" stroke-width="1.5"/><rect x="23" y="25" width="4" height="15" fill="#FFD700" stroke="#111" stroke-width="1.5"/><polygon points="27,30 60,28 63,32 27,34" fill="#00FF88" stroke="#111" stroke-width="1.5"/></g></svg>' },
+                { name: 'Void Scythe', svg: '<svg width="52" height="52" viewBox="0 0 64 64"><g transform="rotate(-30 32 32)"><rect x="10" y="30" width="38" height="5" fill="#18181B" stroke="#8A2BE2" stroke-width="1.5"/><path d="M44 30 Q58 14 34 8 Q46 20 42 32 Z" fill="#A855F7" stroke="#111" stroke-width="2"/></g></svg>' }
+            ];
+            const idxA = Math.floor(Math.random() * roster.length);
+            let idxB = Math.floor(Math.random() * (roster.length - 1));
+            if (idxB >= idxA) idxB++;
+            const wIdxA = Math.floor(Math.random() * weapons.length);
+            let wIdxB = Math.floor(Math.random() * (weapons.length - 1));
+            if (wIdxB >= wIdxA) wIdxB++;
+
+            const charA = roster[idxA], charB = roster[idxB];
+            const wpnA = weapons[wIdxA], wpnB = weapons[wIdxB];
+            document.getElementById('splashCharA').src = charA.img;
+            document.getElementById('splashCharB').src = charB.img;
+            document.getElementById('splashWeaponA').innerHTML = wpnA.svg;
+            document.getElementById('splashWeaponB').innerHTML = wpnB.svg;
+            document.getElementById('splashLabelA').innerText = `${charA.ticker} • ${wpnA.name}`;
+            document.getElementById('splashLabelB').innerText = `${charB.ticker} • ${wpnB.name}`;
+
             const wakeUrl = window.location.hostname.endsWith('github.io')
                 ? 'https://vibe-stock-duels.onrender.com/api/health'
                 : './api/health';
