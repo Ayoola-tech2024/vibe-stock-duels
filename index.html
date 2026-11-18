@@ -7222,23 +7222,65 @@
 
         let deferredInstallPrompt = null;
         const installWebApkBtn = document.getElementById('installWebApkBtn');
+
+        // Small non-intrusive floating WebAPK Install Prompt
+        const webApkBanner = document.createElement('div');
+        webApkBanner.id = 'webApkPromptBanner';
+        webApkBanner.className = 'hidden fixed bottom-3 right-3 z-40 max-w-[290px] bg-[#14141d] text-white border-2 border-[#00FF88] rounded-xl px-3 py-2 shadow-[3px_4px_0_#000] flex items-center gap-2.5';
+        webApkBanner.innerHTML = `
+            <span class="text-lg shrink-0">📲</span>
+            <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-black text-[#00FF88] leading-tight">Install Vibe Duels App</div>
+                <div id="webApkPromptSub" class="text-[10px] text-neutral-300 leading-tight">Add WebAPK for instant 1-tap launch</div>
+            </div>
+            <button id="webApkBannerInstallBtn" type="button" class="btn-neubrutal bg-[#00FF88] text-[#111] px-2 py-1 text-[10px] font-black shrink-0">Install</button>
+            <button id="webApkBannerCloseBtn" type="button" class="text-neutral-400 hover:text-white text-xs font-black px-1 shrink-0" title="Dismiss">✕</button>
+        `;
+        document.body.appendChild(webApkBanner);
+
+        async function triggerWebApkInstall() {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            if (installWebApkBtn) installWebApkBtn.classList.add('hidden');
+            webApkBanner.classList.add('hidden');
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredInstallPrompt = e;
             if (installWebApkBtn) installWebApkBtn.classList.remove('hidden');
+            if (!sessionStorage.getItem('vibe_webapk_dismissed')) {
+                setTimeout(() => {
+                    if (deferredInstallPrompt) webApkBanner.classList.remove('hidden');
+                }, 3400);
+            }
         });
-        if (installWebApkBtn) {
-            installWebApkBtn.addEventListener('click', async () => {
-                if (!deferredInstallPrompt) return;
-                deferredInstallPrompt.prompt();
-                await deferredInstallPrompt.userChoice;
-                deferredInstallPrompt = null;
-                installWebApkBtn.classList.add('hidden');
-            });
+
+        // iOS Safari fallback hint (when not already installed as standalone)
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        if (isIos && !isStandalone && !sessionStorage.getItem('vibe_webapk_dismissed')) {
+            setTimeout(() => {
+                const sub = document.getElementById('webApkPromptSub');
+                const btn = document.getElementById('webApkBannerInstallBtn');
+                if (sub) sub.innerText = 'Tap Share ➔ Add to Home Screen';
+                if (btn) btn.classList.add('hidden');
+                webApkBanner.classList.remove('hidden');
+            }, 3400);
         }
+
+        if (installWebApkBtn) installWebApkBtn.addEventListener('click', triggerWebApkInstall);
+        document.getElementById('webApkBannerInstallBtn')?.addEventListener('click', triggerWebApkInstall);
+        document.getElementById('webApkBannerCloseBtn')?.addEventListener('click', () => {
+            sessionStorage.setItem('vibe_webapk_dismissed', '1');
+            webApkBanner.classList.add('hidden');
+        });
         window.addEventListener('appinstalled', () => {
             deferredInstallPrompt = null;
             if (installWebApkBtn) installWebApkBtn.classList.add('hidden');
+            webApkBanner.classList.add('hidden');
         });
 
         // Auto-Generated Testnet Web3 Wallet Sync + Interactive Web3 Connect & $VCT Faucet
