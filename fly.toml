@@ -1,20 +1,25 @@
-app = "vibe-stock-duels"
-primary_region = "ams"
+# fly.toml app configuration file generated for vibe-stock-duels on 2026-11-18T13:03:27Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
+app = 'vibe-stock-duels'
+primary_region = 'ams'
 
 [build]
+[[mounts]]
+  source = 'vibe_data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
-[mounts]
-  source = "vibe_data"
-  destination = "/data"
-
 [[vm]]
-  memory = "256mb"
-  cpu_kind = "shared"
+  memory = '256mb'
+  cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 256
