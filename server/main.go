@@ -5,11 +5,16 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
 func main() {
-	addr := flag.String("addr", ":8080", "HTTP listen address")
+	defaultAddr := ":8080"
+	if p := os.Getenv("PORT"); p != "" {
+		defaultAddr = ":" + p
+	}
+	addr := flag.String("addr", defaultAddr, "HTTP listen address")
 	dbPath := flag.String("db", "vibe.db", "SQLite database path")
 	staticDir := flag.String("static", "..", "Static web root directory")
 	flag.Parse()
